@@ -60,7 +60,8 @@ class _RemoteScreenState extends State<RemoteScreen> {
     mode = widget.initialMode;
   }
 
-  static const double _controlsAroundPad = 180;
+  static const double _padGap = 28;
+  static const double _controlsAroundPad = 180 + _padGap * 2;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +156,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        const SizedBox(height: _padGap),
         SizedBox(
           width: padSize,
           height: padSize,
@@ -170,7 +172,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
             RemoteMode.numpad => Numpad(onButton: widget.onButton),
           },
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: _padGap),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
