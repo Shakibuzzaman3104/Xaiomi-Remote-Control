@@ -23,7 +23,7 @@ class DisconnectedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_outlined, color: c.primary),
+          Icon(Icons.warning_amber_outlined, color: c.danger),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

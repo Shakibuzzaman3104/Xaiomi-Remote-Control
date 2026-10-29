@@ -10,6 +10,35 @@ import 'package:xiaomi_remote/ui/remote/widgets/dpad.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 
 void main() {
+  testWidgets('overlapping dpad pointers do not leak repeats', (tester) async {
+    final buttons = <RemoteButton>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Center(
+          child: SizedBox(width: 200, child: Dpad(onButton: buttons.add)),
+        ),
+      ),
+    );
+    final center = tester.getCenter(find.byType(Dpad));
+    final first = await tester.startGesture(
+      center + const Offset(0, -70),
+      pointer: 1,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+    final second = await tester.startGesture(
+      center + const Offset(70, 0),
+      pointer: 2,
+    );
+    await second.up();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(buttons.every((button) => button == RemoteButton.up), isTrue);
+    expect(buttons.length, greaterThan(2));
+    await first.up();
+    final count = buttons.length;
+    await tester.pump(const Duration(seconds: 1));
+    expect(buttons.length, count);
+  });
   testWidgets('renders at phone size, larger text and both themes', (
     tester,
   ) async {

@@ -32,6 +32,12 @@ class FavouriteApp {
   final Widget icon;
 }
 
+@immutable
+class VolumeControl {
+  const VolumeControl({required this.index, required this.max});
+  final int index, max;
+}
+
 const _unset = Object();
 
 class RemoteViewState {
@@ -41,18 +47,21 @@ class RemoteViewState {
     required this.reconnecting,
     this.nowPlaying,
     this.volumeLevel,
+    this.exactVolume,
     required this.muted,
   });
   final String deviceName;
   final bool connected, reconnecting, muted;
   final NowPlaying? nowPlaying;
   final int? volumeLevel;
+  final VolumeControl? exactVolume;
   RemoteViewState copyWith({
     String? deviceName,
     bool? connected,
     bool? reconnecting,
     Object? nowPlaying = _unset,
     Object? volumeLevel = _unset,
+    Object? exactVolume = _unset,
     bool? muted,
   }) => RemoteViewState(
     deviceName: deviceName ?? this.deviceName,
@@ -64,6 +73,9 @@ class RemoteViewState {
     volumeLevel: identical(volumeLevel, _unset)
         ? this.volumeLevel
         : volumeLevel as int?,
+    exactVolume: identical(exactVolume, _unset)
+        ? this.exactVolume
+        : exactVolume as VolumeControl?,
     muted: muted ?? this.muted,
   );
 }

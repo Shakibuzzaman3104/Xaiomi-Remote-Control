@@ -59,23 +59,28 @@ class Numpad extends StatelessWidget {
           child: Semantics(
             label: labels[i],
             button: true,
-            child: GestureDetector(
-              onTap: () {
-                AppHaptics.selection();
-                onButton(buttons[i]);
-              },
-              child: Container(
+            child: Material(
+              type: MaterialType.transparency,
+              child: Ink(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: c.surfaceContainer,
                   border: Border.all(color: c.dpadOutline),
                 ),
-                child: Center(
-                  child: Text(
-                    labels[i],
-                    style: context.appTextTheme.bodyMedium!.copyWith(
-                      color: c.onSurfaceStrong,
-                      fontSize: i == 9 || i == 11 ? 14 : 22,
+                child: InkResponse(
+                  customBorder: const CircleBorder(),
+                  containedInkWell: true,
+                  onTap: () {
+                    AppHaptics.selection();
+                    onButton(buttons[i]);
+                  },
+                  child: Center(
+                    child: Text(
+                      labels[i],
+                      style: context.appTextTheme.bodyMedium!.copyWith(
+                        color: c.onSurfaceStrong,
+                        fontSize: i == 9 || i == 11 ? 14 : 22,
+                      ),
                     ),
                   ),
                 ),

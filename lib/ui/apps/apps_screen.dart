@@ -14,10 +14,12 @@ class TvAppItem {
     required this.label,
     required this.icon,
     required this.isFavourite,
+    this.dimmed = false,
   });
   final String package, label;
   final Widget icon;
   final bool isFavourite;
+  final bool dimmed;
 }
 
 class AppsScreen extends StatefulWidget {
@@ -36,6 +38,9 @@ class AppsScreen extends StatefulWidget {
     this.onToggleFavourite,
     this.notice,
     this.onNoticeTap,
+    this.loading = false,
+    this.errorText,
+    this.onRetry,
   });
   final String deviceName;
   final bool connected;
@@ -46,6 +51,9 @@ class AppsScreen extends StatefulWidget {
   final ValueChanged<TvAppItem>? onToggleFavourite;
   final String? notice;
   final VoidCallback? onNoticeTap;
+  final bool loading;
+  final String? errorText;
+  final VoidCallback? onRetry;
   @override
   State<AppsScreen> createState() => _AppsScreenState();
 }
@@ -102,11 +110,6 @@ class _AppsScreenState extends State<AppsScreen> {
                         color: c.onSurfaceStrong,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => _searchFocus.requestFocus(),
-                    icon: Icon(Icons.search, color: c.onSurfaceStrong),
-                    tooltip: 'Search',
                   ),
                 ],
               ),
@@ -204,130 +207,216 @@ class _AppsScreenState extends State<AppsScreen> {
                 ),
               const SizedBox(height: 24),
               Expanded(
-                child: apps.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No apps match "$query"',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: c.muted),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.errorText != null) ...[
+                      Text(
+                        widget.errorText!,
+                        style: context.appTextTheme.labelMedium!.copyWith(
+                          color: c.danger,
                         ),
-                      )
-                    : LayoutBuilder(
-                        builder: (context, constraints) {
-                          final tileWidth = (constraints.maxWidth - 14 * 3) / 4;
-                          final labelPainter = TextPainter(
-                            text: const TextSpan(
-                              text: 'Ag',
-                              style: TextStyle(fontSize: 12, height: 1.2),
-                            ),
-                            textScaler: MediaQuery.textScalerOf(context),
-                            textDirection: Directionality.of(context),
-                            maxLines: 2,
-                          )..layout(maxWidth: tileWidth);
-                          final labelHeight =
-                              labelPainter.preferredLineHeight * 2;
-                          return GridView.builder(
-                            itemCount: apps.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  crossAxisSpacing: 14,
-                                  mainAxisSpacing: 16,
-                                  mainAxisExtent: tileWidth + 6 + labelHeight,
-                                ),
-                            itemBuilder: (context, index) {
-                              final app = apps[index];
-                              final toggle = widget.onToggleFavourite;
-                              return LayoutBuilder(
-                                builder: (context, constraints) => InkWell(
-                                  onTap: () => widget.onOpen(app),
-                                  onLongPress: () => widget.onShowActions(app),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: constraints.maxWidth,
-                                        height: constraints.maxWidth,
-                                        decoration: BoxDecoration(
-                                          color: c.appTile,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: c.subtleOutline,
-                                          ),
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            Center(
-                                              child: SizedBox(
-                                                width: 56,
-                                                height: 56,
-                                                child: app.icon,
-                                              ),
-                                            ),
-                                            if (app.isFavourite)
-                                              Positioned(
-                                                right: 0,
-                                                top: 0,
-                                                child: Semantics(
-                                                  button: true,
-                                                  label:
-                                                      'Remove ${app.label} from favourites',
-                                                  child: GestureDetector(
-                                                    behavior:
-                                                        HitTestBehavior.opaque,
-                                                    onTap: toggle == null
-                                                        ? null
-                                                        : () => toggle(app),
-                                                    child: SizedBox(
-                                                      width: 48,
-                                                      height: 48,
-                                                      child: Align(
-                                                        alignment:
-                                                            Alignment.topRight,
-                                                        child: Icon(
-                                                          Icons.star,
-                                                          size: 16,
-                                                          color: c.primary,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Expanded(
-                                        child: Text(
-                                          app.label,
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: context
-                                              .appTextTheme
-                                              .labelMedium!
-                                              .copyWith(
-                                                height: 1.2,
-                                                color: c.onSurfaceStrong,
-                                              ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
                       ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonal(
+                          onPressed: widget.onRetry,
+                          child: const Text('Try again'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    Expanded(child: _content(context, apps, query)),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _content(BuildContext context, List<TvAppItem> apps, String query) {
+    if (widget.loading && apps.isEmpty) return _skeleton(context);
+    if (apps.isEmpty) return _emptyState(context, query);
+    final c = context.colors;
+    return _grid(
+      context,
+      itemCount: apps.length,
+      builder: (index, tileWidth) {
+        final app = apps[index];
+        final toggle = widget.onToggleFavourite;
+        return InkWell(
+          onTap: () => widget.onOpen(app),
+          onLongPress: () => widget.onShowActions(app),
+          borderRadius: BorderRadius.circular(12),
+          child: Opacity(
+            opacity: app.dimmed ? 0.5 : 1,
+            child: Column(
+              children: [
+                Container(
+                  width: tileWidth,
+                  height: tileWidth,
+                  decoration: BoxDecoration(
+                    color: c.appTile,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: c.subtleOutline),
+                  ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: SizedBox(width: 56, height: 56, child: app.icon),
+                      ),
+                      if (app.isFavourite)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Semantics(
+                            button: true,
+                            label: 'Remove ${app.label} from favourites',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: toggle == null ? null : () => toggle(app),
+                              child: SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: Icon(
+                                    Icons.star,
+                                    size: 16,
+                                    color: c.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: Text(
+                    app.label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.appTextTheme.labelMedium!.copyWith(
+                      height: 1.2,
+                      color: c.onSurfaceStrong,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _emptyState(BuildContext context, String query) {
+    final c = context.colors;
+    if (query.isEmpty) {
+      final favourites = _favourites;
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              favourites ? 'No favourites yet' : 'No apps yet',
+              textAlign: TextAlign.center,
+              style: context.appTextTheme.titleMedium!.copyWith(
+                color: c.onSurfaceStrong,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              favourites
+                  ? 'Long-press an app to add it here.'
+                  : 'Apps will appear here once your TV is connected.',
+              textAlign: TextAlign.center,
+              style: context.appTextTheme.labelMedium!.copyWith(color: c.muted),
+            ),
+          ],
+        ),
+      );
+    }
+    return Center(
+      child: Text(
+        'No apps match "$query"',
+        textAlign: TextAlign.center,
+        style: context.appTextTheme.labelMedium!.copyWith(color: c.muted),
+      ),
+    );
+  }
+
+  Widget _skeleton(BuildContext context) {
+    final c = context.colors;
+    return _grid(
+      context,
+      itemCount: 12,
+      builder: (index, tileWidth) => Column(
+        children: [
+          Container(
+            width: tileWidth,
+            height: tileWidth,
+            decoration: BoxDecoration(
+              color: c.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: tileWidth * 0.6,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: c.surfaceContainer,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _grid(
+    BuildContext context, {
+    required int itemCount,
+    required Widget Function(int index, double tileWidth) builder,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 14 * 3) / 4;
+        final labelPainter = TextPainter(
+          text: const TextSpan(
+            text: 'Ag',
+            style: TextStyle(fontSize: 12, height: 1.2),
+          ),
+          textScaler: MediaQuery.textScalerOf(context),
+          textDirection: Directionality.of(context),
+          maxLines: 2,
+        )..layout(maxWidth: tileWidth);
+        final labelHeight = labelPainter.preferredLineHeight * 2;
+        return GridView.builder(
+          itemCount: itemCount,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 16,
+            mainAxisExtent: tileWidth + 6 + labelHeight,
+          ),
+          itemBuilder: (context, index) => builder(index, tileWidth),
+        );
+      },
     );
   }
 }

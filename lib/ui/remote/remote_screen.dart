@@ -27,6 +27,7 @@ class RemoteScreen extends StatefulWidget {
     this.initialMode = RemoteMode.dpad,
     this.swipeSensitivity = 0.5,
     required this.onButton,
+    this.onExactVolumeChanged,
     required this.onSwitchDevice,
     required this.onOpenNowPlaying,
     required this.onApps,
@@ -44,6 +45,7 @@ class RemoteScreen extends StatefulWidget {
   final RemoteMode initialMode;
   final double swipeSensitivity;
   final ValueChanged<RemoteButton> onButton;
+  final ValueChanged<int>? onExactVolumeChanged;
   final VoidCallback onSwitchDevice,
       onOpenNowPlaying,
       onApps,
@@ -295,6 +297,9 @@ class _RemoteScreenState extends State<RemoteScreen> {
       const SizedBox(height: 8),
       VolumePill(
         level: s.volumeLevel,
+        exactIndex: s.exactVolume?.index,
+        exactMax: s.exactVolume?.max,
+        onExactVolumeChanged: widget.onExactVolumeChanged,
         muted: s.muted,
         onButton: widget.onButton,
       ),

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../haptics.dart';
+import '../../motion.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -81,21 +82,31 @@ class _RoundActionButtonState extends State<RoundActionButton> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: widget.size,
-                height: widget.size,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: widget.selected
-                      ? c.primary
-                      : (pressed || widget.strong)
-                      ? c.surfaceContainerStrong
-                      : c.surfaceContainer,
+              AnimatedScale(
+                scale: pressed ? 0.95 : 1,
+                duration: motion(
+                  context,
+                  Duration(milliseconds: pressed ? 100 : 150),
                 ),
-                child: Icon(
-                  widget.icon,
-                  color: widget.selected ? c.onPrimary : c.onSurface,
-                  size: 25,
+                curve: const Cubic(0.23, 1, 0.32, 1),
+                child: AnimatedContainer(
+                  duration: motion(context, const Duration(milliseconds: 120)),
+                  curve: const Cubic(0.23, 1, 0.32, 1),
+                  width: widget.size,
+                  height: widget.size,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.selected
+                        ? c.primary
+                        : (pressed || widget.strong)
+                        ? c.surfaceContainerStrong
+                        : c.surfaceContainer,
+                  ),
+                  child: Icon(
+                    widget.icon,
+                    color: widget.selected ? c.onPrimary : c.onSurface,
+                    size: 25,
+                  ),
                 ),
               ),
               if (widget.showLabel) ...[

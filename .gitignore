@@ -51,3 +51,4 @@ app.*.map.json
 design/screens_logs_*.txt
 .commandcode/
 tv_helper/build/
+test/shots/failures/

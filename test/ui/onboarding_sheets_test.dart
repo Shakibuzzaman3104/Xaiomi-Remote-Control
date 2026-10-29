@@ -4,7 +4,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xiaomi_remote/core/session/providers.dart';
 import 'package:xiaomi_remote/ui/onboarding/discover_screen.dart';
+import 'package:xiaomi_remote/ui/onboarding/onboarding_flow.dart';
 import 'package:xiaomi_remote/ui/onboarding/pair_screen.dart';
 import 'package:xiaomi_remote/ui/onboarding/step_dots.dart';
 import 'package:xiaomi_remote/ui/onboarding/unlock_screen.dart';
@@ -13,6 +16,59 @@ import 'package:xiaomi_remote/ui/sheets/voice_sheet.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 
 void main() {
+  testWidgets('Discovery times out and can retry', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 780));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var searches = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveredTvsProvider.overrideWith((ref) {
+            searches++;
+            return Stream.value([]);
+          }),
+        ],
+        child: MaterialApp(theme: AppTheme.light, home: const OnboardingFlow()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.text('No TVs found'), findsOneWidget);
+    expect(find.text('Searching…'), findsNothing);
+    await tester.ensureVisible(find.text('Search again'));
+    await tester.tap(find.text('Search again'));
+    await tester.pump();
+    expect(searches, 2);
+    expect(find.text('Searching…'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Manual IP dialog validates and cancels safely', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 780));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveredTvsProvider.overrideWith((ref) => Stream.value([])),
+        ],
+        child: MaterialApp(theme: AppTheme.light, home: const OnboardingFlow()),
+      ),
+    );
+    await tester.pump();
+    await tester.ensureVisible(find.text('Enter IP address manually'));
+    await tester.tap(find.text('Enter IP address manually'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'invalid');
+    await tester.tap(find.widgetWithText(FilledButton, 'Pair'));
+    await tester.pump();
+    expect(find.text('Enter an IP address like 192.168.1.20'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '192.168.1.20');
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('StepDots renders correctly without error', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 780));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -143,7 +199,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Pair with Mi\u00A0Box\u00A0S'), findsOneWidget);
+      expect(find.text('Pair with Mi Box\u00A0S'), findsOneWidget);
       expect(find.text('Enter the code shown on your TV.'), findsOneWidget);
       expect(
         find.text(

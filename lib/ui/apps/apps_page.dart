@@ -190,6 +190,7 @@ class _AppsPageState extends ConsumerState<AppsPage> {
                 label: app.label,
                 icon: _icon(context, app.label, null),
                 isFavourite: favourites.contains(app.package),
+                dimmed: app.webLink == null,
               ),
           ];
     return AppsScreen(
@@ -211,9 +212,10 @@ class _AppsPageState extends ConsumerState<AppsPage> {
             ).push(MaterialPageRoute<void>(builder: (_) => const UnlockPage())),
       notice: !connected
           ? 'Turn on full control to see every app on your TV.'
-          : control.appsLoading
-          ? 'Loading apps…'
-          : control.error,
+          : null,
+      loading: control.appsLoading,
+      errorText: connected ? control.error : null,
+      onRetry: () => ref.read(fullControlProvider.notifier).loadApps(),
     );
   }
 }

@@ -133,6 +133,39 @@ class AdbCommands {
     return (int.parse(selected.group(2)!), int.parse(max.group(1)!));
   }
 
+  static bool parseFixedVolume(String dumpsysAudio) {
+    if (RegExp(
+      r'^\s*mUseFixedVolume\s*=\s*true\b',
+      multiLine: true,
+    ).hasMatch(dumpsysAudio)) {
+      return true;
+    }
+    final fixed = RegExp(
+      r'^\s*mFixedVolumeDevices\s*=\s*([^\r\n]+)',
+      multiLine: true,
+    ).firstMatch(dumpsysAudio)?.group(1);
+    if (fixed == null) return false;
+    final hasHdmi = RegExp(r'0x[0-9a-fA-F]+')
+        .allMatches(fixed)
+        .any(
+          (m) => (int.parse(m.group(0)!.substring(2), radix: 16) & 0x400) != 0,
+        );
+    if (!hasHdmi) return false;
+    final section = RegExp(
+      r'- STREAM_MUSIC:\s*([\s\S]*?)(?=\n\s*- STREAM_|$(?![\s\S]))',
+    ).firstMatch(dumpsysAudio)?.group(1);
+    final device = RegExp(
+      r'^\s*Devices?:\s*([^\r\n]+)',
+      multiLine: true,
+    ).firstMatch(section ?? '')?.group(1);
+    return device != null &&
+        RegExp(r'\bhdmi\b', caseSensitive: false).hasMatch(device);
+  }
+
+  Future<void> setMusicVolume(int index) async {
+    await client.shell('media volume --stream 3 --set $index');
+  }
+
   Future<(int, int)> musicVolume() async =>
       parseMusicVolume(await client.shell('dumpsys audio'));
 

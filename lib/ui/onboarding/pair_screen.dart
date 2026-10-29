@@ -110,7 +110,10 @@ class _PairScreenState extends State<PairScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final isBusy = widget.busy || _submitting;
-    final deviceLabel = widget.deviceName.replaceAll(' ', '\u00A0');
+    final deviceLabel = widget.deviceName.replaceFirst(
+      RegExp(r' (?=[^ ]+$)'),
+      '\u00A0',
+    );
     final text = _controller.text;
     final canSubmit = text.length == 6 && !isBusy;
 
@@ -268,11 +271,14 @@ class _PairScreenState extends State<PairScreen> {
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
-                        Text(
-                          _error!,
-                          textAlign: TextAlign.center,
-                          style: context.appTextTheme.labelLarge!.copyWith(
-                            color: c.danger,
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: context.appTextTheme.labelLarge!.copyWith(
+                              color: c.danger,
+                            ),
                           ),
                         ),
                       ],
@@ -331,8 +337,8 @@ class _PairScreenState extends State<PairScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: c.primary,
                         foregroundColor: c.onPrimary,
-                        disabledBackgroundColor: c.primary,
-                        disabledForegroundColor: c.onPrimary,
+                        disabledBackgroundColor: c.surfaceContainerStrong,
+                        disabledForegroundColor: c.muted,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppShapes.pill),

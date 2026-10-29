@@ -23,13 +23,17 @@ class Dpad extends StatefulWidget {
 class _DpadState extends State<Dpad> {
   RemoteButton? pressed;
   Timer? timer;
+  int? activePointer;
   void stop() {
     timer?.cancel();
     timer = null;
+    activePointer = null;
     if (pressed != null && mounted) setState(() => pressed = null);
   }
 
-  void start(Offset p, double size) {
+  void start(Offset p, double size, int pointer) {
+    timer?.cancel();
+    timer = null;
     final d = p - Offset(size / 2, size / 2);
     if (d.distance > size / 2) return;
     final b = d.distance < size * .18
@@ -37,6 +41,7 @@ class _DpadState extends State<Dpad> {
         : d.dx.abs() > d.dy.abs()
         ? (d.dx < 0 ? RemoteButton.left : RemoteButton.right)
         : (d.dy < 0 ? RemoteButton.up : RemoteButton.down);
+    activePointer = pointer;
     AppHaptics.selection();
     widget.onButton(b);
     setState(() => pressed = b);
@@ -64,9 +69,15 @@ class _DpadState extends State<Dpad> {
       builder: (context, box) {
         final s = box.maxWidth;
         return Listener(
-          onPointerDown: (e) => start(e.localPosition, s),
-          onPointerUp: (_) => stop(),
-          onPointerCancel: (_) => stop(),
+          onPointerDown: (e) {
+            if (activePointer == null) start(e.localPosition, s, e.pointer);
+          },
+          onPointerUp: (e) {
+            if (e.pointer == activePointer) stop();
+          },
+          onPointerCancel: (e) {
+            if (e.pointer == activePointer) stop();
+          },
           child: CustomPaint(
             painter: _Painter(c, pressed),
             child: SizedBox.square(

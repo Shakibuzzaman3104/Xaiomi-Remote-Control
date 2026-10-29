@@ -148,6 +148,36 @@ void main() {
     await tester.pump();
     expect(find.text('No apps match "missing"'), findsOneWidget);
   });
+  testWidgets('empty favourites shows its own message', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: AppsScreen(
+          deviceName: 'Living Room',
+          connected: true,
+          onSwitchDevice: noop,
+          onTvSettings: noop,
+          onAppSettings: noop,
+          onBack: noop,
+          apps: const [
+            TvAppItem(
+              package: 'two',
+              label: 'Netflix',
+              icon: Icon(Icons.tv),
+              isFavourite: false,
+            ),
+          ],
+          onOpen: (_) {},
+          onShowActions: (_) {},
+        ),
+      ),
+    );
+    await tester.tap(find.text('Favourites'));
+    await tester.pump();
+    expect(find.text('No favourites yet'), findsOneWidget);
+    expect(find.text('Long-press an app to add it here.'), findsOneWidget);
+    expect(find.text('No apps match ""'), findsNothing);
+  });
   testWidgets('full control actions are disabled', (tester) async {
     var called = false;
     await tester.pumpWidget(

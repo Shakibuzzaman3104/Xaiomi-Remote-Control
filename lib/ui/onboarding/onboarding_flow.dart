@@ -2,6 +2,7 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,6 +26,36 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   DiscoveredTv? _pairingTv;
   String? _startError;
   bool _starting = false;
+  bool _timedOut = false;
+  Timer? _discoveryTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startDiscoveryTimer();
+  }
+
+  void _startDiscoveryTimer() {
+    _discoveryTimer?.cancel();
+    _timedOut = false;
+    _discoveryTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted &&
+          (ref.read(discoveredTvsProvider).asData?.value.isEmpty ?? true)) {
+        setState(() => _timedOut = true);
+      }
+    });
+  }
+
+  void _retryDiscovery() {
+    ref.invalidate(discoveredTvsProvider);
+    setState(_startDiscoveryTimer);
+  }
+
+  @override
+  void dispose() {
+    _discoveryTimer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _startPairing(DiscoveredTv tv) async {
     setState(() {
@@ -59,39 +90,18 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   };
 
   Future<void> _enterIpManually() async {
-    final controller = TextEditingController();
     final host = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('TV IP address'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(hintText: '192.168.0.103'),
-          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
+      builder: (_) => const _ManualIpDialog(),
     );
-    controller.dispose();
-    final ip = host?.trim();
-    if (ip == null || InternetAddress.tryParse(ip) == null) return;
-    await _startPairing(DiscoveredTv(name: 'Android TV', host: ip));
+    if (!mounted || host == null) return;
+    await _startPairing(DiscoveredTv(name: 'Android TV', host: host));
   }
 
   void _backToDiscovery() {
     ref.read(pairingFlowProvider).cancel();
     setState(() {
+      _startDiscoveryTimer();
       _pairingTv = null;
       _startError = null;
     });
@@ -129,9 +139,71 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ),
       ],
       searching: !discovered.hasError,
+      timedOut: _timedOut,
+      errorText: discovered.hasError
+          ? "Couldn't search the network. Check Wi-Fi and try again."
+          : null,
+      onRetry: _retryDiscovery,
+      onClose:
+          widget.onCancel ??
+          (Navigator.of(context).canPop()
+              ? () => Navigator.of(context).pop()
+              : null),
       onSelect: (item) =>
           _startPairing(devices.firstWhere((d) => d.host == item.id)),
       onEnterIp: _enterIpManually,
     );
   }
+}
+
+class _ManualIpDialog extends StatefulWidget {
+  const _ManualIpDialog();
+
+  @override
+  State<_ManualIpDialog> createState() => _ManualIpDialogState();
+}
+
+class _ManualIpDialogState extends State<_ManualIpDialog> {
+  late final TextEditingController _controller;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final ip = _controller.text.trim();
+    if (InternetAddress.tryParse(ip) == null) {
+      setState(() => _error = 'Enter an IP address like 192.168.1.20');
+      return;
+    }
+    Navigator.of(context).pop(ip);
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('TV IP address'),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(hintText: '192.168.1.20', errorText: _error),
+      onSubmitted: (_) => _submit(),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(onPressed: _submit, child: const Text('Pair')),
+    ],
+  );
 }

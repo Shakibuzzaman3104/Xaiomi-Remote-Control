@@ -307,6 +307,19 @@ class FullControl extends Notifier<FullControlState> {
     return client;
   }
 
+  Future<({int index, int max, bool fixed})> readVolume() async {
+    final output = await _connectedClient().shell('dumpsys audio');
+    final (index, max) = AdbCommands.parseMusicVolume(output);
+    return (
+      index: index,
+      max: max,
+      fixed: AdbCommands.parseFixedVolume(output),
+    );
+  }
+
+  Future<void> setVolume(int index) =>
+      AdbCommands(_connectedClient()).setMusicVolume(index);
+
   Future<void> launch(String package) =>
       AdbCommands(_connectedClient()).launchApp(package);
   Future<void> forceStop(String package) =>

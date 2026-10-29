@@ -28,11 +28,19 @@ class DiscoverScreen extends StatelessWidget {
     required this.searching,
     required this.onSelect,
     required this.onEnterIp,
+    this.timedOut = false,
+    this.errorText,
+    this.onRetry,
+    this.onClose,
   });
   final List<DiscoverItem> devices;
   final bool searching;
   final ValueChanged<DiscoverItem> onSelect;
   final VoidCallback onEnterIp;
+  final bool timedOut;
+  final String? errorText;
+  final VoidCallback? onRetry;
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +54,15 @@ class DiscoverScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
+              if (onClose != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: onClose,
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Close',
+                  ),
+                ),
               const Center(child: StepDots(current: 1)),
               const SizedBox(height: 48),
               Text(
@@ -91,7 +108,6 @@ class DiscoverScreen extends StatelessWidget {
               for (var i = 0; i < devices.length; i++) ...[
                 _DeviceTile(
                   item: devices[i],
-                  highlighted: i == 0,
                   onTap: () {
                     AppHaptics.selection();
                     onSelect(devices[i]);
@@ -99,7 +115,34 @@ class DiscoverScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
               ],
-              if (searching)
+              if (devices.isEmpty && (timedOut || errorText != null))
+                Column(
+                  children: [
+                    Icon(Icons.wifi_off_outlined, color: c.muted, size: 32),
+                    const SizedBox(height: 12),
+                    Text(
+                      errorText ?? 'No TVs found',
+                      textAlign: TextAlign.center,
+                      style: context.appTextTheme.displaySmall!.copyWith(
+                        color: c.onSurfaceStrong,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Make sure the TV is on and on the same Wi-Fi as this phone.',
+                      textAlign: TextAlign.center,
+                      style: context.appTextTheme.bodyMedium!.copyWith(
+                        color: c.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.tonal(
+                      onPressed: onRetry,
+                      child: const Text('Search again'),
+                    ),
+                  ],
+                )
+              else if (searching)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Row(
@@ -158,13 +201,8 @@ class DiscoverScreen extends StatelessWidget {
 }
 
 class _DeviceTile extends StatelessWidget {
-  const _DeviceTile({
-    required this.item,
-    required this.highlighted,
-    required this.onTap,
-  });
+  const _DeviceTile({required this.item, required this.onTap});
   final DiscoverItem item;
-  final bool highlighted;
   final VoidCallback onTap;
 
   @override
@@ -174,12 +212,10 @@ class _DeviceTile extends StatelessWidget {
       button: true,
       label: '${item.title}, ${item.subtitle}',
       child: Material(
-        color: highlighted ? c.surfaceContainer : c.background,
+        color: c.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(13),
-          side: BorderSide(
-            color: highlighted ? c.surfaceContainer : c.subtleOutline,
-          ),
+          side: BorderSide(color: c.subtleOutline),
         ),
         child: InkWell(
           onTap: onTap,

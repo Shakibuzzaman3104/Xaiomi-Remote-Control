@@ -99,6 +99,30 @@ void main() {
     expect(AdbCommands.parseMusicVolume(audio), (12, 15));
   });
 
+  test('detects fixed music volume conservatively', () {
+    expect(AdbCommands.parseFixedVolume('mUseFixedVolume=true'), isTrue);
+    expect(AdbCommands.parseFixedVolume('mUseFixedVolume=false'), isFalse);
+    const fixed =
+        'mFixedVolumeDevices=0x400\n- STREAM_MUSIC:\n  Devices: hdmi\n';
+    expect(AdbCommands.parseFixedVolume(fixed), isTrue);
+    expect(
+      AdbCommands.parseFixedVolume(
+        fixed.replaceAll('Devices: hdmi', 'Devices: speaker'),
+      ),
+      isFalse,
+    );
+    expect(
+      AdbCommands.parseFixedVolume(
+        fixed.replaceAll('Devices: hdmi', 'Current: 400 (hdmi): 12'),
+      ),
+      isFalse,
+    );
+    expect(
+      AdbCommands.parseFixedVolume(fixed.replaceAll('0x400', '0x2')),
+      isFalse,
+    );
+  });
+
   test('fake daemon connects, handles shell, push and install', () async {
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     final uploads = <List<int>>[];

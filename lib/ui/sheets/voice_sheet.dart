@@ -21,6 +21,7 @@ class VoiceSheet extends StatelessWidget {
     required this.onMicTap,
     required this.onCancel,
     this.typeIntoFieldAvailable = true,
+    this.errorText,
   });
 
   final bool listening;
@@ -30,6 +31,7 @@ class VoiceSheet extends StatelessWidget {
   final VoidCallback onMicTap;
   final VoidCallback onCancel;
   final bool typeIntoFieldAvailable;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +39,14 @@ class VoiceSheet extends StatelessWidget {
 
     final String displayText;
     final Color textColor;
-    if (transcript.isNotEmpty) {
+    final isListening = listening && errorText == null;
+    if (errorText != null) {
+      displayText = errorText!;
+      textColor = c.danger;
+    } else if (transcript.isNotEmpty) {
       displayText = transcript;
       textColor = c.onSurfaceStrong;
-    } else if (listening) {
+    } else if (isListening) {
       displayText = 'Listening…';
       textColor = c.muted;
     } else {
@@ -80,23 +86,15 @@ class VoiceSheet extends StatelessWidget {
               Center(
                 child: Semantics(
                   button: true,
-                  label: listening ? 'Stop listening' : 'Start listening',
+                  label: isListening ? 'Stop listening' : 'Start listening',
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       AppHaptics.selection();
                       onMicTap();
                     },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      width: 138,
-                      height: 138,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: c.primary.withValues(alpha: 0.06),
-                      ),
-                      alignment: Alignment.center,
+                    child: _MicRing(
+                      listening: isListening,
                       child: Container(
                         width: 114,
                         height: 114,
@@ -127,28 +125,35 @@ class VoiceSheet extends StatelessWidget {
               const SizedBox(height: 8),
               ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 36),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          displayText,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.appTextTheme.bodyLarge!.copyWith(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                            color: textColor,
+                child: Semantics(
+                  liveRegion: errorText != null,
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayText,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.appTextTheme.bodyLarge!.copyWith(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                              color: textColor,
+                            ),
                           ),
                         ),
-                      ),
-                      if (transcript.isNotEmpty) ...[
-                        const SizedBox(width: 4),
-                        Container(width: 1.5, height: 23, color: c.primaryText),
+                        if (errorText == null && transcript.isNotEmpty) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 1.5,
+                            height: 23,
+                            color: c.primaryText,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -211,6 +216,82 @@ class VoiceSheet extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MicRing extends StatefulWidget {
+  const _MicRing({required this.listening, required this.child});
+
+  final bool listening;
+  final Widget child;
+
+  @override
+  State<_MicRing> createState() => _MicRingState();
+}
+
+class _MicRingState extends State<_MicRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 600),
+  );
+
+  void syncAnimation() {
+    if (widget.listening && !MediaQuery.disableAnimationsOf(context)) {
+      if (!controller.isAnimating) controller.repeat(reverse: true);
+    } else {
+      controller.stop();
+      controller.value = 0;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MicRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    syncAnimation();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final reduced = MediaQuery.disableAnimationsOf(context);
+    return SizedBox(
+      width: 138,
+      height: 138,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) => Transform.scale(
+              scale: 1 + 0.08 * Curves.easeOut.transform(controller.value),
+              child: child,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: c.primary.withValues(
+                  alpha: widget.listening && reduced ? 0.16 : 0.06,
+                ),
+              ),
+            ),
+          ),
+          widget.child,
+        ],
       ),
     );
   }

@@ -96,7 +96,6 @@ class AppActionsSheet extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: color),
                   ],
                 ),
               ),
@@ -157,7 +156,7 @@ class AppActionsSheet extends StatelessWidget {
                 app.isFavourite
                     ? 'Remove from favourites'
                     : 'Add to favourites',
-                Icons.favorite_border,
+                app.isFavourite ? Icons.star : Icons.star_border,
                 onToggleFavourite,
               ),
               action(
@@ -168,7 +167,7 @@ class AppActionsSheet extends StatelessWidget {
               ),
               action(
                 'Clear cache',
-                Icons.delete_outline,
+                Icons.cleaning_services_outlined,
                 onClearCache,
                 requiresControl: true,
               ),
@@ -180,7 +179,7 @@ class AppActionsSheet extends StatelessWidget {
               ),
               action(
                 'Uninstall',
-                Icons.delete_outline,
+                Icons.delete_forever_outlined,
                 onUninstall,
                 requiresControl: true,
                 danger: true,
