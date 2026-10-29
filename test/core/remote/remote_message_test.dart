@@ -31,7 +31,11 @@ void main() {
     receive(
       RemoteMessage(
         remoteImeKeyInject: RemoteImeKeyInject(
-          appInfo: RemoteAppInfo(label: 'Search', appPackage: 'app'),
+          appInfo: RemoteAppInfo(
+            counter: 7,
+            label: 'Search',
+            appPackage: 'app',
+          ),
           textFieldStatus: RemoteTextFieldStatus(counterField: 13),
         ),
       ),
@@ -41,18 +45,65 @@ void main() {
         remoteImeBatchEdit: RemoteImeBatchEdit(imeCounter: 1, fieldCounter: 0),
       ),
     );
-    client.sendText('সংবাদ');
+    client.insertText('সংবাদ');
     final edit = RemoteMessage.fromBuffer(sent.single.writeToBuffer())
         .remoteImeBatchEdit;
-    expect(edit.imeCounter, 1);
+    expect(edit.imeCounter, 7);
     expect(edit.fieldCounter, 13);
     expect(edit.editInfo.single.textFieldStatus.value, 'সংবাদ');
     expect(edit.editInfo.single.textFieldStatus.start, 'সংবাদ'.length - 1);
     expect(client.state.imeActive, isTrue);
     expect(client.state.currentApp, 'app');
   });
+  test(
+    'replaceText sends deletes for the changed tail, then the new tail',
+    () async {
+      receive(
+        RemoteMessage(
+          remoteImeKeyInject: RemoteImeKeyInject(
+            appInfo: RemoteAppInfo(counter: 5),
+            textFieldStatus: RemoteTextFieldStatus(
+              counterField: 3,
+              value: 'hello সংবাদ',
+            ),
+          ),
+        ),
+      );
+      await client.replaceText('hello world');
+      final deletes = sent.where((m) => m.hasRemoteKeyInject()).toList();
+      expect(deletes, hasLength('সংবাদ'.runes.length));
+      expect(
+        deletes.every(
+          (m) => m.remoteKeyInject.keyCode == RemoteKeyCode.KEYCODE_DEL,
+        ),
+        isTrue,
+      );
+      final edit = sent.last.remoteImeBatchEdit;
+      expect(edit.imeCounter, 5);
+      expect(edit.editInfo.single.textFieldStatus.value, 'world');
+      expect(client.state.imeValue, 'hello world');
+      sent.clear();
+      await client.replaceText('hello world');
+      expect(sent, isEmpty);
+    },
+  );
+  test('show request updates the field counter and value', () {
+    receive(
+      RemoteMessage(
+        remoteImeShowRequest: RemoteImeShowRequest(
+          remoteTextFieldStatus: RemoteTextFieldStatus(
+            counterField: 16,
+            value: 'try 5',
+          ),
+        ),
+      ),
+    );
+    expect(client.state.imeValue, 'try 5');
+    client.insertText('!');
+    expect(sent.last.remoteImeBatchEdit.fieldCounter, 16);
+  });
   test('IME positions count UTF-16 code units', () {
-    client.sendText('a😀');
+    client.insertText('a😀');
     final status =
         sent.single.remoteImeBatchEdit.editInfo.single.textFieldStatus;
     expect(status.start, 2);

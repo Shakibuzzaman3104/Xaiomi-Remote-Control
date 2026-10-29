@@ -107,6 +107,9 @@ class AtvRemoteClient {
   Completer<int>? _voiceBegin;
   final _ready = Completer<void>();
   Timer? _watchdog;
+  Future<void> _textQueue = Future.value();
+  Completer<void>? _fieldUpdate;
+  String? _awaitedValue;
   DateTime _lastReceived = DateTime.now();
   bool _closed = false;
 
@@ -257,6 +260,7 @@ class AtvRemoteClient {
       );
     } else if (message.hasRemoteImeKeyInject()) {
       final ime = message.remoteImeKeyInject;
+      _imeCounter = ime.appInfo.counter;
       if (ime.hasTextFieldStatus()) {
         _fieldCounter = ime.textFieldStatus.counterField;
         _update(
@@ -276,8 +280,12 @@ class AtvRemoteClient {
           ),
         );
       }
-    } else if (message.hasRemoteImeBatchEdit()) {
-      _imeCounter = message.remoteImeBatchEdit.imeCounter;
+      _completeFieldUpdate();
+    } else if (message.hasRemoteImeShowRequest()) {
+      final field = message.remoteImeShowRequest.remoteTextFieldStatus;
+      _fieldCounter = field.counterField;
+      _update(_state.copyWith(imeActive: true, imeValue: field.value));
+      _completeFieldUpdate();
     } else if (message.hasRemoteSetVolumeLevel()) {
       final volume = message.remoteSetVolumeLevel;
       _update(
@@ -297,6 +305,13 @@ class AtvRemoteClient {
     }
   }
 
+  void _completeFieldUpdate() {
+    final update = _fieldUpdate;
+    if (update == null || update.isCompleted) return;
+    final awaited = _awaitedValue;
+    if (awaited == null || _state.imeValue == awaited) update.complete();
+  }
+
   void sendKey(
     RemoteKeyCode code, {
     RemoteDirection direction = RemoteDirection.SHORT,
@@ -306,7 +321,42 @@ class AtvRemoteClient {
     ),
   );
 
-  void sendText(String text) {
+  /// Makes the focused TV field read [text], sending only the difference.
+  Future<void> replaceText(String text) =>
+      _textQueue = _textQueue.then((_) => _applyText(text));
+
+  Future<void> _applyText(String text) async {
+    if (_closed && sendSink == null) return;
+    final current = (_state.imeValue ?? '').runes.toList();
+    final target = text.runes.toList();
+    var common = 0;
+    while (common < current.length &&
+        common < target.length &&
+        current[common] == target[common]) {
+      common++;
+    }
+    final deletes = current.length - common;
+    final suffix = String.fromCharCodes(target.skip(common));
+    if (deletes > 0) {
+      final update = _fieldUpdate = Completer<void>();
+      _awaitedValue = String.fromCharCodes(target.take(common));
+      for (var i = 0; i < deletes; i++) {
+        sendKey(RemoteKeyCode.KEYCODE_DEL);
+      }
+      if (suffix.isNotEmpty) {
+        await update.future.timeout(
+          const Duration(milliseconds: 1500),
+          onTimeout: () {},
+        );
+      }
+      _awaitedValue = null;
+    }
+    if (suffix.isNotEmpty) insertText(suffix);
+    _update(_state.copyWith(imeValue: text));
+  }
+
+  /// Inserts [text] at the TV field's cursor.
+  void insertText(String text) {
     if (text.isEmpty) throw ArgumentError('Text cannot be empty');
     final position = text.length - 1;
     _send(

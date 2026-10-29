@@ -177,7 +177,14 @@ class TvSession {
   void pressUp(RemoteButton button) => _command(
     (c) => c.sendKey(keyCodeFor(button), direction: RemoteDirection.END_LONG),
   );
-  void sendText(String text) => _command((c) => c.sendText(text));
+  void sendText(String text) => _command(
+    (c) => unawaited(
+      c.replaceText(text).catchError((Object error) {
+        if (error is AtvConnectionLostException) _failure(_generation, error);
+      }),
+    ),
+  );
+  void insertText(String text) => _command((c) => c.insertText(text));
   void launchLink(String url) => _command((c) => c.launchApp(url));
   Future<int> startVoice() async {
     final client = _client;
