@@ -15,6 +15,8 @@ class VolumePill extends StatelessWidget {
     required this.muted,
     required this.onButton,
   });
+
+  /// Volume in percent, or null when the TV doesn't report it.
   final int? level;
   final bool muted;
   final ValueChanged<RemoteButton> onButton;
@@ -44,7 +46,7 @@ class VolumePill extends StatelessWidget {
                 Expanded(
                   child: Center(
                     child: Text(
-                      level == null ? 'Volume' : 'Volume $level',
+                      level == null ? 'Volume' : 'Volume $level%',
                       style: TextStyle(
                         color: c.onSurfaceStrong,
                         fontWeight: FontWeight.w600,

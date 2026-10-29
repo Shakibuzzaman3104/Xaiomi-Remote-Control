@@ -78,7 +78,9 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
         reconnecting:
             status == SessionStatus.connecting ||
             status == SessionStatus.reconnecting,
-        volumeLevel: atv.volumeMax > 0 ? atv.volumeLevel : null,
+        volumeLevel: atv.volumeMax > 0
+            ? (atv.volumeLevel * 100 / atv.volumeMax).round()
+            : null,
         muted: atv.muted,
       ),
       onButton: (button) => session?.press(button),
