@@ -4,7 +4,7 @@
  */
 import 'package:flutter/material.dart';
 
-/// Colours measured from the locked Remote design.
+/// Colours measured from the locked Remote design and its dark variant.
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
@@ -65,23 +65,22 @@ class AppColors extends ThemeExtension<AppColors> {
     danger: Color(0xFFC62828),
   );
 
-  // TODO: replace with values measured from design/screens/remote_dark once approved.
   static const dark = AppColors(
-    background: Color(0xFF121016),
-    surfaceContainer: Color(0xFF221F2B),
-    surfaceContainerStrong: Color(0xFF2B2736),
-    okButton: Color(0xFF332B4D),
-    dpadOutline: Color(0xFF34303F),
-    subtleOutline: Color(0xFF2A2633),
-    appTile: Color(0xFF1B1922),
-    primary: Color(0xFF8B6CE6),
-    primaryText: Color(0xFFB9A4F5),
+    background: Color(0xFF110F14),
+    surfaceContainer: Color(0xFF201D25),
+    surfaceContainerStrong: Color(0xFF292532),
+    okButton: Color(0xFF332A49),
+    dpadOutline: Color(0xFF2E2B37),
+    subtleOutline: Color(0xFF2A2731),
+    appTile: Color(0xFF1F1C24),
+    primary: Color(0xFF6F51D6),
+    primaryText: Color(0xFF9D7BF4),
     onPrimary: Color(0xFFFFFFFF),
-    onSurfaceStrong: Color(0xFFF4F1FB),
-    onSurface: Color(0xFFDAD5EA),
-    onSurfaceVariant: Color(0xFFC4BEDA),
-    muted: Color(0xFF9F98BC),
-    progressTrack: Color(0xFF34303F),
+    onSurfaceStrong: Color(0xFFF6F4FC),
+    onSurface: Color(0xFFE6E2F2),
+    onSurfaceVariant: Color(0xFFC9C3DE),
+    muted: Color(0xFFA39CC4),
+    progressTrack: Color(0xFF332E3F),
     connected: Color(0xFF5BC57A),
     danger: Color(0xFFEF6F6C),
   );
