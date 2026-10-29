@@ -24,21 +24,22 @@ abstract final class AppTheme {
   static ThemeData get dark => _build(AppColors.dark, Brightness.dark);
 
   static ThemeData _build(AppColors colors, Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: colors.primary,
-      brightness: brightness,
-    ).copyWith(
-      primary: colors.primary,
-      onPrimary: colors.onPrimary,
-      surface: colors.background,
-      onSurface: colors.onSurfaceStrong,
-      onSurfaceVariant: colors.onSurfaceVariant,
-      surfaceContainer: colors.surfaceContainer,
-      surfaceContainerHigh: colors.surfaceContainerStrong,
-      outline: colors.dpadOutline,
-      outlineVariant: colors.subtleOutline,
-      error: colors.danger,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: colors.primary,
+          brightness: brightness,
+        ).copyWith(
+          primary: colors.primary,
+          onPrimary: colors.onPrimary,
+          surface: colors.background,
+          onSurface: colors.onSurfaceStrong,
+          onSurfaceVariant: colors.onSurfaceVariant,
+          surfaceContainer: colors.surfaceContainer,
+          surfaceContainerHigh: colors.surfaceContainerStrong,
+          outline: colors.dpadOutline,
+          outlineVariant: colors.subtleOutline,
+          error: colors.danger,
+        );
 
     final base = ThemeData(
       useMaterial3: true,

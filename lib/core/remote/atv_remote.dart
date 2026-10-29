@@ -4,7 +4,6 @@
  */
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:protobuf/protobuf.dart';
@@ -111,8 +110,9 @@ class AtvRemoteClient {
   }
 
   Future<void> connect() async {
-    if (_closed || _socket != null)
+    if (_closed || _socket != null) {
       throw StateError('Client is closed or already connected');
+    }
     try {
       final socket = await SecureSocket.connect(
         host,
@@ -158,10 +158,11 @@ class AtvRemoteClient {
     _socket?.destroy();
     _socket = null;
     final pending = _voiceBegin;
-    if (pending != null && !pending.isCompleted)
+    if (pending != null && !pending.isCompleted) {
       pending.completeError(
         const AtvConnectionLostException('Connection closed'),
       );
+    }
     _update(_state.copyWith(connected: false, imeActive: false));
     await _states.close();
   }
@@ -173,8 +174,9 @@ class AtvRemoteClient {
     _socket = null;
     final exception = AtvConnectionLostException('$error');
     final pending = _voiceBegin;
-    if (pending != null && !pending.isCompleted)
+    if (pending != null && !pending.isCompleted) {
       pending.completeError(exception);
+    }
     _update(_state.copyWith(connected: false, imeActive: false));
     _states.addError(exception);
     _states.close();
@@ -186,8 +188,9 @@ class AtvRemoteClient {
       return;
     }
     final socket = _socket;
-    if (_closed || socket == null)
+    if (_closed || socket == null) {
       throw const AtvConnectionLostException('Connection closed');
+    }
     socket.add(frame(Uint8List.fromList(message.writeToBuffer())));
   }
 
@@ -267,8 +270,9 @@ class AtvRemoteClient {
       _update(_state.copyWith(isOn: message.remoteStart.started));
     } else if (message.hasRemoteVoiceBegin()) {
       final pending = _voiceBegin;
-      if (pending != null && !pending.isCompleted)
+      if (pending != null && !pending.isCompleted) {
         pending.complete(message.remoteVoiceBegin.sessionId);
+      }
     }
   }
 
@@ -311,8 +315,9 @@ class AtvRemoteClient {
   );
 
   Future<int> startVoice() async {
-    if (_voiceBegin != null || _voiceSession != null)
+    if (_voiceBegin != null || _voiceSession != null) {
       throw StateError('Voice session already in progress');
+    }
     final pending = Completer<int>();
     _voiceBegin = pending;
     try {

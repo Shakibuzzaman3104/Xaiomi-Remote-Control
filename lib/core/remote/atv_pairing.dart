@@ -106,8 +106,9 @@ class AtvPairingClient {
       _socket!.add(frame(Uint8List.fromList(message.writeToBuffer())));
 
   Future<void> startPairing() async {
-    if (_socket != null)
+    if (_socket != null) {
       throw const AtvPairingException('Pairing already started');
+    }
     try {
       _socket = await SecureSocket.connect(
         host,
@@ -139,18 +140,21 @@ class AtvPairingClient {
 
   Future<void> finishPairing(String code) async {
     _validateCode(code);
-    if (_socket == null || _step != 4)
+    if (_socket == null || _step != 4) {
       throw const AtvPairingException('Pairing has not started');
+    }
     final serverPem = _socket!.peerCertificate?.pem;
-    if (serverPem == null)
+    if (serverPem == null) {
       throw const AtvPairingException('Server certificate is missing');
+    }
     final secret = computePairingSecret(
       clientCertPem: certificate.certPem,
       serverCertPem: serverPem,
       code: code,
     );
-    if (secret[0] != int.parse(code.substring(0, 2), radix: 16))
+    if (secret[0] != int.parse(code.substring(0, 2), radix: 16)) {
       throw const AtvPairingException('Incorrect pairing code');
+    }
     _step = 5;
     _pending = Completer<void>();
     _send(_message()..secret = Secret(secret: secret));
@@ -169,8 +173,9 @@ class AtvPairingClient {
     try {
       for (final bytes in _decoder.add(data)) {
         final message = OuterMessage.fromBuffer(bytes);
-        if (message.status != OuterMessage_Status.STATUS_OK)
+        if (message.status != OuterMessage_Status.STATUS_OK) {
           throw AtvPairingException('Pairing status: ${message.status}');
+        }
         if (_step == 1 && message.hasPairingRequestAck()) {
           final options = Options(
             preferredRole: Options_RoleType.ROLE_TYPE_INPUT,
@@ -211,8 +216,9 @@ class AtvPairingClient {
   }
 
   void _fail(String message) {
-    if (_pending != null && !_pending!.isCompleted)
+    if (_pending != null && !_pending!.isCompleted) {
       _pending!.completeError(AtvPairingException(message));
+    }
   }
 
   void _connectionLost(String message) {

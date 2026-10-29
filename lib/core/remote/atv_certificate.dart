@@ -3,7 +3,6 @@
  * @since 29/10/26
  */
 import 'package:basic_utils/basic_utils.dart';
-import 'package:pointycastle/asymmetric/api.dart';
 
 /// A client certificate and its private key in PEM format.
 class AtvCertificate {

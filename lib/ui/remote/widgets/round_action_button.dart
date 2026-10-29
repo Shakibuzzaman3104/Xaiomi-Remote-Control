@@ -1,0 +1,113 @@
+/**
+ * @author Shakib
+ * @since 29/10/26
+ */
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../theme/app_colors.dart';
+
+class RoundActionButton extends StatefulWidget {
+  const RoundActionButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.size = 56,
+    this.selected = false,
+    this.showLabel = true,
+    this.repeat = false,
+    this.strong = false,
+  });
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final double size;
+  final bool selected, showLabel, repeat, strong;
+  @override
+  State<RoundActionButton> createState() => _RoundActionButtonState();
+}
+
+class _RoundActionButtonState extends State<RoundActionButton> {
+  Timer? timer;
+  bool pressed = false;
+  void start() {
+    HapticFeedback.selectionClick();
+    widget.onPressed();
+    setState(() => pressed = true);
+    if (widget.repeat) {
+      timer = Timer(const Duration(milliseconds: 350), () {
+        widget.onPressed();
+        timer = Timer.periodic(
+          const Duration(milliseconds: 120),
+          (_) => widget.onPressed(),
+        );
+      });
+    }
+  }
+
+  void stop() {
+    timer?.cancel();
+    timer = null;
+    if (pressed && mounted) setState(() => pressed = false);
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      label: widget.label,
+      button: true,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onPressed();
+      },
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => start(),
+          onTapUp: (_) => stop(),
+          onTapCancel: stop,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.selected
+                      ? c.primary
+                      : (pressed || widget.strong)
+                      ? c.surfaceContainerStrong
+                      : c.surfaceContainer,
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: widget.selected ? c.onPrimary : c.onSurface,
+                  size: 25,
+                ),
+              ),
+              if (widget.showLabel) ...[
+                const SizedBox(height: 2),
+                Text(
+                  widget.label,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 11, color: c.onSurface),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
