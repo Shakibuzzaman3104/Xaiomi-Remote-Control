@@ -2,8 +2,10 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
+import '../motion.dart';
 import 'app_colors.dart';
 
 /// Corner radii and sizes shared by the flat design.
@@ -48,6 +50,17 @@ abstract final class AppTheme {
       fontFamily: _fontFamily,
       scaffoldBackgroundColor: colors.background,
       splashFactory: InkSparkle.splashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ReduceMotionPageTransitionsBuilder(
+            PredictiveBackPageTransitionsBuilder(),
+          ),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        },
+      ),
     );
 
     return base.copyWith(
@@ -83,6 +96,58 @@ abstract final class AppTheme {
         inactiveTrackColor: colors.progressTrack,
         thumbColor: colors.primary,
       ),
+    );
+  }
+}
+
+/// Swaps the delegate's spatial page transition for a fade when Reduce Motion is on.
+class ReduceMotionPageTransitionsBuilder extends PageTransitionsBuilder {
+  const ReduceMotionPageTransitionsBuilder(this.delegate);
+
+  final PageTransitionsBuilder delegate;
+
+  @override
+  Duration get transitionDuration => delegate.transitionDuration;
+
+  @override
+  Duration get reverseTransitionDuration => delegate.reverseTransitionDuration;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition {
+    final inner = delegate.delegatedTransition;
+    if (inner == null) return null;
+    return (context, animation, secondaryAnimation, allowSnapshotting, child) =>
+        reduceMotion(context)
+        ? null
+        : inner(
+            context,
+            animation,
+            secondaryAnimation,
+            allowSnapshotting,
+            child,
+          );
+  }
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (reduceMotion(context)) {
+      return FadeTransition(
+        opacity: animation.drive(CurveTween(curve: AppMotion.easeOut)),
+        child: child,
+      );
+    }
+    return delegate.buildTransitions(
+      route,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
   }
 }

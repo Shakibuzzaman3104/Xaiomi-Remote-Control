@@ -50,6 +50,7 @@ class AdbClient {
   int _maxData = 256 * 1024;
   bool _connected = false;
   bool _closing = false;
+  bool _offerPublicKey = true;
 
   void _state(AdbConnectionState state) => _states.add(state);
   void _send(String command, int a, int b, [List<int> data = const []]) {
@@ -60,10 +61,12 @@ class AdbClient {
 
   Future<void> connect({
     Duration authTimeout = const Duration(seconds: 60),
+    bool offerPublicKey = true,
   }) async {
     if (_socket != null || _handshake != null) {
       throw AdbException('Already connecting or connected');
     }
+    _offerPublicKey = offerPublicKey;
     _closing = false;
     _authCount = 0;
     deviceModel = null;
@@ -109,6 +112,8 @@ class AdbClient {
       }
       if (_authCount++ == 0) {
         _send('AUTH', 2, 0, key.signToken(m.data));
+      } else if (_authCount == 2 && !_offerPublicKey) {
+        _fail(AdbException('Key not trusted yet'));
       } else if (_authCount == 2) {
         _state(AdbConnectionState.waitingForApproval);
         _send('AUTH', 3, 0, utf8.encode(key.androidPublicKey()));

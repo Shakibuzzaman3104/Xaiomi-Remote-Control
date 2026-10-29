@@ -4,8 +4,9 @@
  */
 import 'package:flutter/material.dart';
 
+import '../fade_rise_in.dart';
 import '../haptics.dart';
-
+import '../motion.dart';
 import '../theme/app_colors.dart';
 import 'step_dots.dart';
 import '../theme/app_theme.dart';
@@ -86,15 +87,22 @@ class DiscoverScreen extends StatelessWidget {
               ),
               const SizedBox(height: 38),
               Center(
-                child: Image.asset(
-                  Theme.of(context).brightness == Brightness.dark
-                      ? 'assets/illustrations/discover_dark.png'
-                      : 'assets/illustrations/discover.png',
-                  width: 280,
-                  height: 201,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) =>
-                      const SizedBox(width: 280, height: 201),
+                child: _SearchRadar(
+                  active:
+                      searching &&
+                      devices.isEmpty &&
+                      !timedOut &&
+                      errorText == null,
+                  child: Image.asset(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? 'assets/illustrations/discover_dark.png'
+                        : 'assets/illustrations/discover.png',
+                    width: 280,
+                    height: 201,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) =>
+                        const SizedBox(width: 280, height: 201),
+                  ),
                 ),
               ),
               const SizedBox(height: 34),
@@ -106,12 +114,15 @@ class DiscoverScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               for (var i = 0; i < devices.length; i++) ...[
-                _DeviceTile(
-                  item: devices[i],
-                  onTap: () {
-                    AppHaptics.selection();
-                    onSelect(devices[i]);
-                  },
+                FadeRiseIn(
+                  key: ValueKey(devices[i].id),
+                  child: _DeviceTile(
+                    item: devices[i],
+                    onTap: () {
+                      AppHaptics.selection();
+                      onSelect(devices[i]);
+                    },
+                  ),
                 ),
                 const SizedBox(height: 10),
               ],
@@ -259,4 +270,105 @@ class _DeviceTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SearchRadar extends StatefulWidget {
+  const _SearchRadar({required this.active, required this.child});
+  final bool active;
+  final Widget child;
+
+  @override
+  State<_SearchRadar> createState() => _SearchRadarState();
+}
+
+class _SearchRadarState extends State<_SearchRadar>
+    with SingleTickerProviderStateMixin {
+  static const _size = Size(280, 201);
+  static const _source = Offset(0.2, 0.67);
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
+
+  bool get _running => widget.active && !reduceMotion(context);
+
+  void _syncAnimation() {
+    if (_running && !_controller.isAnimating) _controller.repeat();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SearchRadar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncAnimation();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colors.primary;
+    return SizedBox.fromSize(
+      size: _size,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ExcludeSemantics(
+              child: AnimatedOpacity(
+                opacity: _running ? 1 : 0,
+                duration: AppMotion.standard,
+                curve: AppMotion.easeOut,
+                onEnd: () {
+                  if (!_running) _controller.stop();
+                },
+                child: ClipRect(
+                  child: CustomPaint(
+                    painter: _RadarPainter(color, _controller, _source),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          widget.child,
+        ],
+      ),
+    );
+  }
+}
+
+class _RadarPainter extends CustomPainter {
+  _RadarPainter(this.color, this.progress, this.source)
+    : super(repaint: progress);
+  final Color color;
+  final Animation<double> progress;
+  final Offset source;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * source.dx, size.height * source.dy);
+    for (final phase in [0.0, 0.5]) {
+      final t = AppMotion.easeOut.transform((progress.value + phase) % 1);
+      canvas.drawCircle(
+        center,
+        14 + 170 * t,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..color = color.withValues(alpha: 0.3 * (1 - t)),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RadarPainter old) => old.color != color;
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../fade_switcher.dart';
 import '../../haptics.dart';
 import '../../motion.dart';
 
@@ -86,12 +87,12 @@ class _RoundActionButtonState extends State<RoundActionButton> {
                 scale: pressed ? 0.95 : 1,
                 duration: motion(
                   context,
-                  Duration(milliseconds: pressed ? 100 : 150),
+                  pressed ? AppMotion.pressIn : AppMotion.pressOut,
                 ),
-                curve: const Cubic(0.23, 1, 0.32, 1),
+                curve: AppMotion.easeOut,
                 child: AnimatedContainer(
-                  duration: motion(context, const Duration(milliseconds: 120)),
-                  curve: const Cubic(0.23, 1, 0.32, 1),
+                  duration: motion(context, AppMotion.tint),
+                  curve: AppMotion.easeOut,
                   width: widget.size,
                   height: widget.size,
                   decoration: BoxDecoration(
@@ -102,20 +103,30 @@ class _RoundActionButtonState extends State<RoundActionButton> {
                         ? c.surfaceContainerStrong
                         : c.surfaceContainer,
                   ),
-                  child: Icon(
-                    widget.icon,
-                    color: widget.selected ? c.onPrimary : c.onSurface,
-                    size: 25,
+                  child: FadeSwitcher(
+                    scale: 0.85,
+                    duration: AppMotion.quick,
+                    child: Icon(
+                      widget.icon,
+                      key: ValueKey(widget.icon),
+                      color: widget.selected ? c.onPrimary : c.onSurface,
+                      size: 25,
+                    ),
                   ),
                 ),
               ),
               if (widget.showLabel) ...[
                 const SizedBox(height: 2),
-                Text(
-                  widget.label,
-                  maxLines: 1,
-                  style: context.appTextTheme.labelSmall!.copyWith(
-                    color: c.onSurface,
+                FadeSwitcher(
+                  scale: 1,
+                  duration: AppMotion.quick,
+                  child: Text(
+                    widget.label,
+                    key: ValueKey(widget.label),
+                    maxLines: 1,
+                    style: context.appTextTheme.labelSmall!.copyWith(
+                      color: c.onSurface,
+                    ),
                   ),
                 ),
               ],

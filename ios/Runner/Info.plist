@@ -26,6 +26,18 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_androidtvremote2._tcp</string>
+		<string>_googlecast._tcp</string>
+		<string>_adb._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Finds and controls Android TVs on your Wi-Fi.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lets you search and type on your TV with your voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Turns your speech into text for the TV.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -47,18 +59,6 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Finds and controls Android TVs on your Wi-Fi.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_androidtvremote2._tcp</string>
-		<string>_googlecast._tcp</string>
-		<string>_adb._tcp</string>
-	</array>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Lets you search and type on your TV with your voice.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Turns your speech into text for the TV.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

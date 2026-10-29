@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/session/providers.dart';
+import 'ui/fade_switcher.dart';
 import 'ui/onboarding/onboarding_flow.dart';
 import 'ui/onboarding/unlock_page.dart';
 import 'ui/remote/remote_home.dart';
@@ -66,13 +67,21 @@ class AppRoot extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paired = ref.watch(pairedTvsProvider);
+    final Widget screen;
     if (paired.isLoading && !paired.hasValue) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      screen = const Scaffold(
+        key: ValueKey('loading'),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    } else if (ref.watch(activeTvProvider) == null) {
+      screen = const OnboardingFlow(key: ValueKey('onboarding'));
+    } else {
+      screen = RemoteHome(
+        key: const ValueKey('remote'),
+        onAddTv: () => _openSettings(context),
+        onAppSettings: () => _openSettings(context),
+      );
     }
-    if (ref.watch(activeTvProvider) == null) return const OnboardingFlow();
-    return RemoteHome(
-      onAddTv: () => _openSettings(context),
-      onAppSettings: () => _openSettings(context),
-    );
+    return FadeSwitcher(scale: 1, expand: true, child: screen);
   }
 }

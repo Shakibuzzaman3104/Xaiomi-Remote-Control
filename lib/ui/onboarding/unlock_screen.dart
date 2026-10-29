@@ -225,41 +225,43 @@ class UnlockScreen extends StatelessWidget {
                             color: c.subtleOutline,
                           ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Semantics(
+                liveRegion: true,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.surfaceContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+                        width: 10,
+                        height: 10,
                         decoration: BoxDecoration(
-                          color: c.surfaceContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: connected ? c.connected : c.muted,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                statusText,
-                                style: context.appTextTheme.bodyMedium!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: c.onSurfaceStrong,
-                                    ),
-                              ),
-                            ),
-                          ],
+                          shape: BoxShape.circle,
+                          color: connected ? c.connected : c.muted,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          statusText,
+                          style: context.appTextTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: c.onSurfaceStrong,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

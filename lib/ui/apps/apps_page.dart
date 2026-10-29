@@ -11,6 +11,8 @@ import '../../core/session/providers.dart';
 import '../../core/session/remote_button.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/favourites.dart';
+import '../haptics.dart';
+import '../motion.dart';
 import '../onboarding/unlock_page.dart';
 import 'app_actions_sheet.dart';
 import 'apps_screen.dart';
@@ -71,8 +73,10 @@ class _AppsPageState extends ConsumerState<AppsPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
-  Future<void> _toggle(String package) =>
-      _run(() => ref.read(favouritesProvider.notifier).toggle(package));
+  Future<void> _toggle(String package) {
+    AppHaptics.selection();
+    return _run(() => ref.read(favouritesProvider.notifier).toggle(package));
+  }
 
   Future<void> _uninstall(TvAppItem app) async {
     final confirmed = await showDialog<bool>(
@@ -105,6 +109,7 @@ class _AppsPageState extends ConsumerState<AppsPage> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      sheetAnimationStyle: sheetAnimation(context),
       builder: (sheetContext) {
         void closeAndRun(VoidCallback callback) {
           Navigator.of(sheetContext).pop();

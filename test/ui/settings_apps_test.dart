@@ -26,11 +26,6 @@ void main() {
   ];
   void noop() {}
   Widget settings(ValueChanged<bool> changed) => SettingsView(
-    deviceName: 'Living Room',
-    connected: true,
-    onSwitchDevice: noop,
-    onTvSettings: noop,
-    onAppSettings: noop,
     devices: const [
       SettingsDevice(
         id: '1',

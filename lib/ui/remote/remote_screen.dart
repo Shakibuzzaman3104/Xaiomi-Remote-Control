@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../fade_switcher.dart';
+import '../motion.dart';
 import 'remote_models.dart';
 import 'widgets/device_header.dart';
 import 'widgets/now_playing_line.dart';
@@ -69,11 +71,13 @@ class _RemoteScreenState extends State<RemoteScreen> {
     mode = widget.initialMode;
   }
 
-  static const double _padGap = 28;
+  static const double _minPadGap = 16;
+  static const double _minActionsGap = 12;
   static const double _landscapeGap = 32;
   static const double _minLandscapePad = 120;
   static const double _minActionsWidth = 280;
-  static const double _controlsAroundPad = 180 + _padGap * 2;
+  static const double _controlsAroundPad =
+      160 + _minPadGap * 2 + _minActionsGap * 2;
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +116,21 @@ class _RemoteScreenState extends State<RemoteScreen> {
                 ? () => widget.onButton(RemoteButton.power)
                 : null,
           ),
-          if (!s.connected) ...[
-            const SizedBox(height: 8),
-            DisconnectedBanner(onRetry: widget.onRetry),
-          ],
+          FadeSwitcher(
+            scale: 1,
+            slide: const Offset(0, -0.2),
+            alignment: Alignment.topCenter,
+            child: s.connected
+                ? const SizedBox.shrink(key: ValueKey('connected'))
+                : Column(
+                    key: const ValueKey('disconnected'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 8),
+                      DisconnectedBanner(onRetry: widget.onRetry),
+                    ],
+                  ),
+          ),
           if (s.connected && s.nowPlaying != null) ...[
             const SizedBox(height: 10),
             NowPlayingLine(
@@ -144,26 +159,37 @@ class _RemoteScreenState extends State<RemoteScreen> {
                             )
                             .clamp(_minLandscapePad, 360.0)
                       : _padSizeFor(constraints);
+                  if (!landscape) {
+                    final controls = _buildControls(padSize);
+                    return CustomScrollView(
+                      slivers: [
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: tablet
+                                ? ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 480,
+                                    ),
+                                    child: controls,
+                                  )
+                                : controls,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
                   return SingleChildScrollView(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight,
                       ),
                       child: Center(
-                        child: landscape
-                            ? _buildLandscapeControls(
-                                padSize,
-                                constraints,
-                                actionBar,
-                              )
-                            : tablet
-                            ? ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 480,
-                                ),
-                                child: _buildControls(padSize),
-                              )
-                            : _buildControls(padSize),
+                        child: _buildLandscapeControls(
+                          padSize,
+                          constraints,
+                          actionBar,
+                        ),
                       ),
                     ),
                   );
@@ -182,15 +208,17 @@ class _RemoteScreenState extends State<RemoteScreen> {
   }
 
   double _padSizeFor(BoxConstraints constraints) {
-    final byWidth = (constraints.maxWidth * .9).clamp(0.0, 320.0);
+    final byWidth = (constraints.maxWidth * .9).clamp(0.0, 360.0);
     final byHeight = constraints.maxHeight - _controlsAroundPad;
     return byWidth < byHeight ? byWidth : byHeight.clamp(168.0, byWidth);
   }
 
   Widget _whenConnected(Widget child) {
     final connected = widget.state.connected;
-    return Opacity(
+    return AnimatedOpacity(
       opacity: connected ? 1 : .4,
+      duration: AppMotion.standard,
+      curve: AppMotion.easeOut,
       child: IgnorePointer(
         ignoring: !connected,
         child: KeyedSubtree(key: ValueKey(connected), child: child),
@@ -199,16 +227,24 @@ class _RemoteScreenState extends State<RemoteScreen> {
   }
 
   Widget _buildControls(double padSize) {
+    final actions = _buildActions();
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: _padGap),
+        ..._flexibleGap(_minPadGap, 6),
         _buildPad(padSize),
-        const SizedBox(height: _padGap),
-        ..._buildActions(),
+        ..._flexibleGap(_minPadGap, 5),
+        actions.first,
+        ..._flexibleGap(_minActionsGap, 3),
+        actions.last,
+        ..._flexibleGap(_minActionsGap, 5),
       ],
     );
   }
+
+  List<Widget> _flexibleGap(double min, int flex) => [
+    SizedBox(height: min),
+    Spacer(flex: flex),
+  ];
 
   Widget _buildLandscapeControls(
     double padSize,
@@ -250,24 +286,33 @@ class _RemoteScreenState extends State<RemoteScreen> {
     return SizedBox(
       width: padSize,
       height: padSize,
-      child: switch (mode) {
-        RemoteMode.dpad => Dpad(onButton: widget.onButton),
-        RemoteMode.swipe => SwipePad(
-          onButton: widget.onButton,
-          sensitivity: widget.swipeSensitivity,
-        ),
-        RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
-          onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
-        ),
-        RemoteMode.mouse => Trackpad(
-          onPointerMove: widget.onPointerMove,
-          onScroll: widget.onScroll,
-          onClick: widget.onClick,
-          onAirMouseChanged: widget.onAirMouseChanged,
-        ),
-        RemoteMode.numpad => Numpad(onButton: widget.onButton),
-      },
+      child: FadeSwitcher(
+        scale: 0.98,
+        duration: AppMotion.swap,
+        expand: true,
+        child: KeyedSubtree(key: ValueKey(mode), child: _padFor(mode)),
+      ),
     );
+  }
+
+  Widget _padFor(RemoteMode mode) {
+    return switch (mode) {
+      RemoteMode.dpad => Dpad(onButton: widget.onButton),
+      RemoteMode.swipe => SwipePad(
+        onButton: widget.onButton,
+        sensitivity: widget.swipeSensitivity,
+      ),
+      RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
+        onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
+      ),
+      RemoteMode.mouse => Trackpad(
+        onPointerMove: widget.onPointerMove,
+        onScroll: widget.onScroll,
+        onClick: widget.onClick,
+        onAirMouseChanged: widget.onAirMouseChanged,
+      ),
+      RemoteMode.numpad => Numpad(onButton: widget.onButton),
+    };
   }
 
   List<Widget> _buildActions() {
@@ -294,7 +339,6 @@ class _RemoteScreenState extends State<RemoteScreen> {
           ),
         ],
       ),
-      const SizedBox(height: 8),
       VolumePill(
         level: s.volumeLevel,
         exactIndex: s.exactVolume?.index,

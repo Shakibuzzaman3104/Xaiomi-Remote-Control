@@ -9,7 +9,7 @@ import '../../core/adb/full_control.dart';
 import '../../core/session/providers.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/app_preferences.dart';
-import '../remote/remote_models.dart';
+import '../motion.dart';
 import '../theme/theme_mode_provider.dart';
 import 'settings_view.dart';
 
@@ -30,6 +30,7 @@ class SettingsScreen extends ConsumerWidget {
     ValueChanged<T> onSelected,
   ) => showModalBottomSheet<void>(
     context: context,
+    sheetAnimationStyle: sheetAnimation(context),
     builder: (sheetContext) => SafeArea(
       child: RadioGroup<T>(
         groupValue: selected,
@@ -66,19 +67,12 @@ class SettingsScreen extends ConsumerWidget {
     final connected =
         ref.watch(tvSessionStateProvider).asData?.value.status ==
         SessionStatus.connected;
-    final session = ref.watch(tvSessionProvider);
     final prefs = ref.watch(appPreferencesProvider);
     final notifier = ref.read(appPreferencesProvider.notifier);
     final theme = ref.watch(themeModeProvider);
 
     return SettingsView(
-      deviceName: active?.name ?? 'No TV',
-      connected: connected,
-      onSwitchDevice: onAddTv,
-      onTvSettings: () => session?.press(RemoteButton.settings),
-      onAppSettings: () {},
       onBack: onBack,
-      onPower: connected ? () => session?.press(RemoteButton.power) : null,
       devices: [
         for (final tv in paired?.tvs ?? const [])
           SettingsDevice(

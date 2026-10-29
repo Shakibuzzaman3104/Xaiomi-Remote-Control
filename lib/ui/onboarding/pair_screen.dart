@@ -2,11 +2,13 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../haptics.dart';
-
+import '../motion.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'step_dots.dart';
@@ -24,6 +26,8 @@ class _UpperCaseHexFormatter extends TextInputFormatter {
   }
 }
 
+double _shakeOffset(double t) => math.sin(t * math.pi * 6) * 8 * (1 - t);
+
 class PairScreen extends StatefulWidget {
   const PairScreen({
     super.key,
@@ -32,6 +36,7 @@ class PairScreen extends StatefulWidget {
     required this.onBack,
     this.onReadAutomatically,
     this.busy = false,
+    this.success = false,
   });
 
   final String deviceName;
@@ -39,14 +44,20 @@ class PairScreen extends StatefulWidget {
   final VoidCallback onBack;
   final VoidCallback? onReadAutomatically;
   final bool busy;
+  final bool success;
 
   @override
   State<PairScreen> createState() => _PairScreenState();
 }
 
-class _PairScreenState extends State<PairScreen> {
+class _PairScreenState extends State<PairScreen>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
+  late final AnimationController _shake = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 360),
+  );
   bool _submitting = false;
   String? _error;
 
@@ -72,7 +83,14 @@ class _PairScreenState extends State<PairScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant PairScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.success && widget.success) AppHaptics.light();
+  }
+
+  @override
   void dispose() {
+    _shake.dispose();
     _controller.removeListener(_onTextChanged);
     _focusNode.removeListener(_onFocusChanged);
     _controller.dispose();
@@ -93,6 +111,8 @@ class _PairScreenState extends State<PairScreen> {
     if (!mounted) return;
 
     if (err != null) {
+      AppHaptics.medium();
+      if (!reduceMotion(context)) _shake.forward(from: 0);
       _controller.clear();
       setState(() {
         _submitting = false;
@@ -190,83 +210,104 @@ class _PairScreenState extends State<PairScreen> {
                       const SizedBox(height: 42),
                       SizedBox(
                         height: 72,
-                        child: Stack(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(6, (index) {
-                                final isFilled = index < text.length;
-                                final isFocusedBox =
-                                    _focusNode.hasFocus &&
-                                    (index == text.length ||
-                                        (text.length == 6 && index == 5));
-                                final char = isFilled ? text[index] : '';
+                        child: AnimatedBuilder(
+                          animation: _shake,
+                          builder: (context, child) => Transform.translate(
+                            offset: Offset(_shakeOffset(_shake.value), 0),
+                            child: child,
+                          ),
+                          child: Stack(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: List.generate(6, (index) {
+                                  final isFilled = index < text.length;
+                                  final isFocusedBox =
+                                      _focusNode.hasFocus &&
+                                      (index == text.length ||
+                                          (text.length == 6 && index == 5));
+                                  final char = isFilled ? text[index] : '';
 
-                                return Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(
-                                      right: index == 5 ? 0 : 7,
-                                    ),
-                                    height: 72,
-                                    decoration: BoxDecoration(
-                                      color: c.background,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isFocusedBox
-                                            ? c.primary
-                                            : c.subtleOutline,
-                                        width: isFocusedBox ? 1.5 : 1.0,
+                                  return Expanded(
+                                    child: AnimatedContainer(
+                                      duration: motion(
+                                        context,
+                                        AppMotion.quick,
                                       ),
+                                      curve: AppMotion.easeOut,
+                                      margin: EdgeInsets.only(
+                                        right: index == 5 ? 0 : 7,
+                                      ),
+                                      height: 72,
+                                      decoration: BoxDecoration(
+                                        color: c.background,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: widget.success
+                                              ? c.primary
+                                              : _error != null
+                                              ? c.danger
+                                              : isFocusedBox
+                                              ? c.primary
+                                              : c.subtleOutline,
+                                          width: isFocusedBox ? 1.5 : 1.0,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: isFilled
+                                          ? _PopIn(
+                                              key: ValueKey('$index$char'),
+                                              child: Text(
+                                                char,
+                                                style: context
+                                                    .appTextTheme
+                                                    .headlineMedium!
+                                                    .copyWith(
+                                                      color: c.onSurfaceStrong,
+                                                    ),
+                                              ),
+                                            )
+                                          : (isFocusedBox &&
+                                                    index == text.length
+                                                ? Container(
+                                                    width: 2,
+                                                    height: 24,
+                                                    color: c.primary,
+                                                  )
+                                                : const SizedBox.shrink()),
                                     ),
-                                    alignment: Alignment.center,
-                                    child: isFilled
-                                        ? Text(
-                                            char,
-                                            style: context
-                                                .appTextTheme
-                                                .headlineMedium!
-                                                .copyWith(
-                                                  color: c.onSurfaceStrong,
-                                                ),
-                                          )
-                                        : (isFocusedBox && index == text.length
-                                              ? Container(
-                                                  width: 2,
-                                                  height: 24,
-                                                  color: c.primary,
-                                                )
-                                              : const SizedBox.shrink()),
+                                  );
+                                }),
+                              ),
+                              Positioned.fill(
+                                child: Opacity(
+                                  opacity: 0.0,
+                                  child: TextField(
+                                    controller: _controller,
+                                    focusNode: _focusNode,
+                                    autofocus: true,
+                                    keyboardType: TextInputType.text,
+                                    textCapitalization:
+                                        TextCapitalization.characters,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9a-fA-F]'),
+                                      ),
+                                      LengthLimitingTextInputFormatter(6),
+                                      _UpperCaseHexFormatter(),
+                                    ],
+                                    onChanged: (_) {
+                                      if (_error != null) {
+                                        setState(() => _error = null);
+                                      }
+                                    },
+                                    onSubmitted: (_) => _handlePair(),
                                   ),
-                                );
-                              }),
-                            ),
-                            Positioned.fill(
-                              child: Opacity(
-                                opacity: 0.0,
-                                child: TextField(
-                                  controller: _controller,
-                                  focusNode: _focusNode,
-                                  autofocus: true,
-                                  keyboardType: TextInputType.text,
-                                  textCapitalization:
-                                      TextCapitalization.characters,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'[0-9a-fA-F]'),
-                                    ),
-                                    LengthLimitingTextInputFormatter(6),
-                                    _UpperCaseHexFormatter(),
-                                  ],
-                                  onChanged: (_) {
-                                    if (_error != null) {
-                                      setState(() => _error = null);
-                                    }
-                                  },
-                                  onSubmitted: (_) => _handlePair(),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       if (_error != null) ...[
@@ -337,15 +378,21 @@ class _PairScreenState extends State<PairScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: c.primary,
                         foregroundColor: c.onPrimary,
-                        disabledBackgroundColor: c.surfaceContainerStrong,
-                        disabledForegroundColor: c.muted,
+                        disabledBackgroundColor: widget.success
+                            ? c.primary
+                            : c.surfaceContainerStrong,
+                        disabledForegroundColor: widget.success
+                            ? c.onPrimary
+                            : c.muted,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppShapes.pill),
                         ),
                         minimumSize: const Size(double.infinity, 52),
                       ),
-                      child: isBusy
+                      child: widget.success
+                          ? _CheckMark(color: c.onPrimary)
+                          : isBusy
                           ? SizedBox(
                               width: 20,
                               height: 20,
@@ -408,4 +455,91 @@ class _PairScreenState extends State<PairScreen> {
       ),
     );
   }
+}
+
+class _PopIn extends StatelessWidget {
+  const _PopIn({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reduceMotion(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppMotion.quick,
+      curve: AppMotion.easeOut,
+      child: child,
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: Transform.scale(scale: 0.8 + 0.2 * t, child: child),
+      ),
+    );
+  }
+}
+
+class _CheckMark extends StatefulWidget {
+  const _CheckMark({required this.color});
+  final Color color;
+
+  @override
+  State<_CheckMark> createState() => _CheckMarkState();
+}
+
+class _CheckMarkState extends State<_CheckMark>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_controller.value == 0 && !_controller.isAnimating) {
+      _controller.animateTo(
+        1,
+        duration: motion(context, const Duration(milliseconds: 380)),
+        curve: AppMotion.easeOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: 'Paired',
+    child: CustomPaint(
+      size: const Size.square(26),
+      painter: _CheckPainter(widget.color, _controller),
+    ),
+  );
+}
+
+class _CheckPainter extends CustomPainter {
+  _CheckPainter(this.color, this.progress) : super(repaint: progress);
+  final Color color;
+  final Animation<double> progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.54)
+      ..lineTo(size.width * 0.4, size.height * 0.76)
+      ..lineTo(size.width * 0.82, size.height * 0.28);
+    final metric = path.computeMetrics().first;
+    canvas.drawPath(
+      metric.extractPath(0, metric.length * progress.value),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CheckPainter old) => old.color != color;
 }

@@ -155,11 +155,6 @@ final shots = <String, Widget Function()>{
     onSkip: () {},
   ),
   'settings': () => SettingsView(
-    deviceName: 'Living Room · Mi Box S',
-    connected: true,
-    onSwitchDevice: () {},
-    onTvSettings: () {},
-    onAppSettings: () {},
     devices: const [
       SettingsDevice(
         id: '1',

@@ -12,6 +12,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/session/providers.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/app_preferences.dart';
+import '../motion.dart';
 import '../sheets/keyboard_sheet.dart';
 import '../sheets/voice_sheet.dart';
 import 'connected_remote_page.dart';
@@ -75,6 +76,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      sheetAnimationStyle: sheetAnimation(context),
       showDragHandle: false,
       builder: (sheetContext) => KeyboardSheet(
         fieldLabel: atv?.imeLabel ?? '',
@@ -98,6 +100,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
     final query = await showModalBottomSheet<_VoiceResult>(
       context: context,
       isScrollControlled: true,
+      sheetAnimationStyle: sheetAnimation(context),
       showDragHandle: false,
       builder: (_) => _VoiceSheetHost(
         typeIntoFieldAvailable: imeActive,

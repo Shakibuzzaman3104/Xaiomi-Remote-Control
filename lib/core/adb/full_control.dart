@@ -201,8 +201,30 @@ class FullControl extends Notifier<FullControlState> {
       if (oldClient != null) await oldClient.disconnect();
       if (generation != _generation) return;
       final client = AdbClient(host: tv.host, key: key);
-      _client = client;
-      _subscription = client.states.listen((event) {
+      final approved = Completer<AdbClient>();
+      Timer? approvalProbe;
+      var probing = false;
+      var settled = false;
+      void probeApproval() {
+        if (probing || settled || generation != _generation) return;
+        probing = true;
+        final probe = AdbClient(host: tv.host, key: key);
+        probe
+            .connect(
+              authTimeout: const Duration(seconds: 5),
+              offerPublicKey: false,
+            )
+            .then((_) {
+              if (settled || generation != _generation) {
+                unawaited(probe.disconnect());
+              } else {
+                approved.complete(probe);
+              }
+            }, onError: (_) {})
+            .whenComplete(() => probing = false);
+      }
+
+      void onState(AdbConnectionState event) {
         if (generation != _generation) return;
         switch (event) {
           case AdbConnectionState.connecting:
@@ -225,10 +247,40 @@ class FullControl extends Notifier<FullControlState> {
               );
             }
         }
-      });
-      await client.connect(authTimeout: const Duration(seconds: 60));
+        if (event == AdbConnectionState.waitingForApproval) {
+          approvalProbe ??= Timer.periodic(
+            const Duration(seconds: 2),
+            (_) => probeApproval(),
+          );
+        }
+      }
+
+      _client = client;
+      _subscription = client.states.listen(onState);
+      final AdbClient connected;
+      try {
+        connected = await Future.any([
+          client
+              .connect(authTimeout: const Duration(seconds: 60))
+              .then((_) => client),
+          approved.future,
+        ]);
+      } finally {
+        settled = true;
+        approvalProbe?.cancel();
+      }
+      if (!identical(connected, client)) {
+        if (generation != _generation) {
+          await connected.disconnect();
+          return;
+        }
+        await _subscription?.cancel();
+        unawaited(client.disconnect());
+        _client = connected;
+        _subscription = connected.states.listen(onState);
+      }
       if (generation != _generation) {
-        await client.disconnect();
+        await connected.disconnect();
         return;
       }
       state = state.copyWith(status: FullControlStatus.connected);

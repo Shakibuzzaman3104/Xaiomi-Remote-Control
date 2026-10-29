@@ -4,10 +4,12 @@
  */
 import 'package:flutter/material.dart';
 
+import '../../fade_switcher.dart';
 import '../../haptics.dart';
-
+import '../../motion.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'pulse_dot.dart';
 
 class DeviceHeader extends StatelessWidget {
   const DeviceHeader({
@@ -66,27 +68,31 @@ class DeviceHeader extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        if (connected)
-                          Icon(Icons.wifi, size: 15, color: c.muted)
-                        else
-                          SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: c.primary,
+                    FadeSwitcher(
+                      scale: 1,
+                      alignment: Alignment.centerLeft,
+                      duration: AppMotion.quick,
+                      child: Row(
+                        key: ValueKey(connected),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox.square(
+                            dimension: 15,
+                            child: Center(
+                              child: connected
+                                  ? Icon(Icons.wifi, size: 15, color: c.muted)
+                                  : const PulseDot(),
                             ),
                           ),
-                        const SizedBox(width: 5),
-                        Text(
-                          connected ? 'Connected' : 'Reconnecting…',
-                          style: context.appTextTheme.labelMedium!.copyWith(
-                            color: c.muted,
+                          const SizedBox(width: 5),
+                          Text(
+                            connected ? 'Connected' : 'Reconnecting…',
+                            style: context.appTextTheme.labelMedium!.copyWith(
+                              color: c.muted,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

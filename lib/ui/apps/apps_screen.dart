@@ -4,6 +4,8 @@
  */
 import 'package:flutter/material.dart';
 
+import '../fade_switcher.dart';
+import '../motion.dart';
 import '../remote/widgets/device_header.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -58,12 +60,49 @@ class AppsScreen extends StatefulWidget {
   State<AppsScreen> createState() => _AppsScreenState();
 }
 
-class _AppsScreenState extends State<AppsScreen> {
+class _AppsScreenState extends State<AppsScreen>
+    with SingleTickerProviderStateMixin {
+  static const _rowDelay = Duration(milliseconds: 40);
+  static const _tileDuration = Duration(milliseconds: 260);
+  static const _staggerRows = 5;
+  static final _entranceDuration = _rowDelay * _staggerRows + _tileDuration;
+
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
+  late final AnimationController _entrance = AnimationController(vsync: this);
   bool _favourites = false;
+  bool _entrancePlayed = false;
+
+  void _playEntranceOnce() {
+    if (_entrancePlayed || widget.apps.isEmpty) return;
+    _entrancePlayed = true;
+    _entrance.animateTo(1, duration: motion(context, _entranceDuration));
+  }
+
+  Curve _tileEntranceCurve(int index) {
+    final delay = _rowDelay * (index ~/ 4).clamp(0, _staggerRows - 1);
+    return Interval(
+      delay.inMilliseconds / _entranceDuration.inMilliseconds,
+      (delay + _tileDuration).inMilliseconds / _entranceDuration.inMilliseconds,
+      curve: AppMotion.easeOut,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _playEntranceOnce();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _playEntranceOnce();
+  }
+
   @override
   void dispose() {
+    _entrance.dispose();
     _search.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -227,7 +266,14 @@ class _AppsScreenState extends State<AppsScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    Expanded(child: _content(context, apps, query)),
+                    Expanded(
+                      child: FadeSwitcher(
+                        scale: 1,
+                        duration: AppMotion.quick,
+                        expand: true,
+                        child: _content(context, apps, query),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -239,82 +285,39 @@ class _AppsScreenState extends State<AppsScreen> {
   }
 
   Widget _content(BuildContext context, List<TvAppItem> apps, String query) {
-    if (widget.loading && apps.isEmpty) return _skeleton(context);
-    if (apps.isEmpty) return _emptyState(context, query);
-    final c = context.colors;
-    return _grid(
-      context,
-      itemCount: apps.length,
-      builder: (index, tileWidth) {
-        final app = apps[index];
-        final toggle = widget.onToggleFavourite;
-        return InkWell(
-          onTap: () => widget.onOpen(app),
-          onLongPress: () => widget.onShowActions(app),
-          borderRadius: BorderRadius.circular(12),
-          child: Opacity(
-            opacity: app.dimmed ? 0.5 : 1,
-            child: Column(
-              children: [
-                Container(
-                  width: tileWidth,
-                  height: tileWidth,
-                  decoration: BoxDecoration(
-                    color: c.appTile,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: c.subtleOutline),
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: SizedBox(width: 56, height: 56, child: app.icon),
-                      ),
-                      if (app.isFavourite)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Semantics(
-                            button: true,
-                            label: 'Remove ${app.label} from favourites',
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: toggle == null ? null : () => toggle(app),
-                              child: SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Icon(
-                                    Icons.star,
-                                    size: 16,
-                                    color: c.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Expanded(
-                  child: Text(
-                    app.label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.appTextTheme.labelMedium!.copyWith(
-                      height: 1.2,
-                      color: c.onSurfaceStrong,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    if (widget.loading && apps.isEmpty) {
+      return KeyedSubtree(
+        key: const ValueKey('skeleton'),
+        child: _PulseOpacity(child: _skeleton(context)),
+      );
+    }
+    if (apps.isEmpty) {
+      return KeyedSubtree(
+        key: const ValueKey('empty'),
+        child: _emptyState(context, query),
+      );
+    }
+    return KeyedSubtree(
+      key: const ValueKey('grid'),
+      child: _grid(
+        context,
+        itemCount: apps.length,
+        builder: (index, tileWidth) {
+          final app = apps[index];
+          return _AppTile(
+            key: ValueKey(app.package),
+            app: app,
+            tileWidth: tileWidth,
+            entrance: _entrance,
+            entranceCurve: _tileEntranceCurve(index),
+            onOpen: () => widget.onOpen(app),
+            onShowActions: () => widget.onShowActions(app),
+            onToggleFavourite: widget.onToggleFavourite == null
+                ? null
+                : () => widget.onToggleFavourite!(app),
+          );
+        },
+      ),
     );
   }
 
@@ -419,4 +422,191 @@ class _AppsScreenState extends State<AppsScreen> {
       },
     );
   }
+}
+
+class _AppTile extends StatefulWidget {
+  const _AppTile({
+    super.key,
+    required this.app,
+    required this.tileWidth,
+    required this.entrance,
+    required this.entranceCurve,
+    required this.onOpen,
+    required this.onShowActions,
+    required this.onToggleFavourite,
+  });
+  final TvAppItem app;
+  final double tileWidth;
+  final Animation<double> entrance;
+  final Curve entranceCurve;
+  final VoidCallback onOpen, onShowActions;
+  final VoidCallback? onToggleFavourite;
+
+  @override
+  State<_AppTile> createState() => _AppTileState();
+}
+
+class _AppTileState extends State<_AppTile> {
+  int _starPops = 0;
+
+  @override
+  void didUpdateWidget(covariant _AppTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.app.isFavourite && widget.app.isFavourite) _starPops++;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final app = widget.app;
+    final tile = InkWell(
+      onTap: widget.onOpen,
+      onLongPress: widget.onShowActions,
+      borderRadius: BorderRadius.circular(12),
+      child: Opacity(
+        opacity: app.dimmed ? 0.5 : 1,
+        child: Column(
+          children: [
+            Container(
+              width: widget.tileWidth,
+              height: widget.tileWidth,
+              decoration: BoxDecoration(
+                color: c.appTile,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: c.subtleOutline),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: SizedBox(width: 56, height: 56, child: app.icon),
+                  ),
+                  if (app.isFavourite)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Semantics(
+                        button: true,
+                        label: 'Remove ${app.label} from favourites',
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: widget.onToggleFavourite,
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: _StarPop(
+                                key: ValueKey(_starPops),
+                                pop: _starPops > 0,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 16,
+                                  color: c.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            Expanded(
+              child: Text(
+                app.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.appTextTheme.labelMedium!.copyWith(
+                  height: 1.2,
+                  color: c.onSurfaceStrong,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return AnimatedBuilder(
+      animation: widget.entrance,
+      child: tile,
+      builder: (context, child) {
+        if (widget.entrance.isCompleted) return child!;
+        final t = widget.entranceCurve.transform(widget.entrance.value);
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 12),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StarPop extends StatelessWidget {
+  const _StarPop({super.key, required this.pop, required this.child});
+  final bool pop;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!pop || reduceMotion(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.6, end: 1),
+      duration: AppMotion.swap,
+      curve: Curves.easeOutBack,
+      child: child,
+      builder: (context, scale, child) =>
+          Transform.scale(scale: scale, child: child),
+    );
+  }
+}
+
+class _PulseOpacity extends StatefulWidget {
+  const _PulseOpacity({required this.child});
+  final Widget child;
+
+  @override
+  State<_PulseOpacity> createState() => _PulseOpacityState();
+}
+
+class _PulseOpacityState extends State<_PulseOpacity>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (reduceMotion(context)) {
+      _controller.stop();
+      _controller.value = 0;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: Tween<double>(begin: 1, end: 0.5).animate(_curve),
+    child: widget.child,
+  );
 }

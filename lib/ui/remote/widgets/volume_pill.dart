@@ -4,6 +4,9 @@
  */
 import 'package:flutter/material.dart';
 
+import '../../fade_switcher.dart';
+import '../../haptics.dart';
+import '../../motion.dart';
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
 import 'round_action_button.dart';
@@ -36,6 +39,7 @@ class _VolumePillState extends State<VolumePill> {
   Widget build(BuildContext context) {
     final c = context.colors;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Container(
@@ -78,19 +82,29 @@ class _VolumePillState extends State<VolumePill> {
                             onChanged: (value) =>
                                 setState(() => _dragIndex = value.round()),
                             onChangeEnd: (value) {
+                              AppHaptics.selection();
                               setState(() => _dragIndex = null);
                               widget.onExactVolumeChanged!(value.round());
                             },
                           ),
                         )
                       : Center(
-                          child: Text(
-                            widget.level == null
-                                ? 'Volume'
-                                : 'Volume ${widget.level}%',
-                            style: TextStyle(
-                              color: c.onSurfaceStrong,
-                              fontWeight: FontWeight.w600,
+                          child: FadeSwitcher(
+                            scale: 1,
+                            slide: const Offset(0, 0.15),
+                            duration: AppMotion.quick,
+                            child: Text(
+                              widget.level == null
+                                  ? 'Volume'
+                                  : 'Volume ${widget.level}%',
+                              key: ValueKey(widget.level),
+                              style: TextStyle(
+                                color: c.onSurfaceStrong,
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                             ),
                           ),
                         ),

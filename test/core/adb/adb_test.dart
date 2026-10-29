@@ -123,6 +123,49 @@ void main() {
     );
   });
 
+  test('probe without public key fails fast on an untrusted key', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    var offeredPublicKey = false;
+    server.listen((socket) {
+      final decoder = AdbMessageDecoder();
+      void send(String command, int a, int b, [List<int> data = const []]) =>
+          socket.add(AdbMessage(adbCommand(command), a, b, data).encode());
+      socket.listen((data) {
+        for (final message in decoder.add(data)) {
+          if (message.command == adbCommand('CNXN')) {
+            send('AUTH', 1, 0, List.filled(20, 7));
+          } else if (message.command == adbCommand('AUTH')) {
+            if (message.arg0 == 3) offeredPublicKey = true;
+            send('AUTH', 1, 0, List.filled(20, 8));
+          }
+        }
+      }, onError: (_) {});
+    });
+    final client = AdbClient(
+      host: '127.0.0.1',
+      port: server.port,
+      key: AdbKey.generate(),
+    );
+    try {
+      await expectLater(
+        client.connect(
+          authTimeout: const Duration(seconds: 5),
+          offerPublicKey: false,
+        ),
+        throwsA(
+          isA<AdbException>().having(
+            (e) => e.message,
+            'message',
+            'Key not trusted yet',
+          ),
+        ),
+      );
+      expect(offeredPublicKey, isFalse);
+    } finally {
+      await server.close();
+    }
+  });
+
   test('fake daemon connects, handles shell, push and install', () async {
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     final uploads = <List<int>>[];

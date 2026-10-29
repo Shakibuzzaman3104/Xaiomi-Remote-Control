@@ -70,11 +70,8 @@ class ModeSwitcher extends StatelessWidget {
                         onChanged(RemoteMode.values[i]);
                       },
                       child: AnimatedContainer(
-                        duration: motion(
-                          context,
-                          const Duration(milliseconds: 150),
-                        ),
-                        curve: const Cubic(0.23, 1, 0.32, 1),
+                        duration: motion(context, AppMotion.quick),
+                        curve: AppMotion.easeOut,
                         decoration: BoxDecoration(
                           color: selected ? c.primary : c.surfaceContainer,
                           borderRadius: BorderRadius.circular(12),

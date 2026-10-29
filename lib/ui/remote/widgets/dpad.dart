@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../haptics.dart';
-
+import '../../motion.dart';
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
 import '../../theme/app_theme.dart';
@@ -20,15 +20,24 @@ class Dpad extends StatefulWidget {
   State<Dpad> createState() => _DpadState();
 }
 
-class _DpadState extends State<Dpad> {
+class _DpadState extends State<Dpad> with TickerProviderStateMixin {
   RemoteButton? pressed;
   Timer? timer;
   int? activePointer;
+  RemoteButton? lastPressed;
+  late final hold = AnimationController(vsync: this);
+  late final spread = AnimationController(vsync: this);
+
   void stop() {
     timer?.cancel();
     timer = null;
     activePointer = null;
-    if (pressed != null && mounted) setState(() => pressed = null);
+    pressed = null;
+    hold.animateBack(
+      0,
+      duration: motion(context, AppMotion.pressOut),
+      curve: AppMotion.easeOut,
+    );
   }
 
   void start(Offset p, double size, int pointer) {
@@ -44,7 +53,19 @@ class _DpadState extends State<Dpad> {
     activePointer = pointer;
     AppHaptics.selection();
     widget.onButton(b);
-    setState(() => pressed = b);
+    pressed = b;
+    lastPressed = b;
+    spread.value = 0;
+    spread.animateTo(
+      1,
+      duration: motion(context, AppMotion.tint),
+      curve: AppMotion.easeOut,
+    );
+    hold.animateTo(
+      1,
+      duration: motion(context, AppMotion.pressIn),
+      curve: AppMotion.easeOut,
+    );
     if (b != RemoteButton.ok) {
       timer = Timer(const Duration(milliseconds: 350), () {
         widget.onButton(b);
@@ -59,6 +80,8 @@ class _DpadState extends State<Dpad> {
   @override
   void dispose() {
     timer?.cancel();
+    hold.dispose();
+    spread.dispose();
     super.dispose();
   }
 
@@ -79,16 +102,25 @@ class _DpadState extends State<Dpad> {
             if (e.pointer == activePointer) stop();
           },
           child: CustomPaint(
-            painter: _Painter(c, pressed),
+            painter: _Painter(c, lastPressed, hold: hold, spread: spread),
             child: SizedBox.square(
               dimension: s,
               child: Stack(
                 children: [
                   Center(
-                    child: Text(
-                      'OK',
-                      style: context.appTextTheme.titleLarge!.copyWith(
-                        color: c.onSurfaceStrong,
+                    child: AnimatedBuilder(
+                      animation: hold,
+                      builder: (context, child) => Transform.scale(
+                        scale: lastPressed == RemoteButton.ok
+                            ? 1 - _okPressedShrink * hold.value
+                            : 1,
+                        child: child,
+                      ),
+                      child: Text(
+                        'OK',
+                        style: context.appTextTheme.titleLarge!.copyWith(
+                          color: c.onSurfaceStrong,
+                        ),
                       ),
                     ),
                   ),
@@ -131,16 +163,22 @@ class _DpadState extends State<Dpad> {
   }
 }
 
+const double _okPressedShrink = 0.05;
+
 class _Painter extends CustomPainter {
-  _Painter(this.c, this.pressed);
+  _Painter(this.c, this.pressed, {required this.hold, required this.spread})
+    : super(repaint: Listenable.merge([hold, spread]));
   final AppColors c;
   final RemoteButton? pressed;
+  final Animation<double> hold, spread;
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
     final r = size.width / 2;
+    final okRadius = r * .36;
+    final strength = hold.value;
     canvas.drawCircle(center, r, Paint()..color = c.surfaceContainer);
-    if (pressed != null && pressed != RemoteButton.ok) {
+    if (pressed != null && pressed != RemoteButton.ok && strength > 0) {
       final index = switch (pressed!) {
         RemoteButton.right => 0,
         RemoteButton.down => 1,
@@ -148,11 +186,19 @@ class _Painter extends CustomPainter {
         _ => 3,
       };
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: r),
+        Rect.fromCircle(
+          center: center,
+          radius: okRadius + (r - okRadius) * spread.value,
+        ),
         -math.pi / 4 + index * math.pi / 2,
         math.pi / 2,
         true,
-        Paint()..color = c.surfaceContainerStrong,
+        Paint()
+          ..color = Color.lerp(
+            c.surfaceContainer,
+            c.surfaceContainerStrong,
+            strength,
+          )!,
       );
     }
     final line = Paint()
@@ -163,17 +209,20 @@ class _Painter extends CustomPainter {
     for (var i = 0; i < 4; i++) {
       final a = math.pi / 4 + i * math.pi / 2;
       final v = Offset(math.cos(a), math.sin(a));
-      canvas.drawLine(center + v * r * .36, center + v * r, line);
+      canvas.drawLine(center + v * okRadius, center + v * r, line);
     }
+    final okPressed = pressed == RemoteButton.ok;
+    final scaledOk =
+        okRadius * (okPressed ? 1 - _okPressedShrink * strength : 1);
     canvas.drawCircle(
       center,
-      r * .36,
+      scaledOk,
       Paint()
-        ..color = (pressed == RemoteButton.ok
-            ? c.surfaceContainerStrong
-            : c.okButton),
+        ..color = okPressed
+            ? Color.lerp(c.okButton, c.surfaceContainerStrong, strength)!
+            : c.okButton,
     );
-    canvas.drawCircle(center, r * .36, line);
+    canvas.drawCircle(center, scaledOk, line);
   }
 
   @override

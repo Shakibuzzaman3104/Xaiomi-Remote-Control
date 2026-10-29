@@ -4,8 +4,9 @@
  */
 import 'package:flutter/material.dart';
 
+import '../fade_switcher.dart';
 import '../haptics.dart';
-
+import '../motion.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -38,19 +39,24 @@ class VoiceSheet extends StatelessWidget {
     final c = context.colors;
 
     final String displayText;
+    final String displayKind;
     final Color textColor;
     final isListening = listening && errorText == null;
     if (errorText != null) {
       displayText = errorText!;
+      displayKind = 'error';
       textColor = c.danger;
     } else if (transcript.isNotEmpty) {
       displayText = transcript;
+      displayKind = 'transcript';
       textColor = c.onSurfaceStrong;
     } else if (isListening) {
       displayText = 'Listening…';
+      displayKind = 'listening';
       textColor = c.muted;
     } else {
       displayText = 'Tap the mic to speak';
+      displayKind = 'idle';
       textColor = c.muted;
     }
 
@@ -132,15 +138,20 @@ class VoiceSheet extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
-                          child: Text(
-                            displayText,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.appTextTheme.bodyLarge!.copyWith(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w400,
-                              color: textColor,
+                          child: FadeSwitcher(
+                            scale: 1,
+                            duration: AppMotion.quick,
+                            child: Text(
+                              displayText,
+                              key: ValueKey(displayKind),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.appTextTheme.bodyLarge!.copyWith(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: textColor,
+                              ),
                             ),
                           ),
                         ),
@@ -241,6 +252,13 @@ class _MicRingState extends State<_MicRing>
   void syncAnimation() {
     if (widget.listening && !MediaQuery.disableAnimationsOf(context)) {
       if (!controller.isAnimating) controller.repeat(reverse: true);
+    } else if (controller.value > 0 &&
+        !MediaQuery.disableAnimationsOf(context)) {
+      controller.animateBack(
+        0,
+        duration: AppMotion.quick,
+        curve: AppMotion.easeOut,
+      );
     } else {
       controller.stop();
       controller.value = 0;

@@ -2,9 +2,9 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../remote/widgets/device_header.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -22,12 +22,6 @@ class SettingsDevice {
 class SettingsView extends StatelessWidget {
   const SettingsView({
     super.key,
-    required this.deviceName,
-    required this.connected,
-    required this.onSwitchDevice,
-    required this.onTvSettings,
-    required this.onAppSettings,
-    this.onPower,
     required this.devices,
     required this.onSelectDevice,
     required this.onRemoveDevice,
@@ -52,10 +46,6 @@ class SettingsView extends StatelessWidget {
     required this.onAboutTap,
     this.onBack,
   });
-  final String deviceName;
-  final bool connected;
-  final VoidCallback onSwitchDevice, onTvSettings, onAppSettings;
-  final VoidCallback? onPower;
   final List<SettingsDevice> devices;
   final ValueChanged<String> onSelectDevice, onRemoveDevice;
   final VoidCallback onAddTv;
@@ -99,15 +89,6 @@ class SettingsView extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            DeviceHeader(
-              name: deviceName,
-              connected: connected,
-              onSwitchDevice: onSwitchDevice,
-              onTvSettings: onTvSettings,
-              onAppSettings: onAppSettings,
-              onPower: onPower,
-            ),
-            const SizedBox(height: 18),
             Row(
               children: [
                 if (onBack != null) ...[
@@ -150,12 +131,13 @@ class SettingsView extends StatelessWidget {
                   'Vibrate on key presses',
                   trailing: toggle(hapticsEnabled, onHapticsChanged),
                 ),
-                row(
-                  Icons.volume_up_outlined,
-                  'Volume keys control TV',
-                  "Use your phone's volume buttons",
-                  trailing: toggle(volumeKeysEnabled, onVolumeKeysChanged),
-                ),
+                if (defaultTargetPlatform != TargetPlatform.iOS)
+                  row(
+                    Icons.volume_up_outlined,
+                    'Volume keys control TV',
+                    "Use your phone's volume buttons",
+                    trailing: toggle(volumeKeysEnabled, onVolumeKeysChanged),
+                  ),
                 row(
                   Icons.swap_horiz,
                   'Swipe sensitivity',

@@ -10,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/discovery/tv_discovery.dart';
 import '../../core/session/providers.dart';
+import '../fade_switcher.dart';
+import '../motion.dart';
 import 'discover_screen.dart';
 import 'pair_screen.dart';
 
@@ -23,10 +25,14 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 }
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
+  static const _successHold = Duration(milliseconds: 900);
+  static const _successHoldReduced = Duration(milliseconds: 400);
+
   DiscoveredTv? _pairingTv;
   String? _startError;
   bool _starting = false;
   bool _timedOut = false;
+  bool _paired = false;
   Timer? _discoveryTimer;
 
   @override
@@ -75,10 +81,18 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<String?> _submitCode(String code) async {
     if (_startError != null) return _startError;
     try {
+      final tv = _pairingTv;
       final paired = await ref.read(pairingFlowProvider).complete(code);
+      if (!mounted) return null;
+      setState(() => _paired = true);
+      await Future<void>.delayed(
+        reduceMotion(context) ? _successHoldReduced : _successHold,
+      );
+      if (!mounted || _pairingTv != tv) return null;
       await ref.read(pairedTvsProvider.notifier).add(paired);
       return null;
     } catch (error) {
+      if (mounted) setState(() => _paired = false);
       return _describe(error);
     }
   }
@@ -104,29 +118,42 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       _startDiscoveryTimer();
       _pairingTv = null;
       _startError = null;
+      _paired = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final tv = _pairingTv;
-    if (tv != null) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _backToDiscovery();
-        },
-        child: PairScreen(
-          deviceName: tv.model ?? tv.friendlyName ?? tv.name,
-          busy: _starting,
-          onSubmit: _submitCode,
-          onBack: _backToDiscovery,
-        ),
-      );
-    }
+    return FadeSwitcher(
+      scale: 1,
+      expand: true,
+      child: tv != null ? _buildPair(tv) : _buildDiscover(),
+    );
+  }
+
+  Widget _buildPair(DiscoveredTv tv) {
+    return PopScope(
+      key: const ValueKey('pair'),
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _backToDiscovery();
+      },
+      child: PairScreen(
+        deviceName: tv.model ?? tv.friendlyName ?? tv.name,
+        busy: _starting,
+        success: _paired,
+        onSubmit: _submitCode,
+        onBack: _backToDiscovery,
+      ),
+    );
+  }
+
+  Widget _buildDiscover() {
     final discovered = ref.watch(discoveredTvsProvider);
     final devices = discovered.asData?.value ?? const <DiscoveredTv>[];
     return DiscoverScreen(
+      key: const ValueKey('discover'),
       devices: [
         for (final device in devices)
           DiscoverItem(
