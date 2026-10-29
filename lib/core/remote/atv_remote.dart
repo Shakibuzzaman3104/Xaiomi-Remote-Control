@@ -86,11 +86,13 @@ class AtvRemoteClient {
     required this.host,
     required this.certificate,
     this.port = 6466,
+    this.silenceTimeout = const Duration(seconds: 16),
     @visibleForTesting this.sendSink,
   });
   final String host;
   final AtvCertificate certificate;
   final int port;
+  final Duration silenceTimeout;
   final void Function(RemoteMessage)? sendSink;
   // VOICE (8) stalls the handshake on the Mi Box S: no set_active, keys ignored.
   static const int features = 1 | 2 | 4 | 32 | 64 | 512;
@@ -104,6 +106,8 @@ class AtvRemoteClient {
   int? _voiceSession;
   Completer<int>? _voiceBegin;
   final _ready = Completer<void>();
+  Timer? _watchdog;
+  DateTime _lastReceived = DateTime.now();
   bool _closed = false;
 
   void _update(AtvState value) {
@@ -131,6 +135,7 @@ class AtvRemoteClient {
       _update(_state.copyWith(connected: true));
       socket.listen(
         (data) {
+          _lastReceived = DateTime.now();
           try {
             for (final bytes in _decoder.add(data)) {
               RemoteMessage message;
@@ -148,6 +153,11 @@ class AtvRemoteClient {
         onError: (Object error) => _lost(error),
         onDone: () => _lost('Connection closed'),
       );
+      _watchdog = Timer.periodic(const Duration(seconds: 4), (_) {
+        if (DateTime.now().difference(_lastReceived) > silenceTimeout) {
+          _lost('No ping from the TV for ${silenceTimeout.inSeconds} s');
+        }
+      });
       await _ready.future.timeout(
         const Duration(seconds: 5),
         onTimeout: () => throw const AtvConnectionLostException(
@@ -163,6 +173,7 @@ class AtvRemoteClient {
   Future<void> disconnect() async {
     if (_closed) return;
     _closed = true;
+    _watchdog?.cancel();
     _socket?.destroy();
     _socket = null;
     final pending = _voiceBegin;
@@ -178,6 +189,7 @@ class AtvRemoteClient {
   void _lost(Object error) {
     if (_closed) return;
     _closed = true;
+    _watchdog?.cancel();
     _socket?.destroy();
     _socket = null;
     final exception = AtvConnectionLostException('$error');
