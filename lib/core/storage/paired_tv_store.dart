@@ -13,6 +13,8 @@ class PairedTv {
   final String name;
   final String host;
   final String? model;
+  final String? tvCertSha256;
+  final String? serviceName;
   final String certPem;
   final String privateKeyPem;
   final DateTime pairedAt;
@@ -23,17 +25,32 @@ class PairedTv {
     required this.name,
     required this.host,
     this.model,
+    this.tvCertSha256,
+    this.serviceName,
     required this.certPem,
     required this.privateKeyPem,
     required this.pairedAt,
     this.lastConnectedAt,
   });
 
+  /// The name to show, preferring the model over the generic default.
+  String get displayName {
+    final model = this.model;
+    if (name != 'Android TV' || model == null || model.isEmpty) return name;
+    return switch (model.toUpperCase()) {
+      'MIBOX4' => 'Mi Box S',
+      'MIBOX3' => 'Mi Box',
+      _ => model,
+    };
+  }
+
   PairedTv copyWith({
     String? id,
     String? name,
     String? host,
     String? model,
+    String? tvCertSha256,
+    String? serviceName,
     String? certPem,
     String? privateKeyPem,
     DateTime? pairedAt,
@@ -44,6 +61,8 @@ class PairedTv {
       name: name ?? this.name,
       host: host ?? this.host,
       model: model ?? this.model,
+      tvCertSha256: tvCertSha256 ?? this.tvCertSha256,
+      serviceName: serviceName ?? this.serviceName,
       certPem: certPem ?? this.certPem,
       privateKeyPem: privateKeyPem ?? this.privateKeyPem,
       pairedAt: pairedAt ?? this.pairedAt,
@@ -57,6 +76,8 @@ class PairedTv {
       'name': name,
       'host': host,
       'model': model,
+      'tvCertSha256': tvCertSha256,
+      'serviceName': serviceName,
       'certPem': certPem,
       'privateKeyPem': privateKeyPem,
       'pairedAt': pairedAt.toIso8601String(),
@@ -70,6 +91,8 @@ class PairedTv {
       name: json['name'] as String,
       host: json['host'] as String,
       model: json['model'] as String?,
+      tvCertSha256: json['tvCertSha256'] as String?,
+      serviceName: json['serviceName'] as String?,
       certPem: json['certPem'] as String,
       privateKeyPem: json['privateKeyPem'] as String,
       pairedAt: DateTime.parse(json['pairedAt'] as String),
@@ -88,6 +111,8 @@ class PairedTv {
           name == other.name &&
           host == other.host &&
           model == other.model &&
+          tvCertSha256 == other.tvCertSha256 &&
+          serviceName == other.serviceName &&
           certPem == other.certPem &&
           privateKeyPem == other.privateKeyPem &&
           pairedAt == other.pairedAt &&
@@ -99,6 +124,8 @@ class PairedTv {
     name,
     host,
     model,
+    tvCertSha256,
+    serviceName,
     certPem,
     privateKeyPem,
     pairedAt,

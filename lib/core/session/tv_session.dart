@@ -33,12 +33,18 @@ class TvSession {
     required this.tv,
     AtvRemoteClient Function(PairedTv tv)? clientFactory,
     Duration Function(int attempt)? backoff,
+    this._resolveHost,
+    this._onTvUpdated,
   }) : _factory = clientFactory ?? _defaultClient,
-       _backoff = backoff ?? _defaultBackoff;
+       _backoff = backoff ?? _defaultBackoff,
+       _currentTv = tv;
 
   final PairedTv tv;
   final AtvRemoteClient Function(PairedTv) _factory;
   final Duration Function(int) _backoff;
+  final Future<String?> Function(PairedTv)? _resolveHost;
+  final Future<void> Function(PairedTv)? _onTvUpdated;
+  PairedTv _currentTv;
   final _states = StreamController<TvSessionState>.broadcast();
   TvSessionState _state = const TvSessionState(
     status: SessionStatus.connecting,
@@ -53,6 +59,7 @@ class TvSession {
 
   static AtvRemoteClient _defaultClient(PairedTv tv) => AtvRemoteClient(
     host: tv.host,
+    tvCertSha256: tv.tvCertSha256,
     certificate: AtvCertificate(
       certPem: tv.certPem,
       privateKeyPem: tv.privateKeyPem,
@@ -98,7 +105,13 @@ class TvSession {
       error: _state.lastError,
     );
     try {
-      final client = _factory(tv);
+      var target = _currentTv;
+      if (_state.attempt >= 2 && target.tvCertSha256 != null && _resolveHost != null) {
+        final host = await _resolveHost(target);
+        if (_disposed || generation != _generation) return;
+        if (host != null && host != target.host) target = target.copyWith(host: host);
+      }
+      final client = _factory(target);
       _client = client;
       _subscription = client.states.listen(
         (atv) {
@@ -117,6 +130,12 @@ class TvSession {
       );
       await client.connect();
       if (_disposed || generation != _generation) return;
+      final fingerprint = client.peerCertSha256;
+      if (fingerprint != null && (target.host != _currentTv.host || _currentTv.tvCertSha256 == null)) {
+        _currentTv = target.copyWith(tvCertSha256: fingerprint);
+        await _onTvUpdated?.call(_currentTv);
+        if (_disposed || generation != _generation) return;
+      }
       _rejections = 0;
       _emit(SessionStatus.connected, atv: client.state, attempt: 0);
     } catch (error) {
@@ -135,7 +154,7 @@ class TvSession {
     if (client != null) unawaited(client.disconnect());
     _rejections = error is AtvNotPairedException ? _rejections + 1 : 0;
     final attempt = _state.attempt + 1;
-    final notPaired = _rejections >= 2;
+    final notPaired = error is AtvIdentityChangedException || _rejections >= 2;
     _emit(
       notPaired
           ? SessionStatus.notPaired
@@ -144,7 +163,7 @@ class TvSession {
           : SessionStatus.reconnecting,
       atv: _state.atv.copyWith(connected: false),
       attempt: attempt,
-      error: '$error',
+      error: error is AtvIdentityChangedException ? error.message : '$error',
     );
     if (attempt < 6 && !notPaired) {
       _timer = Timer(_backoff(attempt), () {

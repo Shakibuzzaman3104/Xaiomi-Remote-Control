@@ -8,17 +8,28 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/adb/full_control.dart';
 import '../../core/discovery/tv_discovery.dart';
+import '../../core/remote/atv_pairing.dart';
+import '../../core/session/pairing_flow.dart';
 import '../../core/session/providers.dart';
 import '../fade_switcher.dart';
 import '../motion.dart';
 import 'discover_screen.dart';
 import 'pair_screen.dart';
+import 'unlock_screen.dart';
 
 /// Finds a TV on the network and pairs with it.
 class OnboardingFlow extends ConsumerStatefulWidget {
-  const OnboardingFlow({super.key, this.onCancel});
+  const OnboardingFlow({
+    super.key,
+    this.onCancel,
+    this.onFinished,
+    this.initialTv,
+  });
   final VoidCallback? onCancel;
+  final VoidCallback? onFinished;
+  final DiscoveredTv? initialTv;
 
   @override
   ConsumerState<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -28,17 +39,26 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   static const _successHold = Duration(milliseconds: 900);
   static const _successHoldReduced = Duration(milliseconds: 400);
 
+  late final PairingFlow _pairingFlow;
   DiscoveredTv? _pairingTv;
   String? _startError;
   bool _starting = false;
   bool _timedOut = false;
   bool _paired = false;
+  bool _showUnlock = false;
   Timer? _discoveryTimer;
 
   @override
   void initState() {
     super.initState();
-    _startDiscoveryTimer();
+    _pairingFlow = ref.read(pairingFlowProvider);
+    if (widget.initialTv != null) {
+      Future.microtask(() {
+        if (mounted) _startPairing(widget.initialTv!);
+      });
+    } else {
+      _startDiscoveryTimer();
+    }
   }
 
   void _startDiscoveryTimer() {
@@ -53,6 +73,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   void _retryDiscovery() {
+    unawaited(ref.read(tvDiscoveryProvider).restart().catchError((_) {}));
     ref.invalidate(discoveredTvsProvider);
     setState(_startDiscoveryTimer);
   }
@@ -60,6 +81,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   @override
   void dispose() {
     _discoveryTimer?.cancel();
+    unawaited(_pairingFlow.cancel());
     super.dispose();
   }
 
@@ -70,19 +92,25 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       _startError = null;
     });
     try {
-      await ref.read(pairingFlowProvider).begin(tv);
+      await _pairingFlow.begin(tv);
     } catch (error) {
-      if (mounted) setState(() => _startError = _describe(error));
+      if (mounted && _pairingTv == tv) {
+        setState(() => _startError = _describe(error));
+      }
     } finally {
-      if (mounted) setState(() => _starting = false);
+      if (mounted && _pairingTv == tv) setState(() => _starting = false);
     }
   }
 
   Future<String?> _submitCode(String code) async {
-    if (_startError != null) return _startError;
+    if (_startError != null) {
+      final tv = _pairingTv;
+      if (tv != null) await _startPairing(tv);
+      return _startError ?? 'The code expired. Get a new one.';
+    }
     try {
       final tv = _pairingTv;
-      final paired = await ref.read(pairingFlowProvider).complete(code);
+      final paired = await _pairingFlow.complete(code);
       if (!mounted) return null;
       setState(() => _paired = true);
       await Future<void>.delayed(
@@ -90,6 +118,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       );
       if (!mounted || _pairingTv != tv) return null;
       await ref.read(pairedTvsProvider.notifier).add(paired);
+      if (mounted) setState(() => _showUnlock = true);
       return null;
     } catch (error) {
       if (mounted) setState(() => _paired = false);
@@ -98,9 +127,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   String _describe(Object error) => switch (error) {
-    SocketException() => "Couldn't reach the TV. Check it's on the same Wi-Fi.",
-    HandshakeException() => 'The TV refused the connection. Try again.',
-    _ => 'That code didn\'t work. Check the code on the TV and try again.',
+    AtvPairingException(kind: PairingFailureKind.wrongCode) =>
+      "That code didn't work. Check the TV and try again.",
+    AtvPairingException(kind: PairingFailureKind.expired) =>
+      'The code expired. Get a new one.',
+    _ => "Couldn't reach the TV. Check it's on and on the same Wi-Fi.",
   };
 
   Future<void> _enterIpManually() async {
@@ -109,11 +140,22 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       builder: (_) => const _ManualIpDialog(),
     );
     if (!mounted || host == null) return;
-    await _startPairing(DiscoveredTv(name: 'Android TV', host: host));
+    final devices =
+        ref.read(discoveredTvsProvider).asData?.value ?? const <DiscoveredTv>[];
+    final matching = devices.where((device) => device.host == host);
+    await _startPairing(
+      matching.isNotEmpty
+          ? matching.first
+          : DiscoveredTv(name: host, host: host),
+    );
   }
 
   void _backToDiscovery() {
-    ref.read(pairingFlowProvider).cancel();
+    if (widget.initialTv != null) {
+      widget.onCancel?.call();
+      return;
+    }
+    _pairingFlow.cancel();
     setState(() {
       _startDiscoveryTimer();
       _pairingTv = null;
@@ -128,9 +170,44 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     return FadeSwitcher(
       scale: 1,
       expand: true,
-      child: tv != null ? _buildPair(tv) : _buildDiscover(),
+      child: _showUnlock
+          ? _buildUnlock()
+          : tv != null
+          ? _buildPair(tv)
+          : _buildDiscover(),
     );
   }
+
+  Widget _buildUnlock() {
+    final control = ref.watch(fullControlProvider);
+    final status = control.status;
+    final connected = status == FullControlStatus.connected;
+    final statusText = switch (status) {
+      FullControlStatus.off => 'Full control: not connected',
+      FullControlStatus.connecting => 'Connecting…',
+      FullControlStatus.waitingForApproval => 'Choose Allow on the TV',
+      FullControlStatus.connected => 'Full control: connected',
+      FullControlStatus.failed =>
+        control.error ?? 'Full control connection failed',
+    };
+    return PopScope(
+      key: const ValueKey('unlock'),
+      canPop: false,
+      child: UnlockScreen(
+        statusText: statusText,
+        connecting:
+            status == FullControlStatus.connecting ||
+            status == FullControlStatus.waitingForApproval,
+        connected: connected,
+        onConnect: connected
+            ? _finish
+            : () => ref.read(fullControlProvider.notifier).connect(),
+        onSkip: _finish,
+      ),
+    );
+  }
+
+  void _finish() => widget.onFinished?.call();
 
   Widget _buildPair(DiscoveredTv tv) {
     return PopScope(
@@ -142,6 +219,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       child: PairScreen(
         deviceName: tv.model ?? tv.friendlyName ?? tv.name,
         busy: _starting,
+        startError: _startError,
+        onRetryStart: () => _startPairing(tv),
         success: _paired,
         onSubmit: _submitCode,
         onBack: _backToDiscovery,
@@ -208,7 +287,7 @@ class _ManualIpDialogState extends State<_ManualIpDialog> {
 
   void _submit() {
     final ip = _controller.text.trim();
-    if (InternetAddress.tryParse(ip) == null) {
+    if (InternetAddress.tryParse(ip)?.type != InternetAddressType.IPv4) {
       setState(() => _error = 'Enter an IP address like 192.168.1.20');
       return;
     }
@@ -221,8 +300,13 @@ class _ManualIpDialogState extends State<_ManualIpDialog> {
     content: TextField(
       controller: _controller,
       autofocus: true,
-      keyboardType: TextInputType.text,
-      decoration: InputDecoration(hintText: '192.168.1.20', errorText: _error),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        hintText: '192.168.1.20',
+        helperText: 'On the TV: Settings › Device Preferences › About › Status › IP address',
+        helperMaxLines: 3,
+        errorText: _error,
+      ),
       onSubmitted: (_) => _submit(),
     ),
     actions: [

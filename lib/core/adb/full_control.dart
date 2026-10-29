@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -107,6 +108,13 @@ final fullControlProvider = NotifierProvider<FullControl, FullControlState>(
 );
 
 class FullControl extends Notifier<FullControlState> {
+  FullControl({AdbClient Function(String host, AdbKey key)? clientFactory})
+    : _clientFactory = clientFactory ?? _newClient;
+
+  static AdbClient _newClient(String host, AdbKey key) =>
+      AdbClient(host: host, key: key);
+
+  final AdbClient Function(String host, AdbKey key) _clientFactory;
   static final _keyLoads = <KeyValueStore, Future<AdbKey>>{};
   AdbClient? _client;
   StreamSubscription<AdbConnectionState>? _subscription;
@@ -114,6 +122,9 @@ class FullControl extends Notifier<FullControlState> {
   PairedTv? _tv;
   KeyValueStore? _store;
   bool _waitingForApproval = false;
+  bool _enabled = false;
+  Timer? _retryTimer;
+  int _retryCount = 0;
 
   @override
   FullControlState build() {
@@ -121,10 +132,15 @@ class FullControl extends Notifier<FullControlState> {
     final store = ref.watch(keyValueStoreProvider);
     _tv = tv;
     _store = store;
+    _enabled = false;
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _retryCount = 0;
     var alive = true;
     final generation = ++_generation;
     ref.onDispose(() {
       alive = false;
+      _retryTimer?.cancel();
       ++_generation;
       final subscription = _subscription;
       final client = _client;
@@ -137,6 +153,7 @@ class FullControl extends Notifier<FullControlState> {
       unawaited(() async {
         try {
           final enabled = await store.read('adb_enabled_${tv.id}');
+          if (alive && generation == _generation) _enabled = enabled == '1';
           if (alive &&
               generation == _generation &&
               enabled == '1' &&
@@ -173,6 +190,8 @@ class FullControl extends Notifier<FullControlState> {
   }
 
   Future<void> connect() async {
+    _retryTimer?.cancel();
+    _retryTimer = null;
     final tv = _tv;
     final store = _store;
     if (tv == null || store == null) {
@@ -200,7 +219,7 @@ class FullControl extends Notifier<FullControlState> {
       if (oldSubscription != null) await oldSubscription.cancel();
       if (oldClient != null) await oldClient.disconnect();
       if (generation != _generation) return;
-      final client = AdbClient(host: tv.host, key: key);
+      final client = _clientFactory(tv.host, key);
       final approved = Completer<AdbClient>();
       Timer? approvalProbe;
       var probing = false;
@@ -208,7 +227,7 @@ class FullControl extends Notifier<FullControlState> {
       void probeApproval() {
         if (probing || settled || generation != _generation) return;
         probing = true;
-        final probe = AdbClient(host: tv.host, key: key);
+        final probe = _clientFactory(tv.host, key);
         probe
             .connect(
               authTimeout: const Duration(seconds: 5),
@@ -235,6 +254,8 @@ class FullControl extends Notifier<FullControlState> {
               status: FullControlStatus.waitingForApproval,
             );
           case AdbConnectionState.connected:
+            _waitingForApproval = false;
+            _retryCount = 0;
             state = state.copyWith(status: FullControlStatus.connected);
           case AdbConnectionState.disconnected:
             state = const FullControlState();
@@ -246,6 +267,7 @@ class FullControl extends Notifier<FullControlState> {
                 appsLoading: false,
               );
             }
+            _scheduleRetry(generation);
         }
         if (event == AdbConnectionState.waitingForApproval) {
           approvalProbe ??= Timer.periodic(
@@ -284,15 +306,15 @@ class FullControl extends Notifier<FullControlState> {
         return;
       }
       state = state.copyWith(status: FullControlStatus.connected);
+      _waitingForApproval = false;
       await store.write('adb_enabled_${tv.id}', '1');
       if (generation != _generation) return;
-      try {
-        await loadApps();
-      } catch (error) {
-        if (generation == _generation) {
-          state = state.copyWith(error: 'Could not load apps: $error');
-        }
+      _enabled = true;
+      if (state.status == FullControlStatus.failed) {
+        _scheduleRetry(generation);
+        return;
       }
+      await loadApps();
     } catch (error) {
       if (generation != _generation) return;
       final message = error.toString().toLowerCase();
@@ -314,42 +336,75 @@ class FullControl extends Notifier<FullControlState> {
         error: readable,
         appsLoading: false,
       );
+      _scheduleRetry(generation);
     }
   }
 
+  void _scheduleRetry(int generation) {
+    if (!_enabled ||
+        _waitingForApproval ||
+        generation != _generation ||
+        _retryTimer != null) {
+      return;
+    }
+    const delays = [2, 5, 10, 30];
+    final delay = delays[_retryCount.clamp(0, delays.length - 1)];
+    _retryCount++;
+    _retryTimer = Timer(Duration(seconds: delay), () {
+      _retryTimer = null;
+      if (generation == _generation && _enabled) unawaited(connect());
+    });
+  }
+
+  Future<void> reconnectIfEnabled() async {
+    if (!_enabled || _tv == null) return;
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    await connect();
+  }
+
   Future<void> loadApps() async {
-    final client = _connectedClient();
     final generation = _generation;
     state = state.copyWith(appsLoading: true);
     try {
+      final client = _connectedClient();
       final data = await rootBundle.load('assets/tv_helper.jar');
       final bytes = data.buffer.asUint8List(
         data.offsetInBytes,
         data.lengthInBytes,
       );
       const path = '/data/local/tmp/xr_helper.jar';
-      final listing = await client.shell('ls -l $path');
-      final size = RegExp(r'^\S+\s+\d+\s+\S+\s+\S+\s+(\d+)\s')
-          .firstMatch(listing.trim())
-          ?.group(1);
-      if (int.tryParse(size ?? '') != bytes.length) {
+      final digest = sha256.convert(bytes).toString();
+      final remoteDigest = await client.shell('cat $path.sha256');
+      if (remoteDigest.trim() != digest) {
         await client.push(bytes, path);
+        await client.shell('echo $digest > $path.sha256');
       }
       final output = await client.shell(
         'CLASSPATH=$path app_process / com.diatomicsoft.xiaomiremote.helper.Main apps 96',
         timeout: const Duration(seconds: 30),
       );
       if (generation == _generation) {
+        final apps = parseHelperApps(output);
+        if (output.trim().isNotEmpty && apps.isEmpty) {
+          throw AdbException('Invalid app helper output');
+        }
         state = state.copyWith(
-          apps: parseHelperApps(output),
+          apps: apps,
           appsLoading: false,
         );
       }
     } catch (_) {
-      if (generation == _generation) state = state.copyWith(appsLoading: false);
-      rethrow;
+      if (generation == _generation) {
+        state = state.copyWith(
+          appsLoading: false,
+          error: "Couldn't load apps from your TV. Try again.",
+        );
+      }
     }
   }
+
+  AdbClient get connectedClient => _connectedClient();
 
   AdbClient _connectedClient() {
     final client = _client;
@@ -359,15 +414,22 @@ class FullControl extends Notifier<FullControlState> {
     return client;
   }
 
-  Future<({int index, int max, bool fixed})> readVolume() async {
+  Future<({int index, int max, bool fixed, bool muted})> readVolume() async {
     final output = await _connectedClient().shell('dumpsys audio');
     final (index, max) = AdbCommands.parseMusicVolume(output);
     return (
       index: index,
       max: max,
       fixed: AdbCommands.parseFixedVolume(output),
+      muted: AdbCommands.parseMusicMuted(output),
     );
   }
+
+  Future<AdbNowPlaying?> readNowPlaying() =>
+      AdbCommands(_connectedClient()).nowPlaying();
+
+  Future<void> openTvSettings() =>
+      AdbCommands(_connectedClient()).openSettings();
 
   Future<void> setVolume(int index) =>
       AdbCommands(_connectedClient()).setMusicVolume(index);
@@ -390,6 +452,9 @@ class FullControl extends Notifier<FullControlState> {
 
   Future<void> disconnect() async {
     ++_generation;
+    _enabled = false;
+    _retryTimer?.cancel();
+    _retryTimer = null;
     final tv = _tv;
     final store = _store;
     final client = _client;

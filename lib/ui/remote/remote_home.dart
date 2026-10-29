@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/session/providers.dart';
+import '../../core/adb/full_control.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/app_preferences.dart';
 import '../motion.dart';
@@ -36,6 +37,7 @@ class RemoteHome extends ConsumerStatefulWidget {
 class _RemoteHomeState extends ConsumerState<RemoteHome> {
   bool _keyboardOpen = false;
   bool _volumeHandlerRegistered = false;
+  final _hardwareVolume = ValueNotifier<RemoteButton?>(null);
 
   void _syncVolumeHandler(bool enabled) {
     if (enabled == _volumeHandlerRegistered) return;
@@ -58,12 +60,15 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
     };
     if (button == null) return false;
     _session?.press(button);
+    _hardwareVolume.value = null;
+    _hardwareVolume.value = button;
     return true;
   }
 
   @override
   void dispose() {
     _syncVolumeHandler(false);
+    _hardwareVolume.dispose();
     super.dispose();
   }
 
@@ -83,10 +88,13 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
       builder: (sheetContext) => KeyboardSheet(
         fieldLabel: atv?.imeLabel ?? '',
         initialText: atv?.imeValue ?? '',
-        onChanged: _sendFieldText,
+        imeActive: atv?.imeActive ?? false,
+        onChanged: (text) {
+          if (atv?.imeActive ?? false) _sendFieldText(text);
+        },
         onClear: () {},
         onSend: () {
-          _session?.submitText();
+          if (atv?.imeActive ?? false) _session?.submitText();
           Navigator.of(sheetContext).pop();
         },
         onClose: () => Navigator.of(sheetContext).pop(),
@@ -108,6 +116,8 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
         typeIntoFieldAvailable: imeActive,
         defaultTarget: prefs.micButton,
         speechLocale: prefs.speechLocale,
+        tvSearchAvailable:
+            ref.read(fullControlProvider).status == FullControlStatus.connected,
       ),
     );
     final session = _session;
@@ -116,6 +126,8 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
       session
         ..sendText(query.text)
         ..submitText();
+    } else if (query.target == VoiceTarget.searchTv) {
+      await ref.read(fullControlProvider.notifier).globalSearch(query.text);
     } else {
       session.launchLink(
         'https://www.youtube.com/results?search_query=${Uri.encodeQueryComponent(query.text)}',
@@ -137,6 +149,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
       onKeyboard: showKeyboard,
       onVoice: showVoice,
       onPairAgain: widget.onPairAgain,
+      hardwareVolume: _hardwareVolume,
     );
   }
 }
@@ -152,10 +165,12 @@ class _VoiceSheetHost extends StatefulWidget {
     required this.typeIntoFieldAvailable,
     required this.defaultTarget,
     required this.speechLocale,
+    required this.tvSearchAvailable,
   });
   final bool typeIntoFieldAvailable;
   final VoiceTargetPreference defaultTarget;
   final String speechLocale;
+  final bool tvSearchAvailable;
 
   @override
   State<_VoiceSheetHost> createState() => _VoiceSheetHostState();
@@ -170,6 +185,7 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
       : VoiceTarget.search;
   String _transcript = '';
   bool _listening = false;
+  String? _error;
 
   @override
   void initState() {
@@ -184,6 +200,7 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
   }
 
   Future<void> _startListening() async {
+    setState(() => _error = null);
     final ready = await _speech.initialize(
       onStatus: (status) {
         if (!mounted) return;
@@ -192,11 +209,24 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
         }
         setState(() => _listening = status == SpeechToText.listeningStatus);
       },
-      onError: (_) {
-        if (mounted) setState(() => _listening = false);
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            _listening = false;
+            _error = error.errorMsg.contains('permission')
+                ? 'Microphone or speech permission is off. Turn it on in Settings to use voice.'
+                : "Couldn't hear that. Tap the mic to try again.";
+          });
+        }
       },
     );
-    if (!ready || !mounted) return;
+    if (!mounted) return;
+    if (!ready) {
+      setState(
+        () => _error = 'Microphone or speech permission is off. Turn it on in Settings to use voice.',
+      );
+      return;
+    }
     await _speech.listen(
       onResult: (result) {
         if (mounted) setState(() => _transcript = result.recognizedWords);
@@ -222,6 +252,8 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
     transcript: _transcript,
     target: _target,
     typeIntoFieldAvailable: widget.typeIntoFieldAvailable,
+    tvSearchAvailable: widget.tvSearchAvailable,
+    errorText: _error,
     onTargetChanged: (target) => setState(() => _target = target),
     onMicTap: _toggleListening,
     onCancel: () => Navigator.of(context).pop(),

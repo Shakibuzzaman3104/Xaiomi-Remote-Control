@@ -4,10 +4,13 @@
  */
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+
 import '../../fade_switcher.dart';
 import '../../haptics.dart';
 import '../../motion.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../remote_models.dart';
 import 'round_action_button.dart';
 
@@ -35,6 +38,21 @@ class VolumePill extends StatefulWidget {
 
 class _VolumePillState extends State<VolumePill> {
   int? _dragIndex;
+  Timer? _throttle;
+  int? _pending;
+
+  void _sendPending() {
+    final value = _pending;
+    _pending = null;
+    if (value != null) widget.onExactVolumeChanged?.call(value);
+  }
+
+  @override
+  void dispose() {
+    _throttle?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -65,28 +83,51 @@ class _VolumePillState extends State<VolumePill> {
                           widget.exactMax != null &&
                           widget.exactMax! > 0 &&
                           widget.onExactVolumeChanged != null
-                      ? Semantics(
-                          label: 'Volume',
-                          child: Slider(
-                            value: (_dragIndex ?? widget.exactIndex!)
-                                .clamp(0, widget.exactMax!)
-                                .toDouble(),
-                            max: widget.exactMax!.toDouble(),
-                            divisions: widget.exactMax,
-                            label:
-                                '${((_dragIndex ?? widget.exactIndex!).clamp(0, widget.exactMax!) * 100 / widget.exactMax!).round()}%',
-                            semanticFormatterCallback: (value) =>
-                                '${(value * 100 / widget.exactMax!).round()}%',
-                            activeColor: c.primary,
-                            inactiveColor: c.progressTrack,
-                            onChanged: (value) =>
-                                setState(() => _dragIndex = value.round()),
-                            onChangeEnd: (value) {
-                              AppHaptics.selection();
-                              setState(() => _dragIndex = null);
-                              widget.onExactVolumeChanged!(value.round());
-                            },
-                          ),
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ExcludeSemantics(
+                              child: Text(
+                                'Volume ${((_dragIndex ?? widget.exactIndex!) * 100 / widget.exactMax!).round()}%',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.appTextTheme.labelMedium,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 32,
+                              child: Slider(
+                                value: (_dragIndex ?? widget.exactIndex!)
+                                    .clamp(0, widget.exactMax!)
+                                    .toDouble(),
+                                max: widget.exactMax!.toDouble(),
+                                divisions: widget.exactMax,
+                                semanticFormatterCallback: (value) =>
+                                    'Volume ${(value * 100 / widget.exactMax!).round()}%',
+                                activeColor: widget.muted ? c.muted : c.primary,
+                                inactiveColor: c.progressTrack,
+                                onChanged: (value) {
+                                  setState(() => _dragIndex = value.round());
+                                  _pending = value.round();
+                                  _throttle ??= Timer(
+                                    const Duration(milliseconds: 150),
+                                    () {
+                                      _throttle = null;
+                                      _sendPending();
+                                    },
+                                  );
+                                },
+                                onChangeEnd: (value) {
+                                  AppHaptics.selection();
+                                  setState(() => _dragIndex = null);
+                                  _throttle?.cancel();
+                                  _throttle = null;
+                                  _pending = value.round();
+                                  _sendPending();
+                                },
+                              ),
+                            ),
+                          ],
                         )
                       : Center(
                           child: FadeSwitcher(
@@ -94,11 +135,15 @@ class _VolumePillState extends State<VolumePill> {
                             slide: const Offset(0, 0.15),
                             duration: AppMotion.quick,
                             child: Text(
-                              widget.level == null
+                              widget.muted
+                                  ? 'Muted'
+                                  : widget.level == null
                                   ? 'Volume'
                                   : 'Volume ${widget.level}%',
-                              key: ValueKey(widget.level),
-                              style: TextStyle(
+                              key: ValueKey(widget.muted ? -1 : widget.level),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.appTextTheme.labelLarge!.copyWith(
                                 color: c.onSurfaceStrong,
                                 fontWeight: FontWeight.w600,
                                 fontFeatures: const [

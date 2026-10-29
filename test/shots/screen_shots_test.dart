@@ -44,20 +44,44 @@ Future<void> _loadFonts() async {
   }
 }
 
-Widget _demoRemote() => RemoteScreen(
-  state: const RemoteViewState(
-    deviceName: 'Living Room · Mi Box S',
-    connected: true,
-    reconnecting: false,
-    nowPlaying: NowPlaying(
-      title: 'Me at the zoo',
-      position: Duration(seconds: 12),
-      duration: Duration(seconds: 19),
-      playing: true,
-    ),
-    volumeLevel: 12,
-    muted: false,
+const _mutedPausedState = RemoteViewState(
+  deviceName: 'Living Room · Mi Box S',
+  connected: true,
+  reconnecting: false,
+  nowPlaying: NowPlaying(
+    title: 'Episode 4 · The Long Night',
+    subtitle: 'Stremio',
+    position: Duration(minutes: 12, seconds: 7),
+    playing: false,
   ),
+  exactVolume: VolumeControl(index: 12, max: 15),
+  muted: true,
+);
+
+Widget _demoRemote({
+  RemoteViewState? state,
+  RemoteMode mode = RemoteMode.dpad,
+  MouseSetupPrompt? mouseSetup,
+}) => RemoteScreen(
+  initialMode: mode,
+  mouseAvailable: mouseSetup == null,
+  mouseSetup: mouseSetup,
+  onExactVolumeChanged: (_) {},
+  state:
+      state ??
+      const RemoteViewState(
+        deviceName: 'Living Room · Mi Box S',
+        connected: true,
+        reconnecting: false,
+        nowPlaying: NowPlaying(
+          title: 'Me at the zoo',
+          position: Duration(seconds: 12),
+          duration: Duration(seconds: 19),
+          playing: true,
+        ),
+        volumeLevel: 12,
+        muted: false,
+      ),
   onButton: (_) {},
   onSwitchDevice: () {},
   onOpenNowPlaying: () {},
@@ -110,11 +134,6 @@ List<TvAppItem> _demoApps() => [
 ];
 
 Widget _demoAppsScreen() => AppsScreen(
-  deviceName: 'Living Room · Mi Box S',
-  connected: true,
-  onSwitchDevice: () {},
-  onTvSettings: () {},
-  onAppSettings: () {},
   onBack: () {},
   apps: _demoApps(),
   onOpen: (_) {},
@@ -124,6 +143,17 @@ Widget _demoAppsScreen() => AppsScreen(
 /// Screens rendered at the design canvas size, for side-by-side comparison.
 final shots = <String, Widget Function()>{
   'remote': _demoRemote,
+  'remote_muted_paused': () => _demoRemote(state: _mutedPausedState),
+  'remote_mouse': () => _demoRemote(mode: RemoteMode.mouse),
+  'remote_mouse_setup': () => _demoRemote(
+    mode: RemoteMode.mouse,
+    mouseSetup: MouseSetupPrompt(
+      title: 'Add a pointer to your TV',
+      message: 'This installs a small pointer app on the TV and turns it on as an accessibility service.',
+      actionLabel: 'Set up pointer',
+      onAction: () {},
+    ),
+  ),
   'discover': () => DiscoverScreen(
     devices: const [
       DiscoverItem(
@@ -145,7 +175,6 @@ final shots = <String, Widget Function()>{
     deviceName: 'Mi Box S',
     onSubmit: (_) async => null,
     onBack: () {},
-    onReadAutomatically: () {},
   ),
   'unlock': () => UnlockScreen(
     statusText: 'Full control: not connected',
@@ -178,8 +207,6 @@ final shots = <String, Widget Function()>{
     onSpeechLanguageTap: () {},
     adbConnected: true,
     onNetworkDebuggingTap: () {},
-    companionInstalled: false,
-    onCompanionTap: () {},
     themeLabel: 'System',
     onThemeTap: () {},
     appVersion: '1.0.0',

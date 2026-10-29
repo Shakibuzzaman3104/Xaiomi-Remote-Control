@@ -36,6 +36,8 @@
 	<string>Finds and controls Android TVs on your Wi-Fi.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lets you search and type on your TV with your voice.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Air mouse uses the phone's motion to move the pointer on your TV.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Turns your speech into text for the TV.</string>
 	<key>UIApplicationSceneManifest</key>

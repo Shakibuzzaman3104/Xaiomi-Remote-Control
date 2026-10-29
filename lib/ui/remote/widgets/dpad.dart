@@ -14,8 +14,14 @@ import '../remote_models.dart';
 import '../../theme/app_theme.dart';
 
 class Dpad extends StatefulWidget {
-  const Dpad({super.key, required this.onButton});
+  const Dpad({
+    super.key,
+    required this.onButton,
+    this.onButtonDown,
+    this.onButtonUp,
+  });
   final ValueChanged<RemoteButton> onButton;
+  final ValueChanged<RemoteButton>? onButtonDown, onButtonUp;
   @override
   State<Dpad> createState() => _DpadState();
 }
@@ -24,11 +30,20 @@ class _DpadState extends State<Dpad> with TickerProviderStateMixin {
   RemoteButton? pressed;
   Timer? timer;
   int? activePointer;
+  bool longPressed = false;
   RemoteButton? lastPressed;
   late final hold = AnimationController(vsync: this);
   late final spread = AnimationController(vsync: this);
 
-  void stop() {
+  void stop({bool cancel = false}) {
+    if (pressed == RemoteButton.ok) {
+      if (longPressed) {
+        widget.onButtonUp?.call(RemoteButton.ok);
+      } else if (!cancel) {
+        widget.onButton(RemoteButton.ok);
+      }
+    }
+    longPressed = false;
     timer?.cancel();
     timer = null;
     activePointer = null;
@@ -52,7 +67,7 @@ class _DpadState extends State<Dpad> with TickerProviderStateMixin {
         : (d.dy < 0 ? RemoteButton.up : RemoteButton.down);
     activePointer = pointer;
     AppHaptics.selection();
-    widget.onButton(b);
+    if (b != RemoteButton.ok) widget.onButton(b);
     pressed = b;
     lastPressed = b;
     spread.value = 0;
@@ -66,7 +81,15 @@ class _DpadState extends State<Dpad> with TickerProviderStateMixin {
       duration: motion(context, AppMotion.pressIn),
       curve: AppMotion.easeOut,
     );
-    if (b != RemoteButton.ok) {
+    if (b == RemoteButton.ok &&
+        widget.onButtonDown != null &&
+        widget.onButtonUp != null) {
+      timer = Timer(const Duration(milliseconds: 450), () {
+        longPressed = true;
+        AppHaptics.selection();
+        widget.onButtonDown!(b);
+      });
+    } else if (b != RemoteButton.ok) {
       timer = Timer(const Duration(milliseconds: 350), () {
         widget.onButton(b);
         timer = Timer.periodic(
@@ -80,6 +103,7 @@ class _DpadState extends State<Dpad> with TickerProviderStateMixin {
   @override
   void dispose() {
     timer?.cancel();
+    if (longPressed) widget.onButtonUp?.call(RemoteButton.ok);
     hold.dispose();
     spread.dispose();
     super.dispose();
@@ -91,69 +115,75 @@ class _DpadState extends State<Dpad> with TickerProviderStateMixin {
     return LayoutBuilder(
       builder: (context, box) {
         final s = box.maxWidth;
-        return Listener(
-          onPointerDown: (e) {
-            if (activePointer == null) start(e.localPosition, s, e.pointer);
-          },
-          onPointerUp: (e) {
-            if (e.pointer == activePointer) stop();
-          },
-          onPointerCancel: (e) {
-            if (e.pointer == activePointer) stop();
-          },
-          child: CustomPaint(
-            painter: _Painter(c, lastPressed, hold: hold, spread: spread),
-            child: SizedBox.square(
-              dimension: s,
-              child: Stack(
-                children: [
-                  Center(
-                    child: AnimatedBuilder(
-                      animation: hold,
-                      builder: (context, child) => Transform.scale(
-                        scale: lastPressed == RemoteButton.ok
-                            ? 1 - _okPressedShrink * hold.value
-                            : 1,
-                        child: child,
-                      ),
-                      child: Text(
-                        'OK',
-                        style: context.appTextTheme.titleLarge!.copyWith(
-                          color: c.onSurfaceStrong,
+        return Semantics(
+          label: 'D-pad',
+          explicitChildNodes: true,
+          child: Listener(
+            onPointerDown: (e) {
+              if (activePointer == null) start(e.localPosition, s, e.pointer);
+            },
+            onPointerUp: (e) {
+              if (e.pointer == activePointer) stop();
+            },
+            onPointerCancel: (e) {
+              if (e.pointer == activePointer) stop(cancel: true);
+            },
+            child: CustomPaint(
+              painter: _Painter(c, lastPressed, hold: hold, spread: spread),
+              child: SizedBox.square(
+                dimension: s,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: AnimatedBuilder(
+                        animation: hold,
+                        builder: (context, child) => Transform.scale(
+                          scale: lastPressed == RemoteButton.ok
+                              ? 1 - _okPressedShrink * hold.value
+                              : 1,
+                          child: child,
+                        ),
+                        child: ExcludeSemantics(
+                          child: Text(
+                            'OK',
+                            style: context.appTextTheme.titleLarge!.copyWith(
+                              color: c.onSurfaceStrong,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  for (final item in [
-                    (Icons.keyboard_arrow_up, const Alignment(0, -.68)),
-                    (Icons.keyboard_arrow_down, const Alignment(0, .68)),
-                    (Icons.keyboard_arrow_left, const Alignment(-.68, 0)),
-                    (Icons.keyboard_arrow_right, const Alignment(.68, 0)),
-                  ])
-                    Align(
-                      alignment: item.$2,
-                      child: Icon(item.$1, color: c.onSurface, size: 30),
-                    ),
-                  for (final item in [
-                    (RemoteButton.ok, 'OK', Alignment.center),
-                    (RemoteButton.up, 'Up', const Alignment(0, -.75)),
-                    (RemoteButton.down, 'Down', const Alignment(0, .75)),
-                    (RemoteButton.left, 'Left', const Alignment(-.75, 0)),
-                    (RemoteButton.right, 'Right', const Alignment(.75, 0)),
-                  ])
-                    Align(
-                      alignment: item.$3,
-                      child: Semantics(
-                        label: item.$2,
-                        button: true,
-                        onTap: () {
-                          AppHaptics.selection();
-                          widget.onButton(item.$1);
-                        },
-                        child: const SizedBox(width: 48, height: 48),
+                    for (final item in [
+                      (Icons.keyboard_arrow_up, const Alignment(0, -.68)),
+                      (Icons.keyboard_arrow_down, const Alignment(0, .68)),
+                      (Icons.keyboard_arrow_left, const Alignment(-.68, 0)),
+                      (Icons.keyboard_arrow_right, const Alignment(.68, 0)),
+                    ])
+                      Align(
+                        alignment: item.$2,
+                        child: Icon(item.$1, color: c.onSurface, size: 30),
                       ),
-                    ),
-                ],
+                    for (final item in [
+                      (RemoteButton.ok, 'OK', Alignment.center),
+                      (RemoteButton.up, 'Up', const Alignment(0, -.75)),
+                      (RemoteButton.down, 'Down', const Alignment(0, .75)),
+                      (RemoteButton.left, 'Left', const Alignment(-.75, 0)),
+                      (RemoteButton.right, 'Right', const Alignment(.75, 0)),
+                    ])
+                      Align(
+                        alignment: item.$3,
+                        child: Semantics(
+                          label: item.$2,
+                          button: true,
+                          onTap: () {
+                            AppHaptics.selection();
+                            widget.onButton(item.$1);
+                          },
+                          child: const SizedBox(width: 48, height: 48),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -5,8 +5,21 @@
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xiaomi_remote/core/remote/atv_certificate.dart';
+import 'package:xiaomi_remote/core/remote/atv_remote.dart';
 
 void main() {
+  test('matches, rejects changes, and records a legacy certificate', () {
+    const der = [1, 2, 3];
+    const fingerprint =
+        '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81';
+    expect(verifyTvCertificate(der, fingerprint), fingerprint);
+    expect(verifyTvCertificate(der, null), fingerprint);
+    expect(
+      () => verifyTvCertificate([1, 2, 4], fingerprint),
+      throwsA(isA<AtvIdentityChangedException>()),
+    );
+  });
+
   test('generates a 2048-bit RSA certificate', () {
     final certificate = AtvCertificate.generate(commonName: 'Test');
     final modulus = X509Utils.getModulusFromRSAX509Pem(certificate.certPem);

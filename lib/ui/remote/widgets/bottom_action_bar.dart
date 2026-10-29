@@ -31,7 +31,11 @@ class BottomActionBar extends StatelessWidget {
         size: 72,
         onPressed: onVoice,
       ),
-      RoundActionButton(label: 'Apps', icon: Icons.apps, onPressed: onApps),
+      RoundActionButton(
+        label: 'Apps',
+        icon: Icons.apps_rounded,
+        onPressed: onApps,
+      ),
     ],
   );
 }

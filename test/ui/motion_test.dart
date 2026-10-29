@@ -49,11 +49,6 @@ TvAppItem _item(String label, {bool favourite = false}) => TvAppItem(
 );
 
 Widget _apps(List<TvAppItem> items) => AppsScreen(
-  deviceName: 'TV',
-  connected: true,
-  onSwitchDevice: () {},
-  onTvSettings: () {},
-  onAppSettings: () {},
   onBack: () {},
   apps: items,
   onOpen: (_) {},
@@ -136,7 +131,6 @@ void main() {
     );
     await tester.enterText(find.byType(TextField), '123456');
     await tester.pump();
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Pair'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.hasRunningAnimations, isTrue);
@@ -182,11 +176,6 @@ void main() {
     tester,
   ) async {
     Widget loading() => AppsScreen(
-      deviceName: 'TV',
-      connected: true,
-      onSwitchDevice: () {},
-      onTvSettings: () {},
-      onAppSettings: () {},
       onBack: () {},
       apps: const [],
       onOpen: (_) {},

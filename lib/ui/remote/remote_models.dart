@@ -12,14 +12,32 @@ class NowPlaying {
   const NowPlaying({
     required this.title,
     required this.position,
-    required this.duration,
+    this.duration,
     required this.playing,
+    this.subtitle,
     this.appIcon,
   });
   final String title;
-  final Duration position, duration;
+  final String? subtitle;
+  final Duration position;
+  final Duration? duration;
   final bool playing;
   final Widget? appIcon;
+}
+
+class MouseSetupPrompt {
+  const MouseSetupPrompt({
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+    this.busy = false,
+    this.isError = false,
+  });
+  final String title, message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool busy, isError;
 }
 
 class FavouriteApp {
@@ -50,11 +68,13 @@ class RemoteViewState {
     this.exactVolume,
     required this.muted,
     this.needsPairing = false,
+    this.attempt = 0,
   });
   final String deviceName;
   final bool connected, reconnecting, muted, needsPairing;
   final NowPlaying? nowPlaying;
   final int? volumeLevel;
+  final int attempt;
   final VolumeControl? exactVolume;
   RemoteViewState copyWith({
     String? deviceName,
@@ -65,6 +85,7 @@ class RemoteViewState {
     Object? exactVolume = _unset,
     bool? muted,
     bool? needsPairing,
+    int? attempt,
   }) => RemoteViewState(
     deviceName: deviceName ?? this.deviceName,
     connected: connected ?? this.connected,
@@ -80,5 +101,6 @@ class RemoteViewState {
         : exactVolume as VolumeControl?,
     muted: muted ?? this.muted,
     needsPairing: needsPairing ?? this.needsPairing,
+    attempt: attempt ?? this.attempt,
   );
 }

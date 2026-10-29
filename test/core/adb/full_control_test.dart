@@ -2,11 +2,15 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xiaomi_remote/core/adb/adb_client.dart';
+import 'package:xiaomi_remote/core/adb/adb_key.dart';
 import 'package:xiaomi_remote/core/adb/full_control.dart';
+import 'package:xiaomi_remote/core/session/providers.dart';
 import 'package:xiaomi_remote/core/settings/favourites.dart';
 import 'package:xiaomi_remote/core/storage/paired_tv_store.dart';
 import 'package:xiaomi_remote/ui/theme/theme_mode_provider.dart';
@@ -28,7 +32,68 @@ class MemoryStore implements KeyValueStore {
   }
 }
 
+class FailingClient extends AdbClient {
+  FailingClient(AdbKey key) : super(host: 'test', key: key);
+
+  final events = StreamController<AdbConnectionState>.broadcast();
+
+  @override
+  Stream<AdbConnectionState> get states => events.stream;
+
+  @override
+  Future<void> connect({
+    Duration authTimeout = const Duration(seconds: 60),
+    bool offerPublicKey = true,
+  }) async {
+    events.add(AdbConnectionState.failed);
+    throw AdbException('offline');
+  }
+
+  @override
+  Future<void> disconnect() async {
+    await events.close();
+  }
+}
+
 void main() {
+  test('disconnect cancels scheduled full control reconnect', () async {
+    final store = MemoryStore();
+    store.values.addAll({
+      'adb_enabled_tv': '1',
+      'adb_private_key': 'private',
+      'adb_public_key': 'public',
+    });
+    final tv = PairedTv(
+      id: 'tv',
+      name: 'TV',
+      host: 'test',
+      certPem: '',
+      privateKeyPem: '',
+      pairedAt: DateTime(2026),
+    );
+    var attempts = 0;
+    final container = ProviderContainer(overrides: [
+      activeTvProvider.overrideWithValue(tv),
+      keyValueStoreProvider.overrideWithValue(store),
+      fullControlProvider.overrideWith(() => FullControl(
+        clientFactory: (_, AdbKey key) {
+          attempts++;
+          return FailingClient(key);
+        },
+      )),
+    ]);
+    addTearDown(container.dispose);
+    container.read(fullControlProvider);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(attempts, 1);
+    expect(container.read(fullControlProvider).status, FullControlStatus.failed);
+    await container.read(fullControlProvider.notifier).disconnect();
+    await Future<void>.delayed(const Duration(milliseconds: 2500));
+    await container.read(fullControlProvider.notifier).reconnectIfEnabled();
+    expect(attempts, 1);
+    expect(container.read(fullControlProvider).status, FullControlStatus.off);
+  });
+
   test('parses icons, skips malformed lines, prefers TV entries and sorts', () {
     final apps = parseHelperApps(
       'phone.z\tAlpha\tphone\tAQI=\n'

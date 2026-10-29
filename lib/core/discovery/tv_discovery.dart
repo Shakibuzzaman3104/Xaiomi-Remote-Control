@@ -56,6 +56,13 @@ class DiscoveredTv {
 
 /// Discovers Android TV devices on the local network using mDNS.
 class TvDiscovery {
+  TvDiscovery({BonsoirDiscovery Function(String type)? discoveryFactory})
+    : _discoveryFactory = discoveryFactory ?? _createDiscovery;
+
+  static BonsoirDiscovery _createDiscovery(String type) =>
+      BonsoirDiscovery(type: type);
+
+  final BonsoirDiscovery Function(String type) _discoveryFactory;
   static const String remoteServiceType = '_androidtvremote2._tcp';
   static const String castServiceType = '_googlecast._tcp';
   static const String adbServiceType = '_adb._tcp';
@@ -71,10 +78,24 @@ class TvDiscovery {
   final Set<String> _adbHosts = {};
 
   bool _isSearching = false;
+  int _generation = 0;
+  Future<void> _operation = Future.value();
 
-  Stream<List<DiscoveredTv>> get devices => _devicesController.stream;
+  Stream<List<DiscoveredTv>> get devices => Stream.multi((controller) {
+    final subscription = _devicesController.stream.listen(controller.add, onError: controller.addError, onDone: controller.close);
+    controller.add(_snapshot());
+    controller.onCancel = subscription.cancel;
+  });
 
-  Future<void> start() async {
+  Future<void> start() {
+    final generation = _generation;
+    final result = _operation.then((_) => _start(generation));
+    _operation = result.catchError((Object _) {});
+    return result;
+  }
+
+  Future<void> _start(int generation) async {
+    if (generation != _generation) return;
     if (_isSearching) return;
     _isSearching = true;
 
@@ -86,25 +107,50 @@ class TvDiscovery {
 
     final serviceTypes = [remoteServiceType, castServiceType, adbServiceType];
 
+    try {
     for (final type in serviceTypes) {
-      final discovery = BonsoirDiscovery(type: type);
+      final discovery = _discoveryFactory(type);
       _discoveries.add(discovery);
       await discovery.initialize();
+      if (generation != _generation) { await _cleanup(); return; }
 
       final stream = discovery.eventStream;
       if (stream != null) {
         final sub = stream.listen(
-          (event) => _handleDiscoveryEvent(type, discovery, event),
+          (event) {
+            if (generation == _generation) {
+              _handleDiscoveryEvent(type, discovery, event);
+            }
+          },
           onError: (_) {},
         );
         _subscriptions.add(sub);
       }
       await discovery.start();
+      if (generation != _generation) { await _cleanup(); return; }
+    }
+    } catch (_) {
+      await _cleanup();
+      rethrow;
     }
   }
 
-  Future<void> stop() async {
-    if (!_isSearching) return;
+  Future<void> stop() {
+    ++_generation;
+    final result = _operation.then((_) => _cleanup());
+    _operation = result.catchError((Object _) {});
+    return result;
+  }
+
+  Future<void> restart() async {
+    final stopping = stop();
+    final generation = _generation;
+    await stopping;
+    if (generation != _generation) return;
+    await start();
+  }
+
+  Future<void> _cleanup() async {
     _isSearching = false;
 
     for (final sub in _subscriptions) {
@@ -113,7 +159,7 @@ class TvDiscovery {
     _subscriptions.clear();
 
     for (final discovery in _discoveries) {
-      await discovery.stop();
+      try { await discovery.stop(); } catch (_) {}
     }
     _discoveries.clear();
 
@@ -212,10 +258,11 @@ class TvDiscovery {
   }
 
   void _emitDevices() {
-    final list = _primaryDevices.values.toList();
-    list.sort((a, b) => a.name.compareTo(b.name));
     if (!_devicesController.isClosed) {
-      _devicesController.add(list);
+      _devicesController.add(_snapshot());
     }
   }
+
+  List<DiscoveredTv> _snapshot() => _primaryDevices.values.toList()
+    ..sort((a, b) => a.name.compareTo(b.name));
 }

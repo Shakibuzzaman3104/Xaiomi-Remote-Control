@@ -10,12 +10,12 @@ import '../fade_switcher.dart';
 import '../motion.dart';
 import 'remote_models.dart';
 import 'widgets/device_header.dart';
-import 'widgets/now_playing_line.dart';
-import 'widgets/mode_switcher.dart';
 import 'widgets/mouse_unavailable.dart';
+import 'widgets/now_playing_line.dart';
+import 'widgets/trackpad.dart';
+import 'widgets/mode_switcher.dart';
 import 'widgets/dpad.dart';
 import 'widgets/swipe_pad.dart';
-import 'widgets/trackpad.dart';
 import 'widgets/numpad.dart';
 import 'widgets/round_action_button.dart';
 import 'widgets/volume_pill.dart';
@@ -29,9 +29,12 @@ class RemoteScreen extends StatefulWidget {
     this.initialMode = RemoteMode.dpad,
     this.swipeSensitivity = 0.5,
     required this.onButton,
+    this.onButtonDown,
+    this.onButtonUp,
+    this.onModeChanged,
     this.onExactVolumeChanged,
     required this.onSwitchDevice,
-    required this.onOpenNowPlaying,
+    this.onOpenNowPlaying,
     required this.onApps,
     required this.onKeyboard,
     required this.onVoice,
@@ -42,25 +45,30 @@ class RemoteScreen extends StatefulWidget {
     required this.onScroll,
     required this.onClick,
     required this.onAirMouseChanged,
+    this.onPointerLongPress,
     this.mouseAvailable = true,
+    this.mouseSetup,
   });
   final RemoteViewState state;
   final RemoteMode initialMode;
   final double swipeSensitivity;
   final ValueChanged<RemoteButton> onButton;
+  final ValueChanged<RemoteButton>? onButtonDown, onButtonUp;
+  final ValueChanged<RemoteMode>? onModeChanged;
   final ValueChanged<int>? onExactVolumeChanged;
   final VoidCallback onSwitchDevice,
-      onOpenNowPlaying,
       onApps,
       onKeyboard,
       onVoice,
       onRetry,
       onAppSettings;
-  final VoidCallback? onPairAgain;
+  final VoidCallback? onPairAgain, onOpenNowPlaying;
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
+  final VoidCallback? onPointerLongPress;
   final bool mouseAvailable;
+  final MouseSetupPrompt? mouseSetup;
   @override
   State<RemoteScreen> createState() => _RemoteScreenState();
 }
@@ -71,6 +79,12 @@ class _RemoteScreenState extends State<RemoteScreen> {
   void initState() {
     super.initState();
     mode = widget.initialMode;
+  }
+
+  @override
+  void didUpdateWidget(covariant RemoteScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMode != widget.initialMode) mode = widget.initialMode;
   }
 
   static const double _minPadGap = 16;
@@ -127,7 +141,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
             scale: 1,
             slide: const Offset(0, -0.2),
             alignment: Alignment.topCenter,
-            child: s.connected
+            child: s.connected || (s.reconnecting && s.attempt < 2)
                 ? const SizedBox.shrink(key: ValueKey('connected'))
                 : Column(
                     key: const ValueKey('disconnected'),
@@ -149,12 +163,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
             ),
           ],
           const SizedBox(height: 12),
-          _whenConnected(
-            ModeSwitcher(
-              mode: mode,
-              onChanged: (v) => setState(() => mode = v),
-            ),
-          ),
+          _whenConnected(ModeSwitcher(mode: mode, onChanged: _changeMode)),
           Expanded(
             child: _whenConnected(
               LayoutBuilder(
@@ -172,6 +181,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
                   if (!landscape) {
                     final controls = _buildControls(padSize);
                     return CustomScrollView(
+                      physics:
+                          mode == RemoteMode.swipe || mode == RemoteMode.mouse
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
                       slivers: [
                         SliverFillRemaining(
                           hasScrollBody: false,
@@ -190,6 +203,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
                     );
                   }
                   return SingleChildScrollView(
+                    physics:
+                        mode == RemoteMode.swipe || mode == RemoteMode.mouse
+                        ? const NeverScrollableScrollPhysics()
+                        : null,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight,
@@ -219,7 +236,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
 
   double _padSizeFor(BoxConstraints constraints) {
     final byWidth = (constraints.maxWidth * .9).clamp(0.0, 360.0);
-    final byHeight = constraints.maxHeight - _controlsAroundPad;
+    final byHeight =
+        constraints.maxHeight -
+        _controlsAroundPad *
+            MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
     return byWidth < byHeight ? byWidth : byHeight.clamp(168.0, byWidth);
   }
 
@@ -229,9 +249,12 @@ class _RemoteScreenState extends State<RemoteScreen> {
       opacity: connected ? 1 : .4,
       duration: AppMotion.standard,
       curve: AppMotion.easeOut,
-      child: IgnorePointer(
-        ignoring: !connected,
-        child: KeyedSubtree(key: ValueKey(connected), child: child),
+      child: ExcludeSemantics(
+        excluding: !connected,
+        child: IgnorePointer(
+          ignoring: !connected,
+          child: KeyedSubtree(key: ValueKey(connected), child: child),
+        ),
       ),
     );
   }
@@ -307,22 +330,40 @@ class _RemoteScreenState extends State<RemoteScreen> {
 
   Widget _padFor(RemoteMode mode) {
     return switch (mode) {
-      RemoteMode.dpad => Dpad(onButton: widget.onButton),
+      RemoteMode.dpad => Dpad(
+        onButton: widget.onButton,
+        onButtonDown: widget.onButtonDown,
+        onButtonUp: widget.onButtonUp,
+      ),
       RemoteMode.swipe => SwipePad(
         onButton: widget.onButton,
+        onButtonDown: widget.onButtonDown,
+        onButtonUp: widget.onButtonUp,
         sensitivity: widget.swipeSensitivity,
       ),
       RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
-        onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
+        prompt:
+            widget.mouseSetup ??
+            const MouseSetupPrompt(
+              title: 'Mouse needs Full control',
+              message: 'Turn on Full control in Settings to use a pointer on the TV.',
+            ),
+        onUseSwipe: () => _changeMode(RemoteMode.swipe),
       ),
       RemoteMode.mouse => Trackpad(
         onPointerMove: widget.onPointerMove,
         onScroll: widget.onScroll,
         onClick: widget.onClick,
         onAirMouseChanged: widget.onAirMouseChanged,
+        onLongPress: widget.onPointerLongPress,
       ),
       RemoteMode.numpad => Numpad(onButton: widget.onButton),
     };
+  }
+
+  void _changeMode(RemoteMode value) {
+    setState(() => mode = value);
+    widget.onModeChanged?.call(value);
   }
 
   List<Widget> _buildActions() {
@@ -334,17 +375,29 @@ class _RemoteScreenState extends State<RemoteScreen> {
         children: [
           RoundActionButton(
             label: 'Back',
-            icon: Icons.arrow_back,
+            icon: Icons.arrow_back_rounded,
             onPressed: () => widget.onButton(RemoteButton.back),
+            onLongDown: widget.onButtonDown == null
+                ? null
+                : () => widget.onButtonDown!(RemoteButton.back),
+            onLongUp: widget.onButtonUp == null
+                ? null
+                : () => widget.onButtonUp!(RemoteButton.back),
           ),
           RoundActionButton(
             label: 'Home',
             icon: Icons.home_outlined,
             onPressed: () => widget.onButton(RemoteButton.home),
+            onLongDown: widget.onButtonDown == null
+                ? null
+                : () => widget.onButtonDown!(RemoteButton.home),
+            onLongUp: widget.onButtonUp == null
+                ? null
+                : () => widget.onButtonUp!(RemoteButton.home),
           ),
           RoundActionButton(
             label: playing ? 'Pause' : 'Play',
-            icon: playing ? Icons.pause : Icons.play_arrow,
+            icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
             onPressed: () => widget.onButton(RemoteButton.playPause),
           ),
         ],

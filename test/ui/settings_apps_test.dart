@@ -3,11 +3,19 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xiaomi_remote/core/adb/full_control.dart';
+import 'package:xiaomi_remote/core/settings/favourites.dart';
+import 'package:xiaomi_remote/core/session/providers.dart';
+import 'package:xiaomi_remote/core/storage/paired_tv_store.dart';
 import 'package:xiaomi_remote/ui/apps/app_actions_sheet.dart';
+import 'package:xiaomi_remote/ui/apps/apps_page.dart';
 import 'package:xiaomi_remote/ui/apps/apps_screen.dart';
+import 'package:xiaomi_remote/ui/settings/settings_screen.dart';
 import 'package:xiaomi_remote/ui/settings/settings_view.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
+import 'package:xiaomi_remote/ui/theme/theme_mode_provider.dart';
 
 void main() {
   const apps = [
@@ -49,19 +57,12 @@ void main() {
     onSpeechLanguageTap: noop,
     adbConnected: true,
     onNetworkDebuggingTap: noop,
-    companionInstalled: false,
-    onCompanionTap: noop,
     themeLabel: 'System',
     onThemeTap: noop,
     appVersion: '1.0.0',
     onAboutTap: noop,
   );
   Widget appScreen(ValueChanged<TvAppItem> actions) => AppsScreen(
-    deviceName: 'Living Room',
-    connected: true,
-    onSwitchDevice: noop,
-    onTvSettings: noop,
-    onAppSettings: noop,
     onBack: noop,
     apps: apps,
     onOpen: (_) {},
@@ -148,11 +149,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.light,
         home: AppsScreen(
-          deviceName: 'Living Room',
-          connected: true,
-          onSwitchDevice: noop,
-          onTvSettings: noop,
-          onAppSettings: noop,
           onBack: noop,
           apps: const [
             TvAppItem(
@@ -173,8 +169,9 @@ void main() {
     expect(find.text('Long-press an app to add it here.'), findsOneWidget);
     expect(find.text('No apps match ""'), findsNothing);
   });
-  testWidgets('full control actions are disabled', (tester) async {
+  testWidgets('full control actions ask for setup when off', (tester) async {
     var called = false;
+    var needsControl = false;
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -188,12 +185,181 @@ void main() {
             onClearCache: noop,
             onAppInfo: noop,
             onUninstall: noop,
+            onNeedFullControl: () => needsControl = true,
           ),
         ),
       ),
     );
-    expect(find.text('Needs full control'), findsNWidgets(4));
+    expect(find.text('Needs Full control'), findsNWidgets(4));
+    expect(find.byIcon(Icons.lock_outline), findsNWidgets(4));
     await tester.tap(find.text('Force stop'));
     expect(called, isFalse);
+    expect(needsControl, isTrue);
   });
+  testWidgets('paired TV row exposes a remove action', (tester) async {
+    String? removed;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: SettingsView(
+          devices: const [
+            SettingsDevice(
+              id: '1',
+              name: 'Living Room',
+              subtitle: 'host',
+              isActive: true,
+            ),
+          ],
+          onSelectDevice: (_) {},
+          onRemoveDevice: (id) => removed = id,
+          onAddTv: noop,
+          hapticsEnabled: false,
+          onHapticsChanged: (_) {},
+          volumeKeysEnabled: false,
+          onVolumeKeysChanged: (_) {},
+          swipeSensitivity: .5,
+          onSwipeSensitivityChanged: (_) {},
+          micButtonLabel: 'Search YouTube',
+          onMicButtonTap: noop,
+          speechLanguageLabel: 'English',
+          onSpeechLanguageTap: noop,
+          adbConnected: false,
+          onNetworkDebuggingTap: noop,
+          themeLabel: 'System',
+          onThemeTap: noop,
+          appVersion: '1.0.0',
+          onAboutTap: noop,
+        ),
+      ),
+    );
+    await tester.tap(find.byTooltip('Remove Living Room'));
+    expect(removed, '1');
+  });
+  testWidgets('force stop confirms with a snack bar', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          fullControlProvider.overrideWith(_FakeControl.new),
+          favouritesProvider.overrideWith(_FakeFavourites.new),
+        ],
+        child: MaterialApp(theme: AppTheme.light, home: const AppsPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.longPress(find.text('YouTube'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Force stop'));
+    await tester.pumpAndSettle();
+    expect(find.text('Stopped YouTube'), findsOneWidget);
+  });
+  testWidgets('removing a TV asks for confirmation first', (tester) async {
+    final store = _MemoryStore();
+    final saved = PairedTvStore(store);
+    for (final (id, name) in [('1', 'Living Room'), ('2', 'Bedroom')]) {
+      await saved.save(
+        PairedTv(
+          id: id,
+          name: name,
+          host: 'host-$id',
+          certPem: 'cert',
+          privateKeyPem: 'key',
+          pairedAt: DateTime(2026),
+        ),
+      );
+    }
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          pairedTvStoreProvider.overrideWithValue(saved),
+          keyValueStoreProvider.overrideWithValue(store),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: SettingsScreen(
+            onAddTv: noop,
+            onOpenFullControl: noop,
+            onBack: noop,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Remove Living Room'));
+    await tester.pumpAndSettle();
+    expect(find.text('Remove Living Room?'), findsOneWidget);
+    expect(
+      find.text("You'll need to pair it again to use it."),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Living Room'), findsOneWidget);
+    await tester.tap(find.byTooltip('Remove Living Room'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+    expect(find.text('Living Room'), findsNothing);
+    expect(find.text('Bedroom'), findsOneWidget);
+  });
+  testWidgets('settings names Full control and offers to turn it off', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: SettingsView(
+          devices: const [],
+          onSelectDevice: (_) {},
+          onRemoveDevice: (_) {},
+          onAddTv: noop,
+          hapticsEnabled: true,
+          onHapticsChanged: (_) {},
+          volumeKeysEnabled: true,
+          onVolumeKeysChanged: (_) {},
+          swipeSensitivity: .5,
+          onSwipeSensitivityChanged: (_) {},
+          micButtonLabel: 'Search YouTube',
+          onMicButtonTap: noop,
+          speechLanguageLabel: 'English',
+          onSpeechLanguageTap: noop,
+          adbConnected: true,
+          onNetworkDebuggingTap: noop,
+          onTurnOffFullControl: noop,
+          themeLabel: 'System',
+          onThemeTap: noop,
+          appVersion: '1.0.0',
+          onAboutTap: noop,
+        ),
+      ),
+    );
+    expect(find.text('Full control'), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('Turn off Full control'), findsOneWidget);
+  });
+}
+
+class _MemoryStore implements KeyValueStore {
+  final _values = <String, String>{};
+  @override
+  Future<String?> read(String key) async => _values[key];
+  @override
+  Future<void> write(String key, String value) async => _values[key] = value;
+  @override
+  Future<void> delete(String key) async => _values.remove(key);
+}
+
+class _FakeFavourites extends Favourites {
+  @override
+  Set<String> build() => const {};
+}
+
+class _FakeControl extends FullControl {
+  @override
+  FullControlState build() => const FullControlState(
+    status: FullControlStatus.connected,
+    apps: [TvApp(package: 'one', label: 'YouTube', isTvApp: true)],
+  );
+
+  @override
+  Future<void> forceStop(String package) async {}
 }

@@ -8,6 +8,7 @@ import '../../haptics.dart';
 import '../../motion.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../remote_models.dart';
 
 class ModeSwitcher extends StatelessWidget {
@@ -21,12 +22,12 @@ class ModeSwitcher extends StatelessWidget {
       Icons.gamepad_outlined,
       Icons.touch_app_outlined,
       Icons.mouse_outlined,
-      Icons.dialpad,
+      Icons.dialpad_rounded,
     ];
     final labels = ['D-pad', 'Swipe', 'Mouse', 'Numpad'];
     final textScaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
-    const labelStyle = TextStyle(fontSize: 13);
+    final labelStyle = context.appTextTheme.bodySmall!;
 
     double labelWidth(String label) {
       final painter = TextPainter(
@@ -49,7 +50,7 @@ class ModeSwitcher extends StatelessWidget {
         builder: (context, constraints) {
           final tabWidth = constraints.maxWidth / 4;
           final iconsOnly = labels.any(
-            (label) => 8 + 19 + 4 + labelWidth(label) > tabWidth,
+            (label) => 8 + 20 + 4 + labelWidth(label) > tabWidth,
           );
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,6 +64,8 @@ class ModeSwitcher extends StatelessWidget {
                     button: true,
                     selected: selected,
                     label: labels[i],
+                    excludeSemantics: true,
+                    onTap: () => onChanged(RemoteMode.values[i]),
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
@@ -79,7 +82,7 @@ class ModeSwitcher extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(icons[i], size: 19, color: color),
+                            Icon(icons[i], size: 20, color: color),
                             if (!iconsOnly) ...[
                               const SizedBox(width: 4),
                               Text(

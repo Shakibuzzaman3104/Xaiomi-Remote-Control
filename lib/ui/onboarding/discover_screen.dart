@@ -186,6 +186,16 @@ class DiscoverScreen extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 68),
+              if (devices.isEmpty &&
+                  timedOut &&
+                  Theme.of(context).platform == TargetPlatform.iOS)
+                Text(
+                  'On iPhone, allow Local Network for Xiaomi Remote in Settings › Privacy & Security › Local Network.',
+                  textAlign: TextAlign.center,
+                  style: context.appTextTheme.bodyMedium!.copyWith(
+                    color: c.onSurfaceVariant,
+                  ),
+                ),
               Center(
                 child: TextButton(
                   onPressed: () {
@@ -225,12 +235,12 @@ class _DeviceTile extends StatelessWidget {
       child: Material(
         color: c.background,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(AppShapes.card),
           side: BorderSide(color: c.subtleOutline),
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(AppShapes.card),
           child: Container(
             constraints: const BoxConstraints(minHeight: 64),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),

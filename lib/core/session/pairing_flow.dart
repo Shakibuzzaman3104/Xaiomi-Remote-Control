@@ -29,13 +29,22 @@ class PairingFlow {
 
   Future<void> begin(DiscoveredTv tv) async {
     final generation = ++_generation;
+    _client?.close();
     _client = null;
     _tv = null;
     final cert = _certificateFactory();
     final client = _clientFactory(tv.host, cert);
-    await client.startPairing();
-    if (generation != _generation) return;
     _client = client;
+    try {
+      await client.startPairing();
+    } catch (_) {
+      client.close();
+      rethrow;
+    }
+    if (generation != _generation) {
+      client.close();
+      return;
+    }
     _certificate = cert;
     _tv = tv;
   }
@@ -57,6 +66,8 @@ class PairingFlow {
       name: tv.friendlyName ?? tv.name,
       host: tv.host,
       model: tv.model,
+      serviceName: tv.name,
+      tvCertSha256: client.tvCertSha256,
       certPem: cert.certPem,
       privateKeyPem: cert.privateKeyPem,
       pairedAt: DateTime.now(),
@@ -71,6 +82,7 @@ class PairingFlow {
 
   Future<void> cancel() async {
     ++_generation;
+    _client?.close();
     _client = null;
     _tv = null;
     _certificate = null;

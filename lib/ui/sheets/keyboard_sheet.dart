@@ -18,8 +18,7 @@ class KeyboardSheet extends StatefulWidget {
     required this.onSend,
     required this.onClear,
     required this.onClose,
-    this.languageLabel = 'EN / বাংলা',
-    this.onLanguageTap,
+    this.imeActive = true,
   });
 
   final String fieldLabel;
@@ -28,8 +27,7 @@ class KeyboardSheet extends StatefulWidget {
   final VoidCallback onSend;
   final VoidCallback onClear;
   final VoidCallback onClose;
-  final String languageLabel;
-  final VoidCallback? onLanguageTap;
+  final bool imeActive;
 
   @override
   State<KeyboardSheet> createState() => _KeyboardSheetState();
@@ -134,15 +132,15 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppShapes.card),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppShapes.card),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppShapes.card),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
                   ),
                   suffixIconConstraints: const BoxConstraints(
@@ -181,46 +179,11 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 onSubmitted: (_) => _handleSend(),
               ),
               const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Material(
-                  color: c.surfaceContainer,
-                  shape: StadiumBorder(
-                    side: BorderSide(color: c.subtleOutline),
-                  ),
-                  child: InkWell(
-                    customBorder: const StadiumBorder(),
-                    onTap: widget.onLanguageTap,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.language, size: 20, color: c.onSurface),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              widget.languageLabel,
-                              style: context.appTextTheme.bodySmall!.copyWith(
-                                color: c.onSurface,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 18,
-                            color: c.onSurface,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+              if (!widget.imeActive)
+                Text(
+                  'Select a text field on the TV first.',
+                  style: context.appTextTheme.bodyMedium,
                 ),
-              ),
               const SizedBox(height: 14),
               Row(
                 children: [
@@ -230,14 +193,14 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                       label: 'Clear',
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(minHeight: 48),
-                        child: TextButton.icon(
+                        child: FilledButton.tonalIcon(
                           onPressed: _handleClear,
                           icon: const Icon(Icons.backspace_outlined, size: 20),
                           label: Text(
                             'Clear',
                             style: context.appTextTheme.displaySmall!,
                           ),
-                          style: TextButton.styleFrom(
+                          style: FilledButton.styleFrom(
                             backgroundColor: c.surfaceContainer,
                             side: BorderSide(color: c.subtleOutline),
                             foregroundColor: c.onSurfaceStrong,
@@ -259,14 +222,14 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                       label: 'Send',
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(minHeight: 48),
-                        child: ElevatedButton.icon(
+                        child: FilledButton.icon(
                           onPressed: _handleSend,
                           icon: const Icon(Icons.send_outlined, size: 20),
                           label: Text(
                             'Send',
                             style: context.appTextTheme.displaySmall!,
                           ),
-                          style: ElevatedButton.styleFrom(
+                          style: FilledButton.styleFrom(
                             backgroundColor: c.primary,
                             foregroundColor: c.onPrimary,
                             elevation: 0,

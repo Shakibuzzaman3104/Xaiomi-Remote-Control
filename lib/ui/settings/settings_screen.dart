@@ -77,26 +77,22 @@ class SettingsScreen extends ConsumerWidget {
         for (final tv in paired?.tvs ?? const [])
           SettingsDevice(
             id: tv.id,
-            name: tv.name,
+            name: tv.displayName,
             subtitle: tv.host,
             isActive: tv.id == active?.id && connected,
           ),
       ],
       onSelectDevice: (id) => ref.read(pairedTvsProvider.notifier).select(id),
       onRemoveDevice: (id) async {
-        if (id == active?.id && (paired?.tvs.length ?? 0) > 1) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Select another TV before removing this one.'),
-            ),
-          );
-          return;
+        String? removedName;
+        for (final item in paired?.tvs ?? const []) {
+          if (item.id == id) removedName = item.displayName;
         }
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Remove TV?'),
-            content: const Text('Remove this TV from paired devices?'),
+            title: Text('Remove ${removedName ?? 'this TV'}?'),
+            content: const Text("You'll need to pair it again to use it."),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
@@ -109,14 +105,19 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         );
-        if (confirmed == true && context.mounted) {
-          final navigator = Navigator.of(context);
-          final removingLast =
-              (paired?.tvs.length ?? 0) == 1 && id == active?.id;
-          await ref.read(pairedTvsProvider.notifier).remove(id);
-          if (removingLast && navigator.mounted) {
-            navigator.popUntil((route) => route.isFirst);
-          }
+        if (confirmed != true || !context.mounted) return;
+        final navigator = Navigator.of(context);
+        final remaining = [
+          for (final item in paired?.tvs ?? const [])
+            if (item.id != id) item,
+        ];
+        final removingLast = remaining.isEmpty;
+        if (id == active?.id && remaining.isNotEmpty) {
+          await ref.read(pairedTvsProvider.notifier).select(remaining.first.id);
+        }
+        await ref.read(pairedTvsProvider.notifier).remove(id);
+        if (removingLast && navigator.mounted) {
+          navigator.popUntil((route) => route.isFirst);
         }
       },
       onAddTv: onAddTv,
@@ -144,8 +145,30 @@ class SettingsScreen extends ConsumerWidget {
       adbConnected:
           ref.watch(fullControlProvider).status == FullControlStatus.connected,
       onNetworkDebuggingTap: onOpenFullControl,
-      companionInstalled: false,
-      onCompanionTap: onOpenFullControl,
+      onTurnOffFullControl: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Turn off Full control?'),
+            content: const Text(
+              "Apps, mouse and exact volume will stop working until you set it up again.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Turn off'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed == true) {
+          await ref.read(fullControlProvider.notifier).disconnect();
+        }
+      },
       themeLabel: switch (theme) {
         ThemeMode.system => 'System',
         ThemeMode.light => 'Light',

@@ -17,6 +17,7 @@ class AppPreferences {
     this.swipeSensitivity = 0.5,
     this.micButton = VoiceTargetPreference.askAssistant,
     this.speechLocale = 'en_US',
+    this.remoteMode = 'dpad',
   });
 
   final bool haptics;
@@ -24,6 +25,7 @@ class AppPreferences {
   final double swipeSensitivity;
   final VoiceTargetPreference micButton;
   final String speechLocale;
+  final String remoteMode;
 
   AppPreferences copyWith({
     bool? haptics,
@@ -31,12 +33,14 @@ class AppPreferences {
     double? swipeSensitivity,
     VoiceTargetPreference? micButton,
     String? speechLocale,
+    String? remoteMode,
   }) => AppPreferences(
     haptics: haptics ?? this.haptics,
     volumeKeysControlTv: volumeKeysControlTv ?? this.volumeKeysControlTv,
     swipeSensitivity: swipeSensitivity ?? this.swipeSensitivity,
     micButton: micButton ?? this.micButton,
     speechLocale: speechLocale ?? this.speechLocale,
+    remoteMode: remoteMode ?? this.remoteMode,
   );
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +49,7 @@ class AppPreferences {
     'swipeSensitivity': swipeSensitivity,
     'micButton': micButton.name,
     'speechLocale': speechLocale,
+    'remoteMode': remoteMode,
   };
 
   factory AppPreferences.fromJson(Map<String, dynamic> json) => AppPreferences(
@@ -63,6 +68,9 @@ class AppPreferences {
     speechLocale: json['speechLocale'] is String
         ? json['speechLocale'] as String
         : 'en_US',
+    remoteMode: json['remoteMode'] is String
+        ? json['remoteMode'] as String
+        : 'dpad',
   );
 }
 
@@ -112,6 +120,8 @@ class AppPreferencesNotifier extends Notifier<AppPreferences> {
       _update(state.copyWith(micButton: value));
   Future<void> setSpeechLocale(String value) =>
       _update(state.copyWith(speechLocale: value));
+  Future<void> setRemoteMode(String value) =>
+      _update(state.copyWith(remoteMode: value));
 }
 
 final appPreferencesProvider =

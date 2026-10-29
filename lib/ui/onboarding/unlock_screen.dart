@@ -35,7 +35,7 @@ class UnlockScreen extends StatelessWidget {
   static const _steps = [
     'On the TV open Settings › Device Preferences › About',
     'Click Build 7 times to become a developer',
-    'Open Developer options and turn on Network debugging',
+    'Open Developer options and turn on USB debugging (called Network debugging on some TVs)',
     'Tap Connect below, then choose Always allow on the TV',
   ];
 
@@ -65,72 +65,15 @@ class UnlockScreen extends StatelessWidget {
                           child: IconButton(
                             onPressed: onBack,
                             icon: Icon(
-                              Icons.arrow_back,
+                              Theme.of(context).platform == TargetPlatform.iOS
+                                  ? Icons.arrow_back_ios_new
+                                  : Icons.arrow_back,
                               color: c.onSurfaceStrong,
                             ),
                             tooltip: 'Back',
                           ),
                         ),
                         const SizedBox(height: 12),
-                      ] else if (deviceName != null) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.tv_outlined,
-                              size: 28,
-                              color: c.onSurfaceStrong,
-                            ),
-                            const SizedBox(width: 22),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          deviceName!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: context
-                                              .appTextTheme
-                                              .titleSmall!
-                                              .copyWith(
-                                                color: c.onSurfaceStrong,
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Icon(
-                                        Icons.keyboard_arrow_down,
-                                        size: 20,
-                                        color: c.onSurfaceStrong,
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.wifi,
-                                        size: 16,
-                                        color: c.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Connected',
-                                        style: context.appTextTheme.labelMedium!
-                                            .copyWith(color: c.muted),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(Icons.more_vert, color: c.onSurfaceStrong),
-                          ],
-                        ),
-                        const SizedBox(height: 25),
                       ] else
                         const SizedBox(height: 20),
                       if (onBack == null) ...[
@@ -149,7 +92,7 @@ class UnlockScreen extends StatelessWidget {
                         const SizedBox(height: 25),
                       ],
                       Text(
-                        'Unlock full control',
+                        'Unlock Full control',
                         textAlign: TextAlign.center,
                         style: context.appTextTheme.headlineMedium!.copyWith(
                           color: c.onSurfaceStrong,
@@ -157,7 +100,7 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Optional. Shows every app on your TV and lets you force stop, clear cache or uninstall them.',
+                        "Full control unlocks: Open any app, TV pointer and air mouse, what's playing, exact volume, TV settings.",
                         textAlign: TextAlign.center,
                         style: context.appTextTheme.bodyMedium!.copyWith(
                           color: c.muted,
@@ -185,8 +128,8 @@ class UnlockScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                width: 34,
-                                height: 34,
+                                width: 32,
+                                height: 32,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: c.okButton,
@@ -244,13 +187,10 @@ class UnlockScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: connected ? c.connected : c.muted,
-                        ),
+                      Icon(
+                        connected ? Icons.check_circle : Icons.circle_outlined,
+                        size: 18,
+                        color: connected ? c.connected : c.muted,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -273,19 +213,18 @@ class UnlockScreen extends StatelessWidget {
                   label: connected ? 'Continue' : 'Connect',
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 52),
-                    child: ElevatedButton(
+                    child: FilledButton(
                       onPressed: connecting
                           ? null
                           : () {
                               AppHaptics.selection();
                               onConnect();
                             },
-                      style: ElevatedButton.styleFrom(
+                      style: FilledButton.styleFrom(
                         backgroundColor: c.primary,
                         foregroundColor: c.onPrimary,
                         disabledBackgroundColor: c.surfaceContainerStrong,
                         disabledForegroundColor: c.muted,
-                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppShapes.pill),
                         ),
@@ -341,9 +280,9 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       child: Semantics(
                         button: true,
-                        label: onBack == null ? 'Skip for now' : 'Not now',
+                        label: 'Skip for now',
                         child: Text(
-                          onBack == null ? 'Skip for now' : 'Not now',
+                          'Skip for now',
                           style: context.appTextTheme.displaySmall!.copyWith(
                             color: c.primaryText,
                           ),

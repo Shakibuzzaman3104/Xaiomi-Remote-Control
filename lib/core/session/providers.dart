@@ -59,6 +59,16 @@ class PairedTvs extends AsyncNotifier<PairedTvsState> {
     await select(tv.id);
   }
 
+  Future<void> updatePairedTv(PairedTv tv) async {
+    await ref.read(pairedTvStoreProvider).save(tv);
+    final current = state.asData?.value;
+    if (current == null) return;
+    state = AsyncData(PairedTvsState(
+      tvs: [for (final saved in current.tvs) if (saved.id == tv.id) tv else saved],
+      lastUsedId: current.lastUsedId,
+     ));
+  }
+
   Future<void> remove(String id) async {
     final store = ref.read(pairedTvStoreProvider);
     await store.remove(id);
@@ -93,9 +103,32 @@ final activeTvProvider = Provider<PairedTv?>((ref) {
 });
 
 final tvSessionProvider = Provider<TvSession?>((ref) {
-  final tv = ref.watch(activeTvProvider);
+  ref.watch(
+    activeTvProvider.select((tv) => tv == null ? null : (tv.id, tv.certPem)),
+  );
+  final tv = ref.read(activeTvProvider);
   if (tv == null) return null;
-  final session = TvSession(tv: tv);
+  final session = TvSession(
+    tv: tv,
+    onTvUpdated: (updated) =>
+        ref.read(pairedTvsProvider.notifier).updatePairedTv(updated),
+    resolveHost: (tv) async {
+      final discovery = ref.read(tvDiscoveryProvider);
+      try {
+        await discovery.start();
+        final name = tv.serviceName ?? tv.name;
+        final devices = await discovery.devices.firstWhere(
+          (devices) => devices.any((device) => device.host != tv.host && (device.name == name || device.friendlyName == name)),
+        ).timeout(const Duration(seconds: 4), onTimeout: () => []);
+        for (final device in devices) {
+          if (device.host != tv.host && (device.name == name || device.friendlyName == name)) return device.host;
+        }
+      } catch (_) {
+        return null;
+      }
+      return null;
+    },
+  );
   ref.onDispose(() => unawaited(session.dispose()));
   unawaited(session.start());
   return session;
@@ -115,6 +148,8 @@ final tvSessionStateProvider = StreamProvider<TvSessionState>((ref) {
   });
 });
 
-final pairingFlowProvider = Provider<PairingFlow>(
-  (ref) => PairingFlow(store: ref.watch(pairedTvStoreProvider)),
-);
+final pairingFlowProvider = Provider<PairingFlow>((ref) {
+  final flow = PairingFlow(store: ref.watch(pairedTvStoreProvider));
+  ref.onDispose(() => unawaited(flow.cancel()));
+  return flow;
+});

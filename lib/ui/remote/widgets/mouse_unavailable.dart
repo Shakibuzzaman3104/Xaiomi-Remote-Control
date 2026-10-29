@@ -6,10 +6,16 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../remote_models.dart';
 
-/// Shown in Mouse mode until the TV pointer is available.
+/// Shown in Mouse mode until the TV pointer is ready.
 class MouseUnavailable extends StatelessWidget {
-  const MouseUnavailable({super.key, required this.onUseSwipe});
+  const MouseUnavailable({
+    super.key,
+    required this.prompt,
+    required this.onUseSwipe,
+  });
+  final MouseSetupPrompt prompt;
   final VoidCallback onUseSwipe;
 
   @override
@@ -32,23 +38,37 @@ class MouseUnavailable extends StatelessWidget {
               Icon(Icons.mouse_outlined, size: 40, color: c.primary),
               const SizedBox(height: 16),
               Text(
-                'Mouse pointer is coming soon',
+                prompt.title,
                 textAlign: TextAlign.center,
                 style: context.appTextTheme.titleMedium!.copyWith(
                   color: c.onSurfaceStrong,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Swipe works on every TV screen in the meantime.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: c.onSurfaceVariant),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  prompt.message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: prompt.isError ? c.danger : c.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              FilledButton(
-                onPressed: onUseSwipe,
-                child: const Text('Use Swipe'),
-              ),
+              if (prompt.busy)
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                )
+              else if (prompt.actionLabel != null && prompt.onAction != null)
+                FilledButton(
+                  onPressed: prompt.onAction,
+                  child: Text(prompt.actionLabel!),
+                ),
+              const SizedBox(height: 4),
+              TextButton(onPressed: onUseSwipe, child: const Text('Use Swipe')),
             ],
           ),
         ),

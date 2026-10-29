@@ -25,4 +25,13 @@ void main() {
     final b = Uint8List.fromList([3]);
     expect(FrameDecoder().add([...frame(a), ...frame(b)]), [a, b]);
   });
+  test('rejects a split oversized length before its body', () {
+    final decoder = FrameDecoder();
+    expect(decoder.add([0x81, 0x80]), isEmpty);
+    expect(() => decoder.add([0x04]), throwsFormatException);
+  });
+  test('accepts an incomplete maximum sized frame', () {
+    final decoder = FrameDecoder();
+    expect(decoder.add([0x80, 0x80, 0x04, 1, 2]), isEmpty);
+  });
 }

@@ -47,6 +47,8 @@ void main() {
           name: 'Living Room TV',
           host: '192.168.1.100',
           model: 'MIBOX4',
+          tvCertSha256: 'abcdef',
+          serviceName: 'Living Room',
           certPem:
               '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
           privateKeyPem:
@@ -63,6 +65,9 @@ void main() {
         expect(list.first.name, tv.name);
         expect(list.first.host, tv.host);
         expect(list.first.model, tv.model);
+        expect(list.first.tvCertSha256, 'abcdef');
+        expect(list.first.serviceName, 'Living Room');
+        expect(list.first.copyWith(tvCertSha256: '123').tvCertSha256, '123');
         expect(list.first.certPem, tv.certPem);
         expect(list.first.privateKeyPem, tv.privateKeyPem);
         expect(list.first.pairedAt, tv.pairedAt);

@@ -20,6 +20,7 @@ class AppActionsSheet extends StatelessWidget {
     required this.onClearCache,
     required this.onAppInfo,
     required this.onUninstall,
+    this.onNeedFullControl,
   });
   final TvAppItem app;
   final String? sizeLabel;
@@ -30,6 +31,7 @@ class AppActionsSheet extends StatelessWidget {
       onClearCache,
       onAppInfo,
       onUninstall;
+  final VoidCallback? onNeedFullControl;
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -53,7 +55,7 @@ class AppActionsSheet extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: enabled ? callback : null,
+            onTap: enabled ? callback : onNeedFullControl,
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 52),
               child: Padding(
@@ -88,7 +90,7 @@ class AppActionsSheet extends StatelessWidget {
                           ),
                           if (!enabled)
                             Text(
-                              'Needs full control',
+                              'Needs Full control',
                               style: context.appTextTheme.labelSmall!.copyWith(
                                 color: c.muted,
                               ),
@@ -96,6 +98,8 @@ class AppActionsSheet extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (!enabled)
+                      Icon(Icons.lock_outline, size: 18, color: c.muted),
                   ],
                 ),
               ),

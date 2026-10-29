@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'atv_certificate.dart';
@@ -86,18 +87,34 @@ class AtvNotPairedException extends AtvConnectionLostException {
 }
 
 /// A TLS client for the Android TV Remote Service v2 protocol.
+class AtvIdentityChangedException extends AtvConnectionLostException {
+  const AtvIdentityChangedException() : super("This TV's identity changed. Pair it again.");
+}
+
+@visibleForTesting
+String verifyTvCertificate(List<int> der, String? expectedFingerprint) {
+  final fingerprint = sha256.convert(der).toString();
+  if (expectedFingerprint != null && fingerprint != expectedFingerprint) {
+    throw const AtvIdentityChangedException();
+  }
+  return fingerprint;
+}
+
 class AtvRemoteClient {
   AtvRemoteClient({
     required this.host,
     required this.certificate,
     this.port = 6466,
     this.silenceTimeout = const Duration(seconds: 16),
+    this.tvCertSha256,
     @visibleForTesting this.sendSink,
   });
   final String host;
   final AtvCertificate certificate;
   final int port;
   final Duration silenceTimeout;
+  final String? tvCertSha256;
+  String? peerCertSha256;
   final void Function(RemoteMessage)? sendSink;
   // VOICE (8) stalls the handshake on the Mi Box S: no set_active, keys ignored.
   static const int features = 1 | 2 | 4 | 32 | 64 | 512;
@@ -131,15 +148,39 @@ class AtvRemoteClient {
     }
     try {
       final SecureSocket socket;
+      var mismatch = false;
       try {
         socket = await SecureSocket.connect(
           host,
           port,
           context: atvSecurityContext(certificate),
-          onBadCertificate: (_) => true,
+          onBadCertificate: (cert) {
+            try {
+              verifyTvCertificate(cert.der, tvCertSha256);
+              return true;
+            } on AtvIdentityChangedException {
+              mismatch = true;
+              return false;
+            }
+          },
         );
+      } on TlsException catch (_) {
+        if (mismatch) throw const AtvIdentityChangedException();
+        rethrow;
       } on SocketException catch (e) {
+        if (mismatch) throw const AtvIdentityChangedException();
         if (_isReset(e)) throw const AtvNotPairedException();
+        rethrow;
+      }
+      final peer = socket.peerCertificate;
+      if (peer == null) {
+        socket.destroy();
+        throw const AtvConnectionLostException('Server certificate is missing');
+      }
+      try {
+        peerCertSha256 = verifyTvCertificate(peer.der, tvCertSha256);
+      } on AtvIdentityChangedException {
+        socket.destroy();
         rethrow;
       }
       if (_closed) {

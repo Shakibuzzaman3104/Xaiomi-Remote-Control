@@ -10,7 +10,7 @@ import '../motion.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-enum VoiceTarget { search, typeIntoField }
+enum VoiceTarget { search, typeIntoField, searchTv }
 
 class VoiceSheet extends StatelessWidget {
   const VoiceSheet({
@@ -23,6 +23,7 @@ class VoiceSheet extends StatelessWidget {
     required this.onCancel,
     this.typeIntoFieldAvailable = true,
     this.errorText,
+    this.tvSearchAvailable = false,
   });
 
   final bool listening;
@@ -32,6 +33,7 @@ class VoiceSheet extends StatelessWidget {
   final VoidCallback onMicTap;
   final VoidCallback onCancel;
   final bool typeIntoFieldAvailable;
+  final bool tvSearchAvailable;
   final String? errorText;
 
   @override
@@ -88,6 +90,16 @@ class VoiceSheet extends StatelessWidget {
                   ),
                 ),
               ),
+              if (tvSearchAvailable) ...[
+                const SizedBox(height: 12),
+                _TargetChip(
+                  label: 'Search TV',
+                  icon: Icons.search_rounded,
+                  selected: target == VoiceTarget.searchTv,
+                  enabled: true,
+                  onTap: () => onTargetChanged(VoiceTarget.searchTv),
+                ),
+              ],
               const SizedBox(height: 16),
               Center(
                 child: Semantics(
@@ -296,7 +308,7 @@ class _MicRingState extends State<_MicRing>
           AnimatedBuilder(
             animation: controller,
             builder: (context, child) => Transform.scale(
-              scale: 1 + 0.08 * Curves.easeOut.transform(controller.value),
+              scale: 1 + 0.08 * AppMotion.easeOut.transform(controller.value),
               child: child,
             ),
             child: Container(

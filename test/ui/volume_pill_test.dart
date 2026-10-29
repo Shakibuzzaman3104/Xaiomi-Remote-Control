@@ -26,10 +26,37 @@ void main() {
       ),
     );
     expect(find.byType(Slider), findsOneWidget);
+    expect(find.text('Volume 50%'), findsOneWidget);
     await tester.drag(find.byType(Slider), const Offset(80, 0));
     await tester.pumpAndSettle();
     expect(selected, isNotNull);
     expect(selected!, greaterThan(5));
+  });
+
+  testWidgets('exact volume is sent during a drag', (tester) async {
+    final values = <int>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: VolumePill(
+            level: 50,
+            muted: false,
+            onButton: (_) {},
+            exactIndex: 5,
+            exactMax: 10,
+            onExactVolumeChanged: values.add,
+          ),
+        ),
+      ),
+    );
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Slider)),
+    );
+    await gesture.moveBy(const Offset(60, 0));
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(values, isNotEmpty);
+    await gesture.up();
   });
 
   testWidgets('volume pill retains label mode without exact volume', (

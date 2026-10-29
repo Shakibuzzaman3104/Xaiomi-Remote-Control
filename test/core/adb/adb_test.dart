@@ -2,6 +2,7 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -14,6 +15,77 @@ import 'package:xiaomi_remote/core/adb/adb_key.dart';
 import 'package:xiaomi_remote/core/adb/adb_message.dart';
 
 void main() {
+  test('a socket arriving after disconnect is destroyed', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final accepted = Completer<Socket>();
+    final subscription = server.listen(accepted.complete);
+    final pending = Completer<Socket>();
+    final client = AdbClient(
+      host: '127.0.0.1',
+      key: AdbKey.generate(),
+      socketConnector: (_, _, _) => pending.future,
+    );
+    final connecting = client.connect();
+    final expectation = expectLater(connecting, throwsA(isA<AdbException>()));
+    await client.disconnect();
+    final socket = await Socket.connect('127.0.0.1', server.port);
+    final peer = await accepted.future;
+    final closed = peer.drain<void>();
+    pending.complete(socket);
+    await expectation;
+    await closed.timeout(const Duration(seconds: 2));
+    peer.destroy();
+    await subscription.cancel();
+    await server.close();
+  });
+
+  test('concurrent stream writes wait for each acknowledgement', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final firstWrite = Completer<void>();
+    final writes = <String>[];
+    Socket? peer;
+    final subscription = server.listen((socket) {
+      peer = socket;
+      final decoder = AdbMessageDecoder();
+      void send(String command, int a, int b) =>
+          socket.add(AdbMessage(adbCommand(command), a, b).encode());
+      socket.listen((data) {
+        for (final message in decoder.add(data)) {
+          if (message.command == adbCommand('CNXN')) {
+            send('CNXN', 0x01000000, 262144);
+          } else if (message.command == adbCommand('OPEN')) {
+            send('OKAY', 100, message.arg0);
+          } else if (message.command == adbCommand('WRTE')) {
+            writes.add(utf8.decode(message.data));
+            if (writes.length == 1) {
+              firstWrite.complete();
+            } else {
+              send('OKAY', 100, message.arg0);
+            }
+          }
+        }
+      });
+    });
+    final client = AdbClient(host: '127.0.0.1', port: server.port, key: AdbKey.generate());
+    try {
+      await client.connect();
+      final stream = await client.openSocket('test');
+      final first = stream.write(utf8.encode('first'));
+      final second = stream.write(utf8.encode('second'));
+      await firstWrite.future;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(writes, ['first']);
+      peer!.add(AdbMessage(adbCommand('OKAY'), 100, 1).encode());
+      await Future.wait([first, second]);
+      expect(writes, ['first', 'second']);
+      stream.close();
+    } finally {
+      await client.disconnect();
+      peer?.destroy();
+      await subscription.cancel();
+      await server.close();
+    }
+  });
   test('messages survive split and coalesced chunks', () {
     final first = AdbMessage(adbCommand('WRTE'), 1, 2, [1, 2, 3]);
     final second = AdbMessage(adbCommand('OKAY'), 2, 1);
@@ -97,6 +169,39 @@ void main() {
     expect(now.positionMs, 1437);
     expect(now.state, AdbPlaybackState.playing);
     expect(AdbCommands.parseMusicVolume(audio), (12, 15));
+    expect(AdbCommands.parseMusicMuted(audio), isFalse);
+    expect(
+      AdbCommands.parseMusicMuted(
+        audio.replaceFirst('Muted: false', 'Muted: true'),
+      ),
+      isTrue,
+    );
+    expect(
+      AdbCommands.parseMusicMuted(
+        '$audio- STREAM_ALARM:\n   Muted: true\n',
+      ),
+      isFalse,
+    );
+  });
+
+  test('advances a playing position by the time since the last update', () {
+    const media = '''
+    package=com.stremio.one
+      state=PlaybackState {state=3, position=10000, buffered position=0, speed=1.0, updated=5000, actions=379, custom actions=[], active item id=-1, error=null}
+      metadata:size=2, description=Episode 1, null
+__UPTIME__ 8.5
+''';
+    final uptime = AdbCommands.parseUptimeMs(media);
+    expect(uptime, 8500);
+    final now = AdbCommands.parseNowPlaying(media, uptimeMs: uptime)!;
+    expect(now.positionMs, 13500);
+    expect(now.subtitle, '');
+    final paused = AdbCommands.parseNowPlaying(
+      media.replaceFirst('state=3', 'state=2'),
+      uptimeMs: uptime,
+    )!;
+    expect(paused.positionMs, 10000);
+    expect(paused.state, AdbPlaybackState.paused);
   });
 
   test('detects fixed music volume conservatively', () {

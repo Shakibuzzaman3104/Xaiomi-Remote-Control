@@ -23,6 +23,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.onSurfaceVariant,
     required this.muted,
     required this.progressTrack,
+    required this.inputOutline,
     required this.connected,
     required this.danger,
   });
@@ -42,6 +43,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color onSurfaceVariant;
   final Color muted;
   final Color progressTrack;
+  final Color inputOutline;
   final Color connected;
   final Color danger;
 
@@ -50,7 +52,8 @@ class AppColors extends ThemeExtension<AppColors> {
     surfaceContainer: Color(0xFFECE9F5),
     surfaceContainerStrong: Color(0xFFE4E0F0),
     okButton: Color(0xFFE4DDF7),
-    dpadOutline: Color(0xFFDFDAF1),
+    dpadOutline: Color(0xFFB3AAD3),
+    inputOutline: Color(0xFF8A80B0),
     subtleOutline: Color(0xFFECEAF8),
     appTile: Color(0xFFFBFAFE),
     primary: Color(0xFF6041B4),
@@ -59,7 +62,7 @@ class AppColors extends ThemeExtension<AppColors> {
     onSurfaceStrong: Color(0xFF050425),
     onSurface: Color(0xFF3C3654),
     onSurfaceVariant: Color(0xFF464261),
-    muted: Color(0xFF676186),
+    muted: Color(0xFF615B80),
     progressTrack: Color(0xFFDEDBED),
     connected: Color(0xFF1E8E3E),
     danger: Color(0xFFC62828),
@@ -70,11 +73,12 @@ class AppColors extends ThemeExtension<AppColors> {
     surfaceContainer: Color(0xFF201D25),
     surfaceContainerStrong: Color(0xFF292532),
     okButton: Color(0xFF332A49),
-    dpadOutline: Color(0xFF2E2B37),
+    dpadOutline: Color(0xFF565068),
+    inputOutline: Color(0xFF6D6683),
     subtleOutline: Color(0xFF2A2731),
     appTile: Color(0xFF1F1C24),
     primary: Color(0xFF6F51D6),
-    primaryText: Color(0xFF9D7BF4),
+    primaryText: Color(0xFFA78BFA),
     onPrimary: Color(0xFFFFFFFF),
     onSurfaceStrong: Color(0xFFF6F4FC),
     onSurface: Color(0xFFE6E2F2),

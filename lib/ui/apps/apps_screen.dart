@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../fade_switcher.dart';
 import '../motion.dart';
-import '../remote/widgets/device_header.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -27,12 +26,6 @@ class TvAppItem {
 class AppsScreen extends StatefulWidget {
   const AppsScreen({
     super.key,
-    required this.deviceName,
-    required this.connected,
-    required this.onSwitchDevice,
-    required this.onTvSettings,
-    required this.onAppSettings,
-    this.onPower,
     required this.onBack,
     required this.apps,
     required this.onOpen,
@@ -43,11 +36,9 @@ class AppsScreen extends StatefulWidget {
     this.loading = false,
     this.errorText,
     this.onRetry,
+    this.onRefresh,
   });
-  final String deviceName;
-  final bool connected;
-  final VoidCallback onSwitchDevice, onTvSettings, onAppSettings, onBack;
-  final VoidCallback? onPower;
+  final VoidCallback onBack;
   final List<TvAppItem> apps;
   final ValueChanged<TvAppItem> onOpen, onShowActions;
   final ValueChanged<TvAppItem>? onToggleFavourite;
@@ -56,6 +47,7 @@ class AppsScreen extends StatefulWidget {
   final bool loading;
   final String? errorText;
   final VoidCallback? onRetry;
+  final Future<void> Function()? onRefresh;
   @override
   State<AppsScreen> createState() => _AppsScreenState();
 }
@@ -125,15 +117,6 @@ class _AppsScreenState extends State<AppsScreen>
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Column(
             children: [
-              DeviceHeader(
-                name: widget.deviceName,
-                connected: widget.connected,
-                onSwitchDevice: widget.onSwitchDevice,
-                onTvSettings: widget.onTvSettings,
-                onAppSettings: widget.onAppSettings,
-                onPower: widget.onPower,
-              ),
-              const SizedBox(height: 18),
               Row(
                 children: [
                   IconButton(
@@ -202,6 +185,8 @@ class _AppsScreenState extends State<AppsScreen>
                               ),
                               child: Text(
                                 favourite ? 'Favourites' : 'All',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: _favourites == favourite
                                       ? c.onPrimary
@@ -362,6 +347,7 @@ class _AppsScreenState extends State<AppsScreen>
     return _grid(
       context,
       itemCount: 12,
+      refreshable: false,
       builder: (index, tileWidth) => Column(
         children: [
           Container(
@@ -395,6 +381,7 @@ class _AppsScreenState extends State<AppsScreen>
     BuildContext context, {
     required int itemCount,
     required Widget Function(int index, double tileWidth) builder,
+    bool refreshable = true,
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -409,7 +396,8 @@ class _AppsScreenState extends State<AppsScreen>
           maxLines: 2,
         )..layout(maxWidth: tileWidth);
         final labelHeight = labelPainter.preferredLineHeight * 2;
-        return GridView.builder(
+        final grid = GridView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: itemCount,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
@@ -419,6 +407,9 @@ class _AppsScreenState extends State<AppsScreen>
           ),
           itemBuilder: (context, index) => builder(index, tileWidth),
         );
+        final onRefresh = widget.onRefresh;
+        if (!refreshable || onRefresh == null) return grid;
+        return RefreshIndicator(onRefresh: onRefresh, child: grid);
       },
     );
   }

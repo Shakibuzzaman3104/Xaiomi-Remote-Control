@@ -11,30 +11,44 @@ import '../remote_models.dart';
 import '../../theme/app_theme.dart';
 
 class NowPlayingLine extends StatelessWidget {
-  const NowPlayingLine({super.key, required this.playing, required this.onTap});
+  const NowPlayingLine({super.key, required this.playing, this.onTap});
   final NowPlaying playing;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   String time(Duration d) {
     final s = d.inSeconds.clamp(0, 999999);
-    return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+    final seconds = (s % 60).toString().padLeft(2, '0');
+    if (s >= 3600) {
+      return '${s ~/ 3600}:${((s ~/ 60) % 60).toString().padLeft(2, '0')}:$seconds';
+    }
+    return '${s ~/ 60}:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final progress = playing.duration.inMilliseconds <= 0
-        ? 0.0
-        : (playing.position.inMilliseconds / playing.duration.inMilliseconds)
-              .clamp(0.0, 1.0);
+    final duration = playing.duration;
+    final hasDuration = duration != null && duration.inMilliseconds > 0;
+    final progress = hasDuration
+        ? (playing.position.inMilliseconds / duration.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          )
+        : 0.0;
+    final subtitle = playing.subtitle;
+    final tap = onTap;
     return Semantics(
-      label: 'Now playing, ${playing.title}',
-      button: true,
+      label:
+          '${playing.playing ? 'Playing' : 'Paused'}, ${playing.title}'
+          '${subtitle == null || subtitle.isEmpty ? '' : ', $subtitle'}',
+      button: tap != null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          AppHaptics.selection();
-          onTap();
-        },
+        onTap: tap == null
+            ? null
+            : () {
+                AppHaptics.selection();
+                tap();
+              },
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 48),
           child: Row(
@@ -44,7 +58,12 @@ class NowPlayingLine extends StatelessWidget {
                 height: 24,
                 child:
                     playing.appIcon ??
-                    Icon(Icons.play_circle_outline, color: c.primary),
+                    Icon(
+                      playing.playing
+                          ? Icons.play_circle_outline
+                          : Icons.pause_circle_outline,
+                      color: c.primary,
+                    ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -57,7 +76,7 @@ class NowPlayingLine extends StatelessWidget {
                             playing.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: context.appTextTheme.titleSmall!.copyWith(
                               color: c.onSurfaceStrong,
                               fontWeight: FontWeight.w600,
                             ),
@@ -67,26 +86,45 @@ class NowPlayingLine extends StatelessWidget {
                           time(playing.position),
                           style: context.appTextTheme.labelMedium!.copyWith(
                             color: c.primaryText,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        Text(
-                          ' / ${time(playing.duration)}',
+                        if (hasDuration)
+                          Text(
+                            ' / ${time(duration)}',
+                            style: context.appTextTheme.labelMedium!.copyWith(
+                              color: c.muted,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (subtitle != null && subtitle.isNotEmpty)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: context.appTextTheme.labelMedium!.copyWith(
                             color: c.muted,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 3,
-                        backgroundColor: c.progressTrack,
-                        color: c.primary,
                       ),
-                    ),
+                    if (hasDuration) ...[
+                      const SizedBox(height: 5),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 3,
+                          backgroundColor: c.progressTrack,
+                          color: c.primary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

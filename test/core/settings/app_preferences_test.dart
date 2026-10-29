@@ -67,6 +67,7 @@ void main() {
       'swipeSensitivity': 0.75,
       'micButton': 'typeIntoField',
       'speechLocale': 'bn_BD',
+      'remoteMode': 'dpad',
     });
   });
 }

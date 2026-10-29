@@ -31,8 +31,8 @@ class FadeSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     final scaled = !reduceMotion(context) && scale != 1;
     return AnimatedSwitcher(
-      duration: duration,
-      reverseDuration: reverseDuration,
+      duration: motion(context, duration),
+      reverseDuration: motion(context, reverseDuration),
       switchInCurve: AppMotion.easeOut,
       switchOutCurve: AppMotion.easeOut,
       layoutBuilder: (current, previous) => Stack(

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 class Trackpad extends StatefulWidget {
   const Trackpad({
@@ -15,16 +16,25 @@ class Trackpad extends StatefulWidget {
     required this.onScroll,
     required this.onClick,
     required this.onAirMouseChanged,
+    this.onLongPress,
   });
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
+  final VoidCallback? onLongPress;
   @override
   State<Trackpad> createState() => _TrackpadState();
 }
 
 class _TrackpadState extends State<Trackpad> {
   bool air = false;
+
+  @override
+  void dispose() {
+    if (air) widget.onAirMouseChanged(false);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -32,11 +42,23 @@ class _TrackpadState extends State<Trackpad> {
       children: [
         Expanded(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: Semantics(
                   label: 'Mouse trackpad',
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      AppHaptics.selection();
+                      widget.onClick(false);
+                    },
+                    onLongPress: widget.onLongPress == null
+                        ? null
+                        : () {
+                            AppHaptics.medium();
+                            widget.onLongPress!();
+                          },
                     onPanUpdate: (d) => widget.onPointerMove(d.delta),
                     child: Container(
                       decoration: BoxDecoration(
@@ -66,7 +88,7 @@ class _TrackpadState extends State<Trackpad> {
             ],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Row(
           children: [
             for (final right in [false, true])
@@ -86,7 +108,7 @@ class _TrackpadState extends State<Trackpad> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Text(right ? 'Right click' : 'Left click'),
+                    child: Text(right ? 'Back' : 'Click'),
                   ),
                 ),
               ),
@@ -94,11 +116,18 @@ class _TrackpadState extends State<Trackpad> {
         ),
         Row(
           children: [
-            Text('Air mouse', style: TextStyle(color: c.onSurfaceStrong)),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                air ? 'Point the phone at the TV and turn it' : 'Air mouse',
+                style: context.appTextTheme.bodyMedium!.copyWith(
+                  color: c.onSurfaceStrong,
+                ),
+              ),
+            ),
             Semantics(
               label: 'Air mouse',
-              child: Switch(
+              child: Switch.adaptive(
+                activeTrackColor: c.primary,
                 value: air,
                 onChanged: (v) {
                   AppHaptics.selection();

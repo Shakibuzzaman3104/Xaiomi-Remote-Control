@@ -34,7 +34,8 @@ class PairScreen extends StatefulWidget {
     required this.deviceName,
     required this.onSubmit,
     required this.onBack,
-    this.onReadAutomatically,
+    this.startError,
+    this.onRetryStart,
     this.busy = false,
     this.success = false,
   });
@@ -42,7 +43,8 @@ class PairScreen extends StatefulWidget {
   final String deviceName;
   final Future<String?> Function(String code) onSubmit;
   final VoidCallback onBack;
-  final VoidCallback? onReadAutomatically;
+  final String? startError;
+  final VoidCallback? onRetryStart;
   final bool busy;
   final bool success;
 
@@ -73,6 +75,13 @@ class _PairScreenState extends State<PairScreen>
   void _onTextChanged() {
     if (mounted) {
       setState(() {});
+      if (_controller.text.length == 6 &&
+          !widget.busy &&
+          widget.startError == null &&
+          !_submitting &&
+          !widget.success) {
+        _handlePair();
+      }
     }
   }
 
@@ -135,7 +144,11 @@ class _PairScreenState extends State<PairScreen>
       '\u00A0',
     );
     final text = _controller.text;
-    final canSubmit = text.length == 6 && !isBusy;
+    final canSubmit =
+        text.length == 6 &&
+        !isBusy &&
+        widget.startError == null &&
+        !widget.success;
 
     return Scaffold(
       backgroundColor: c.background,
@@ -173,7 +186,9 @@ class _PairScreenState extends State<PairScreen>
                               width: 48,
                               height: 48,
                               child: Icon(
-                                Icons.arrow_back_rounded,
+                                Theme.of(context).platform == TargetPlatform.iOS
+                                    ? Icons.arrow_back_ios_new
+                                    : Icons.arrow_back,
                                 color: c.onSurfaceStrong,
                                 size: 22,
                               ),
@@ -201,7 +216,9 @@ class _PairScreenState extends State<PairScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Enter the code shown on your TV.',
+                        widget.busy
+                            ? 'Connecting to ${widget.deviceName}…'
+                            : 'Enter the code shown on your TV.',
                         textAlign: TextAlign.center,
                         style: context.appTextTheme.bodyLarge!.copyWith(
                           color: c.onSurfaceVariant,
@@ -218,73 +235,86 @@ class _PairScreenState extends State<PairScreen>
                           ),
                           child: Stack(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: List.generate(6, (index) {
-                                  final isFilled = index < text.length;
-                                  final isFocusedBox =
-                                      _focusNode.hasFocus &&
-                                      (index == text.length ||
-                                          (text.length == 6 && index == 5));
-                                  final char = isFilled ? text[index] : '';
+                              ExcludeSemantics(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: List.generate(6, (index) {
+                                    final isFilled = index < text.length;
+                                    final isFocusedBox =
+                                        _focusNode.hasFocus &&
+                                        (index == text.length ||
+                                            (text.length == 6 && index == 5));
+                                    final char = isFilled ? text[index] : '';
 
-                                  return Expanded(
-                                    child: AnimatedContainer(
-                                      duration: motion(
-                                        context,
-                                        AppMotion.quick,
-                                      ),
-                                      curve: AppMotion.easeOut,
-                                      margin: EdgeInsets.only(
-                                        right: index == 5 ? 0 : 7,
-                                      ),
-                                      height: 72,
-                                      decoration: BoxDecoration(
-                                        color: c.background,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: widget.success
-                                              ? c.primary
-                                              : _error != null
-                                              ? c.danger
-                                              : isFocusedBox
-                                              ? c.primary
-                                              : c.subtleOutline,
-                                          width: isFocusedBox ? 1.5 : 1.0,
+                                    return Expanded(
+                                      child: AnimatedContainer(
+                                        duration: motion(
+                                          context,
+                                          AppMotion.quick,
                                         ),
+                                        curve: AppMotion.easeOut,
+                                        margin: EdgeInsets.only(
+                                          right: index == 5 ? 0 : 7,
+                                        ),
+                                        height: 72,
+                                        decoration: BoxDecoration(
+                                          color: c.background,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: widget.success
+                                                ? c.primary
+                                                : _error != null
+                                                ? c.danger
+                                                : isFocusedBox
+                                                ? c.primary
+                                                : c.inputOutline,
+                                            width: isFocusedBox ? 1.5 : 1.0,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: isFilled
+                                            ? _PopIn(
+                                                key: ValueKey('$index$char'),
+                                                child: Text(
+                                                  char,
+                                                  style: context
+                                                      .appTextTheme
+                                                      .headlineMedium!
+                                                      .copyWith(
+                                                        color:
+                                                            c.onSurfaceStrong,
+                                                      ),
+                                                ),
+                                              )
+                                            : (isFocusedBox &&
+                                                      index == text.length
+                                                  ? Container(
+                                                      width: 2,
+                                                      height: 24,
+                                                      color: c.primary,
+                                                    )
+                                                  : const SizedBox.shrink()),
                                       ),
-                                      alignment: Alignment.center,
-                                      child: isFilled
-                                          ? _PopIn(
-                                              key: ValueKey('$index$char'),
-                                              child: Text(
-                                                char,
-                                                style: context
-                                                    .appTextTheme
-                                                    .headlineMedium!
-                                                    .copyWith(
-                                                      color: c.onSurfaceStrong,
-                                                    ),
-                                              ),
-                                            )
-                                          : (isFocusedBox &&
-                                                    index == text.length
-                                                ? Container(
-                                                    width: 2,
-                                                    height: 24,
-                                                    color: c.primary,
-                                                  )
-                                                : const SizedBox.shrink()),
-                                    ),
-                                  );
-                                }),
+                                    );
+                                  }),
+                                ),
                               ),
                               Positioned.fill(
                                 child: Opacity(
                                   opacity: 0.0,
+                                  alwaysIncludeSemantics: true,
                                   child: TextField(
                                     controller: _controller,
+                                    enabled:
+                                        !widget.busy &&
+                                        widget.startError == null &&
+                                        !widget.success,
+                                    decoration: const InputDecoration(
+                                      labelText: '6-digit pairing code',
+                                    ),
                                     focusNode: _focusNode,
                                     autofocus: true,
                                     keyboardType: TextInputType.text,
@@ -310,12 +340,12 @@ class _PairScreenState extends State<PairScreen>
                           ),
                         ),
                       ),
-                      if (_error != null) ...[
+                      if (_error != null || widget.startError != null) ...[
                         const SizedBox(height: 12),
                         Semantics(
                           liveRegion: true,
                           child: Text(
-                            _error!,
+                            widget.startError ?? _error!,
                             textAlign: TextAlign.center,
                             style: context.appTextTheme.labelLarge!.copyWith(
                               color: c.danger,
@@ -323,12 +353,26 @@ class _PairScreenState extends State<PairScreen>
                           ),
                         ),
                       ],
+                      if (widget.startError != null ||
+                          _error == 'The code expired. Get a new one.')
+                        TextButton(
+                          onPressed: () {
+                            _controller.clear();
+                            setState(() => _error = null);
+                            widget.onRetryStart?.call();
+                          },
+                          child: Text(
+                            widget.startError != null
+                                ? 'Try again'
+                                : 'Get a new code',
+                          ),
+                        ),
                       const SizedBox(height: 40),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: c.surfaceContainer,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(AppShapes.card),
                         ),
                         child: Row(
                           children: [
@@ -368,14 +412,14 @@ class _PairScreenState extends State<PairScreen>
                   label: 'Pair',
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 52),
-                    child: ElevatedButton(
+                    child: FilledButton(
                       onPressed: canSubmit
                           ? () {
                               AppHaptics.selection();
                               _handlePair();
                             }
                           : null,
-                      style: ElevatedButton.styleFrom(
+                      style: FilledButton.styleFrom(
                         backgroundColor: c.primary,
                         foregroundColor: c.onPrimary,
                         disabledBackgroundColor: widget.success
@@ -383,8 +427,7 @@ class _PairScreenState extends State<PairScreen>
                             : c.surfaceContainerStrong,
                         disabledForegroundColor: widget.success
                             ? c.onPrimary
-                            : c.muted,
-                        elevation: 0,
+                            : c.onSurfaceVariant,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppShapes.pill),
                         ),
@@ -411,44 +454,7 @@ class _PairScreenState extends State<PairScreen>
                   ),
                 ),
               ),
-              if (widget.onReadAutomatically != null) ...[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: 48,
-                        minWidth: 48,
-                      ),
-                      child: TextButton(
-                        onPressed: () {
-                          AppHaptics.selection();
-                          widget.onReadAutomatically!();
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: c.primaryText,
-                          minimumSize: const Size(48, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppShapes.card),
-                          ),
-                        ),
-                        child: Semantics(
-                          button: true,
-                          label: 'Read code automatically (needs full control)',
-                          child: Text(
-                            'Read code automatically (needs full control)',
-                            textAlign: TextAlign.center,
-                            style: context.appTextTheme.labelLarge!.copyWith(
-                              color: c.primaryText,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ] else
-                const SizedBox(height: 12),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -495,7 +501,7 @@ class _CheckMarkState extends State<_CheckMark>
     if (_controller.value == 0 && !_controller.isAnimating) {
       _controller.animateTo(
         1,
-        duration: motion(context, const Duration(milliseconds: 380)),
+        duration: motion(context, AppMotion.standard),
         curve: AppMotion.easeOut,
       );
     }

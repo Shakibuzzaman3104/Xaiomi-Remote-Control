@@ -10,6 +10,33 @@ import 'package:xiaomi_remote/ui/remote/widgets/dpad.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 
 void main() {
+  testWidgets('OK sends a tap or a long down and up', (tester) async {
+    final events = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Center(
+          child: SizedBox(
+            width: 200,
+            child: Dpad(
+              onButton: (button) => events.add('tap:$button'),
+              onButtonDown: (button) => events.add('down:$button'),
+              onButtonUp: (button) => events.add('up:$button'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final center = tester.getCenter(find.byType(Dpad));
+    await tester.tapAt(center);
+    expect(events, ['tap:${RemoteButton.ok}']);
+    events.clear();
+    final gesture = await tester.startGesture(center);
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(events, ['down:${RemoteButton.ok}']);
+    await gesture.up();
+    expect(events, ['down:${RemoteButton.ok}', 'up:${RemoteButton.ok}']);
+  });
   testWidgets('overlapping dpad pointers do not leak repeats', (tester) async {
     final buttons = <RemoteButton>[];
     await tester.pumpWidget(
@@ -109,6 +136,7 @@ void main() {
           deviceName: 'TV',
           connected: connected,
           reconnecting: !connected,
+          attempt: connected ? 0 : 2,
           muted: false,
         ),
         onButton: buttons.add,
@@ -151,7 +179,7 @@ void main() {
       buttons.where((b) => b == RemoteButton.up).length,
       greaterThan(count + 1),
     );
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pump();
     expect(buttons.last, RemoteButton.back);
     await tester.tap(find.byIcon(Icons.add));
@@ -180,5 +208,39 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pump();
     expect(buttons.length, before);
+  });
+  testWidgets('connecting suppresses banner until the second attempt', (
+    tester,
+  ) async {
+    Widget screen(int attempt) => MaterialApp(
+      theme: AppTheme.light,
+      home: RemoteScreen(
+        state: RemoteViewState(
+          deviceName: 'TV',
+          connected: false,
+          reconnecting: true,
+          muted: false,
+          attempt: attempt,
+        ),
+        onButton: (_) {},
+        onSwitchDevice: () {},
+        onApps: () {},
+        onKeyboard: () {},
+        onVoice: () {},
+        onRetry: () {},
+        onAppSettings: () {},
+        onPointerMove: (_) {},
+        onScroll: (_) {},
+        onClick: (_) {},
+        onAirMouseChanged: (_) {},
+      ),
+    );
+    await tester.pumpWidget(screen(0));
+    expect(find.textContaining('TV is asleep'), findsNothing);
+    await tester.pumpWidget(screen(1));
+    expect(find.textContaining('TV is asleep'), findsNothing);
+    await tester.pumpWidget(screen(2));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('TV is asleep'), findsOneWidget);
   });
 }

@@ -24,10 +24,13 @@ class RoundActionButton extends StatefulWidget {
     this.showLabel = true,
     this.repeat = false,
     this.strong = false,
+    this.onLongDown,
+    this.onLongUp,
   });
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
+  final VoidCallback? onLongDown, onLongUp;
   final double size;
   final bool selected, showLabel, repeat, strong;
   @override
@@ -37,11 +40,18 @@ class RoundActionButton extends StatefulWidget {
 class _RoundActionButtonState extends State<RoundActionButton> {
   Timer? timer;
   bool pressed = false;
+  bool longPressed = false;
   void start() {
     AppHaptics.selection();
-    widget.onPressed();
+    if (widget.onLongDown == null) widget.onPressed();
     setState(() => pressed = true);
-    if (widget.repeat) {
+    if (widget.onLongDown != null && widget.onLongUp != null) {
+      timer = Timer(const Duration(milliseconds: 450), () {
+        longPressed = true;
+        AppHaptics.selection();
+        widget.onLongDown!();
+      });
+    } else if (widget.repeat) {
       timer = Timer(const Duration(milliseconds: 350), () {
         widget.onPressed();
         timer = Timer.periodic(
@@ -52,7 +62,15 @@ class _RoundActionButtonState extends State<RoundActionButton> {
     }
   }
 
-  void stop() {
+  void stop({bool cancel = false}) {
+    if (pressed && widget.onLongDown != null) {
+      if (longPressed) {
+        widget.onLongUp?.call();
+      } else if (!cancel) {
+        widget.onPressed();
+      }
+    }
+    longPressed = false;
     timer?.cancel();
     timer = null;
     if (pressed && mounted) setState(() => pressed = false);
@@ -61,6 +79,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
   @override
   void dispose() {
     timer?.cancel();
+    if (longPressed) widget.onLongUp?.call();
     super.dispose();
   }
 
@@ -79,7 +98,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
           behavior: HitTestBehavior.opaque,
           onTapDown: (_) => start(),
           onTapUp: (_) => stop(),
-          onTapCancel: stop,
+          onTapCancel: () => stop(cancel: true),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -116,7 +135,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
                 ),
               ),
               if (widget.showLabel) ...[
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 FadeSwitcher(
                   scale: 1,
                   duration: AppMotion.quick,

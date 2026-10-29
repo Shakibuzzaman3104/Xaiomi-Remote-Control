@@ -53,12 +53,14 @@ class DeviceHeader extends StatelessWidget {
                     Row(
                       children: [
                         Flexible(
-                          child: Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.appTextTheme.titleSmall!.copyWith(
-                              color: c.onSurfaceStrong,
+                          child: ExcludeSemantics(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.appTextTheme.titleSmall!.copyWith(
+                                color: c.onSurfaceStrong,
+                              ),
                             ),
                           ),
                         ),

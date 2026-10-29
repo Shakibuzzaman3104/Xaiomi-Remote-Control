@@ -31,14 +31,29 @@ class _AdbStream {
   int? remoteId;
   final opened = Completer<void>();
   Completer<void>? ack;
+  Future<void> writes = Future.value();
   final data = StreamController<List<int>>();
 }
 
+/// A two-way stream to a device service, such as `localabstract:<name>`.
+class AdbSocket {
+  AdbSocket._(this._client, this._stream);
+  final AdbClient _client;
+  final _AdbStream _stream;
+
+  Stream<List<int>> get input => _stream.data.stream;
+
+  Future<void> write(List<int> bytes) => _client._write(_stream, bytes);
+
+  void close() => _client._close(_stream);
+}
+
 class AdbClient {
-  AdbClient({required this.host, this.port = 5555, required this.key});
+  AdbClient({required this.host, this.port = 5555, required this.key, this.socketConnector});
   final String host;
   final int port;
   final AdbKey key;
+  final Future<Socket> Function(String host, int port, Duration timeout)? socketConnector;
   final _states = StreamController<AdbConnectionState>.broadcast();
   Stream<AdbConnectionState> get states => _states.stream;
   String? deviceModel;
@@ -51,6 +66,7 @@ class AdbClient {
   bool _connected = false;
   bool _closing = false;
   bool _offerPublicKey = true;
+  int _generation = 0;
 
   void _state(AdbConnectionState state) => _states.add(state);
   void _send(String command, int a, int b, [List<int> data = const []]) {
@@ -72,12 +88,19 @@ class AdbClient {
     deviceModel = null;
     _state(AdbConnectionState.connecting);
     _handshake = Completer<void>();
-    _handshake!.future.ignore();
+    final handshake = _handshake!;
+    final generation = ++_generation;
+    handshake.future.ignore();
+    Socket? socket;
     try {
-      _socket = await Socket.connect(host, port, timeout: authTimeout);
+      socket = await (socketConnector?.call(host, port, authTimeout) ??
+          Socket.connect(host, port, timeout: authTimeout));
+      if (generation != _generation) throw AdbException('Disconnected');
+      _socket = socket;
       final decoder = AdbMessageDecoder();
       _socket!.listen(
         (bytes) {
+          if (generation != _generation) return;
           try {
             for (final message in decoder.add(bytes)) {
               _receive(message);
@@ -86,22 +109,28 @@ class AdbClient {
             _fail(AdbException('Invalid ADB response: $e'));
           }
         },
-        onError: (Object e) => _fail(AdbException('Socket error: $e')),
-        onDone: () => _fail(AdbException('Socket closed')),
+        onError: (Object e) {
+          if (generation == _generation) _fail(AdbException('Socket error: $e'));
+        },
+        onDone: () {
+          if (generation == _generation) _fail(AdbException('Socket closed'));
+        },
       );
       _send('CNXN', 0x01000000, 256 * 1024, utf8.encode('host::\u0000'));
-      await _handshake!.future.timeout(authTimeout);
+      await handshake.future.timeout(authTimeout);
+      if (generation != _generation) throw AdbException('Disconnected');
     } on TimeoutException {
-      _fail(AdbException('Connection timed out'));
+      if (generation == _generation) _fail(AdbException('Connection timed out'));
       throw AdbException('Connection timed out');
     } catch (e) {
       final error = e is AdbException
           ? e
           : AdbException('Connection failed: $e');
-      _fail(error);
+      if (generation == _generation) _fail(error);
       throw error;
     } finally {
-      _handshake = null;
+      if (generation != _generation || !_connected) socket?.destroy();
+      if (identical(_handshake, handshake)) _handshake = null;
     }
   }
 
@@ -152,6 +181,9 @@ class AdbClient {
       stream.data.add(m.data);
       _send('OKAY', stream.id, m.arg0);
     } else if (m.command == adbCommand('CLSE')) {
+      if (stream.remoteId != null && stream.remoteId != m.arg0) {
+        throw AdbException('Invalid stream ID');
+      }
       if (!stream.opened.isCompleted) {
         stream.opened.completeError(AdbException('Stream closed before OKAY'));
       }
@@ -173,6 +205,7 @@ class AdbClient {
     if (_handshake != null && !_handshake!.isCompleted) {
       _handshake!.completeError(error);
     }
+    _handshake = null;
     for (final stream in _streams.values) {
       if (!stream.opened.isCompleted) {
         stream.opened.completeError(error);
@@ -203,12 +236,25 @@ class AdbClient {
 
   void _close(_AdbStream stream) {
     if (_streams.remove(stream.id) == null) return;
+    final error = AdbException('Stream closed');
+    if (!stream.opened.isCompleted) stream.opened.completeError(error);
+    if (stream.ack != null && !stream.ack!.isCompleted) {
+      stream.ack!.completeError(error);
+    }
     if (_socket != null) _send('CLSE', stream.id, stream.remoteId ?? 0);
     stream.data.close();
   }
 
-  Future<void> _write(_AdbStream stream, List<int> bytes) async {
+  Future<void> _write(_AdbStream stream, List<int> bytes) {
+    final result = stream.writes.then((_) => _writeNow(stream, bytes));
+    stream.writes = result.then((_) {}, onError: (Object _) {});
+    return result;
+  }
+
+  Future<void> _writeNow(_AdbStream stream, List<int> bytes) async {
+    if (!_streams.containsKey(stream.id)) throw AdbException('Stream closed');
     for (var offset = 0; offset < bytes.length; offset += _maxData) {
+      if (!_streams.containsKey(stream.id)) throw AdbException('Stream closed');
       stream.ack = Completer<void>();
       _send(
         'WRTE',
@@ -219,6 +265,7 @@ class AdbClient {
       try {
         await stream.ack!.future.timeout(const Duration(seconds: 15));
       } on TimeoutException {
+        _close(stream);
         throw AdbException('Stream write timed out');
       } finally {
         stream.ack = null;
@@ -234,6 +281,9 @@ class AdbClient {
       _close(stream);
     }
   }
+
+  Future<AdbSocket> openSocket(String service) async =>
+      AdbSocket._(this, await _open(service));
 
   Stream<List<int>> shellStream(String command) =>
       _readService('shell:$command');
@@ -379,12 +429,14 @@ class AdbClient {
   }
 
   Future<void> disconnect() async {
+    ++_generation;
     _closing = true;
     _connected = false;
     final error = AdbException('Disconnected');
     if (_handshake != null && !_handshake!.isCompleted) {
       _handshake!.completeError(error);
     }
+    _handshake = null;
     for (final stream in _streams.values) {
       if (!stream.opened.isCompleted) stream.opened.completeError(error);
       if (stream.ack != null && !stream.ack!.isCompleted) {

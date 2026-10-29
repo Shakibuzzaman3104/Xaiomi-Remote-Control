@@ -22,7 +22,15 @@ class FrameDecoder {
   final List<int> _buffer = [];
 
   List<Uint8List> add(List<int> chunk) {
-    _buffer.addAll(chunk);
+    final messages = <Uint8List>[];
+    for (final byte in chunk) {
+      _buffer.add(byte);
+      messages.addAll(_decode());
+    }
+    return messages;
+  }
+
+  List<Uint8List> _decode() {
     final messages = <Uint8List>[];
     while (_buffer.isNotEmpty) {
       var length = 0;
@@ -44,6 +52,10 @@ class FrameDecoder {
           _buffer.clear();
           throw const FormatException('Invalid frame length');
         }
+      }
+      if (length > 65536) {
+        _buffer.clear();
+        throw const FormatException('Frame exceeds 64 KiB');
       }
       if (!complete || _buffer.length - pos < length) break;
       messages.add(Uint8List.fromList(_buffer.sublist(pos, pos + length)));

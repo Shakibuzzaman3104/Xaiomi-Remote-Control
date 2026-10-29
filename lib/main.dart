@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/session/providers.dart';
+import 'core/discovery/tv_discovery.dart';
 import 'ui/fade_switcher.dart';
 import 'ui/onboarding/onboarding_flow.dart';
 import 'ui/onboarding/unlock_page.dart';
 import 'ui/remote/remote_home.dart';
 import 'ui/settings/preferences_sync.dart';
 import 'ui/settings/settings_screen.dart';
+import 'ui/sheets/tv_switcher_sheet.dart';
+import 'ui/theme/app_colors.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/theme_mode_provider.dart';
 
@@ -34,24 +37,45 @@ class XiaomiRemoteApp extends ConsumerWidget {
 }
 
 /// Shows onboarding until a TV is paired, then the Remote.
-class AppRoot extends ConsumerWidget {
+class AppRoot extends ConsumerStatefulWidget {
   const AppRoot({super.key});
 
-  void _openAddTv(BuildContext context) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (routeContext) => Consumer(
-        builder: (_, ref, child) {
-          ref.listen(activeTvProvider, (previous, next) {
-            if (next != null && next.id != previous?.id) {
-              Navigator.of(routeContext).popUntil((route) => route.isFirst);
-            }
-          });
-          return child!;
+  @override
+  ConsumerState<AppRoot> createState() => _AppRootState();
+}
+
+class _AppRootState extends ConsumerState<AppRoot> {
+  bool _firstRunInProgress = false;
+
+  void _openAddTv(BuildContext context, {DiscoveredTv? initialTv}) =>
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (routeContext) => OnboardingFlow(
+            initialTv: initialTv,
+            onCancel: () => Navigator.of(routeContext).pop(),
+            onFinished: () =>
+                Navigator.of(routeContext).popUntil((route) => route.isFirst),
+          ),
+        ),
+      );
+
+  void _openSwitcher(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: context.colors.surfaceContainer,
+      builder: (sheetContext) => TvSwitcherSheet(
+        onAddTv: () {
+          Navigator.of(sheetContext).pop();
+          _openAddTv(context);
         },
-        child: const OnboardingFlow(),
+        onSettings: () {
+          Navigator.of(sheetContext).pop();
+          _openSettings(context);
+        },
       ),
-    ),
-  );
+    );
+  }
 
   void _openSettings(BuildContext context) => Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -65,7 +89,7 @@ class AppRoot extends ConsumerWidget {
   );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final paired = ref.watch(pairedTvsProvider);
     final Widget screen;
     if (paired.isLoading && !paired.hasValue) {
@@ -73,14 +97,30 @@ class AppRoot extends ConsumerWidget {
         key: ValueKey('loading'),
         body: Center(child: CircularProgressIndicator()),
       );
-    } else if (ref.watch(activeTvProvider) == null) {
-      screen = const OnboardingFlow(key: ValueKey('onboarding'));
+    } else if (ref.watch(activeTvProvider) == null || _firstRunInProgress) {
+      _firstRunInProgress = true;
+      screen = OnboardingFlow(
+        key: const ValueKey('onboarding'),
+        onFinished: () => setState(() => _firstRunInProgress = false),
+      );
     } else {
       screen = RemoteHome(
         key: const ValueKey('remote'),
-        onAddTv: () => _openSettings(context),
+        onAddTv: () => _openSwitcher(context),
         onAppSettings: () => _openSettings(context),
-        onPairAgain: () => _openAddTv(context),
+        onPairAgain: () {
+          final tv = ref.read(activeTvProvider);
+          if (tv != null) {
+            _openAddTv(
+              context,
+              initialTv: DiscoveredTv(
+                name: tv.name,
+                host: tv.host,
+                model: tv.model,
+              ),
+            );
+          }
+        },
       );
     }
     return FadeSwitcher(scale: 1, expand: true, child: screen);

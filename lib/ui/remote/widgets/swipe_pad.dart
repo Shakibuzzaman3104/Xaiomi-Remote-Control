@@ -12,10 +12,17 @@ import '../../theme/app_colors.dart';
 import '../remote_models.dart';
 
 class SwipePad extends StatefulWidget {
-  const SwipePad({super.key, required this.onButton, this.sensitivity = 0.5});
+  const SwipePad({
+    super.key,
+    required this.onButton,
+    this.sensitivity = 0.5,
+    this.onButtonDown,
+    this.onButtonUp,
+  });
 
   final ValueChanged<RemoteButton> onButton;
   final double sensitivity;
+  final ValueChanged<RemoteButton>? onButtonDown, onButtonUp;
 
   @override
   State<SwipePad> createState() => _SwipePadState();
@@ -28,7 +35,7 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
   int maxPointers = 0;
   bool moved = false;
   Timer? timer;
-  RemoteButton? direction;
+  bool longPressed = false;
   RemoteButton? flashDirection;
   final touch = ValueNotifier<Offset?>(null);
   late final contact = AnimationController(vsync: this);
@@ -50,13 +57,24 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
       duration: motion(context, AppMotion.pressIn),
       curve: AppMotion.easeOut,
     );
+    if (points.length == 1 &&
+        widget.onButtonDown != null &&
+        widget.onButtonUp != null) {
+      timer = Timer(const Duration(milliseconds: 450), () {
+        if (!moved && points.length == 1) {
+          longPressed = true;
+          AppHaptics.selection();
+          widget.onButtonDown!(RemoteButton.ok);
+        }
+      });
+    }
     if (points.length > 1) {
       timer?.cancel();
       timer = null;
     }
   }
 
-  double get threshold => 32 - 16 * widget.sensitivity.clamp(0.0, 1.0);
+  double get threshold => 52 - 16 * widget.sensitivity.clamp(0.0, 1.0);
 
   void move(PointerMoveEvent event) {
     points[event.pointer] = event.localPosition;
@@ -69,22 +87,25 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
       }
       return;
     }
-    if (origin == null || direction != null) return;
-    final delta = event.localPosition - origin!;
-    if (delta.distance < threshold) return;
-    moved = true;
-    direction = delta.dx.abs() > delta.dy.abs()
-        ? (delta.dx < 0 ? RemoteButton.left : RemoteButton.right)
-        : (delta.dy < 0 ? RemoteButton.up : RemoteButton.down);
-    emit(direction!);
-    flashDirection = direction;
-    flash.forward(from: 0);
-    timer = Timer(const Duration(milliseconds: 350), () {
-      timer = Timer.periodic(
-        const Duration(milliseconds: 120),
-        (_) => widget.onButton(direction!),
-      );
-    });
+    if (origin == null || longPressed) return;
+    var delta = event.localPosition - origin!;
+    while (delta.distance >= threshold) {
+      moved = true;
+      timer?.cancel();
+      final horizontal = delta.dx.abs() > delta.dy.abs();
+      final direction = horizontal
+          ? (delta.dx < 0 ? RemoteButton.left : RemoteButton.right)
+          : (delta.dy < 0 ? RemoteButton.up : RemoteButton.down);
+      origin =
+          origin! +
+          (horizontal
+              ? Offset(delta.dx.sign * threshold, 0)
+              : Offset(0, delta.dy.sign * threshold));
+      delta = event.localPosition - origin!;
+      emit(direction);
+      flashDirection = direction;
+      flash.forward(from: 0);
+    }
   }
 
   void up(PointerEvent event, {bool cancel = false}) {
@@ -101,16 +122,21 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
       curve: AppMotion.easeOut,
     );
     timer?.cancel();
-    if (!moved) emit(maxPointers >= 2 ? RemoteButton.back : RemoteButton.ok);
+    if (longPressed) {
+      widget.onButtonUp?.call(RemoteButton.ok);
+    } else if (!moved) {
+      emit(maxPointers >= 2 ? RemoteButton.back : RemoteButton.ok);
+    }
+    longPressed = false;
     origin = null;
     maxPointers = 0;
     moved = false;
-    direction = null;
   }
 
   @override
   void dispose() {
     timer?.cancel();
+    if (longPressed) widget.onButtonUp?.call(RemoteButton.ok);
     touch.dispose();
     contact.dispose();
     flash.dispose();

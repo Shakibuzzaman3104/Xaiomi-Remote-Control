@@ -5,7 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xiaomi_remote/core/discovery/tv_discovery.dart';
+import 'package:xiaomi_remote/core/session/pairing_flow.dart';
 import 'package:xiaomi_remote/core/session/providers.dart';
+import 'package:xiaomi_remote/core/storage/paired_tv_store.dart';
 import 'package:xiaomi_remote/ui/onboarding/discover_screen.dart';
 import 'package:xiaomi_remote/ui/onboarding/onboarding_flow.dart';
 import 'package:xiaomi_remote/ui/onboarding/pair_screen.dart';
@@ -14,8 +17,74 @@ import 'package:xiaomi_remote/ui/onboarding/unlock_screen.dart';
 import 'package:xiaomi_remote/ui/sheets/keyboard_sheet.dart';
 import 'package:xiaomi_remote/ui/sheets/voice_sheet.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
+import 'package:xiaomi_remote/ui/theme/theme_mode_provider.dart';
+
+class _MemoryStore implements KeyValueStore {
+  final values = <String, String>{};
+  @override
+  Future<String?> read(String key) async => values[key];
+  @override
+  Future<void> write(String key, String value) async => values[key] = value;
+  @override
+  Future<void> delete(String key) async => values.remove(key);
+}
+
+class _Pairing extends PairingFlow {
+  _Pairing(PairedTvStore store) : super(store: store);
+  @override
+  Future<void> begin(DiscoveredTv tv) async {}
+  @override
+  Future<PairedTv> complete(String code) async => PairedTv(
+    id: 'tv',
+    name: 'Living room',
+    host: '192.168.1.2',
+    certPem: 'cert',
+    privateKeyPem: 'key',
+    pairedAt: DateTime(2026),
+  );
+  @override
+  Future<void> cancel() async {}
+}
 
 void main() {
+  testWidgets('Pairing shows Full control and Skip finishes onboarding', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 780));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final store = PairedTvStore(_MemoryStore());
+    var finished = false;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          pairedTvStoreProvider.overrideWithValue(store),
+          keyValueStoreProvider.overrideWithValue(_MemoryStore()),
+          pairingFlowProvider.overrideWithValue(_Pairing(store)),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: OnboardingFlow(
+            initialTv: const DiscoveredTv(
+              name: 'Living room',
+              host: '192.168.1.2',
+            ),
+            onFinished: () => finished = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.enterText(find.byType(TextField), '123456');
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Unlock Full control'), findsOneWidget);
+    expect(finished, isFalse);
+    await tester.tap(find.text('Skip for now'));
+    expect(finished, isTrue);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
   testWidgets('Discovery times out and can retry', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 780));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -178,7 +247,6 @@ void main() {
       String? submittedCode;
       var returnError = false;
       var backTapped = false;
-      var readAutoTapped = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -192,7 +260,6 @@ void main() {
                 return null;
               },
               onBack: () => backTapped = true,
-              onReadAutomatically: () => readAutoTapped = true,
             ),
           ),
         ),
@@ -221,16 +288,12 @@ void main() {
       expect(find.text('9'), findsOneWidget);
       expect(find.text('E'), findsOneWidget);
 
-      // Tap Pair button
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Pair'));
-      await tester.pump();
+      // The sixth character submits automatically.
       expect(submittedCode, equals('A72A9E'));
 
       // Test error returned from onSubmit
       returnError = true;
       await tester.enterText(find.byType(TextField), '123456');
-      await tester.pump();
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Pair'));
       await tester.pump();
 
       expect(find.text('Wrong code'), findsOneWidget);
@@ -238,16 +301,11 @@ void main() {
         expect(find.text(digit), findsNothing);
       }
 
-      // Test back and read automatically buttons
+      // Test back
       await tester.tap(find.bySemanticsLabel('Back'));
       await tester.pump();
       expect(backTapped, isTrue);
 
-      await tester.tap(
-        find.text('Read code automatically (needs full control)'),
-      );
-      await tester.pump();
-      expect(readAutoTapped, isTrue);
       expect(tester.takeException(), isNull);
     },
   );
@@ -277,17 +335,17 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Unlock full control'), findsOneWidget);
+    expect(find.text('Unlock Full control'), findsOneWidget);
     expect(
       find.text('Click Build 7 times to become a developer'),
       findsOneWidget,
     );
     expect(find.text('Full control: not connected'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Connect'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Connect'), findsOneWidget);
     expect(find.text('Skip for now'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Connect'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Connect'));
     await tester.pump();
     expect(connectTapped, isTrue);
 
@@ -311,7 +369,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.widgetWithText(ElevatedButton, 'Continue'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Continue'), findsOneWidget);
     expect(find.text('Full control: connected'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -363,7 +421,6 @@ void main() {
     expect(clearTapped, isTrue);
     expect(currentText, equals(''));
 
-    expect(find.text('EN / বাংলা'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

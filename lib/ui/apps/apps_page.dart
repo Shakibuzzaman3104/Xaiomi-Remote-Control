@@ -8,8 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/adb/full_control.dart';
 import '../../core/session/app_links.dart';
 import '../../core/session/providers.dart';
-import '../../core/session/remote_button.dart';
-import '../../core/session/tv_session.dart';
 import '../../core/settings/favourites.dart';
 import '../haptics.dart';
 import '../motion.dart';
@@ -18,41 +16,74 @@ import 'app_actions_sheet.dart';
 import 'apps_screen.dart';
 
 class AppsPage extends ConsumerStatefulWidget {
-  const AppsPage({
-    super.key,
-    required this.onAppSettings,
-    required this.onSwitchDevice,
-  });
-  final VoidCallback onAppSettings;
-  final VoidCallback onSwitchDevice;
+  const AppsPage({super.key});
 
   @override
   ConsumerState<AppsPage> createState() => _AppsPageState();
 }
 
 class _AppsPageState extends ConsumerState<AppsPage> {
-  void _showError(Object error) {
+  void _toast(String message, {SnackBarAction? action}) {
     if (!mounted) return;
-    final message = error.toString().replaceFirst('AdbException: ', '');
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message), action: action));
   }
 
-  Future<void> _run(Future<void> Function() action) async {
+  void _openFullControlSetup() {
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const UnlockPage()));
+  }
+
+  Future<void> _showError(
+    Object error, {
+    TvAppItem? app,
+    _AppAction action = _AppAction.other,
+  }) async {
+    final raw = error.toString().toLowerCase();
+    if (action == _AppAction.uninstall &&
+        (raw.contains('delete_failed') || raw.contains('system app'))) {
+      _toast(
+        "Can't uninstall ${app?.label ?? 'this app'}. It came with the TV.",
+      );
+      return;
+    }
+    if (action == _AppAction.clearCache && app != null) {
+      _toast(
+        "Couldn't clear the cache. Opening ${app.label} info on the TV instead.",
+      );
+      try {
+        await ref.read(fullControlProvider.notifier).openAppInfo(app.package);
+      } catch (_) {}
+      return;
+    }
+    _toast("That didn't work. Try again.");
+  }
+
+  Future<void> _run(
+    Future<void> Function() action, {
+    TvAppItem? app,
+    _AppAction kind = _AppAction.other,
+    String? done,
+  }) async {
     try {
       await action();
+      if (done != null) _toast(done);
     } catch (error) {
-      _showError(error);
+      await _showError(error, app: app, action: kind);
     }
   }
 
   Future<void> _open(TvAppItem app) async {
     if (ref.read(fullControlProvider).status == FullControlStatus.connected) {
+      _toast('Opening ${app.label}…');
       try {
         await ref.read(fullControlProvider.notifier).launch(app.package);
         if (mounted) Navigator.of(context).pop();
       } catch (error) {
-        _showError(error);
+        await _showError(error);
       }
       return;
     }
@@ -61,12 +92,18 @@ class _AppsPageState extends ConsumerState<AppsPage> {
         .firstOrNull;
     final link = known?.webLink;
     if (link == null) {
-      _showError('Turn on full control to open ${app.label}');
+      _toast(
+        'Turn on Full control to open ${app.label}',
+        action: SnackBarAction(
+          label: 'Set up',
+          onPressed: _openFullControlSetup,
+        ),
+      );
       return;
     }
     final session = ref.read(tvSessionProvider);
     if (session == null || !session.isConnected) {
-      _showError('The TV is not connected');
+      _toast('The TV is not connected');
       return;
     }
     session.launchLink(link);
@@ -99,6 +136,9 @@ class _AppsPageState extends ConsumerState<AppsPage> {
     if (confirmed == true && mounted) {
       await _run(
         () => ref.read(fullControlProvider.notifier).uninstall(app.package),
+        app: app,
+        kind: _AppAction.uninstall,
+        done: 'Uninstalled ${app.label}',
       );
     }
   }
@@ -121,10 +161,13 @@ class _AppsPageState extends ConsumerState<AppsPage> {
           fullControl: connected,
           onOpen: () => closeAndRun(() => _open(app)),
           onToggleFavourite: () => closeAndRun(() => _toggle(app.package)),
+          onNeedFullControl: () => closeAndRun(_openFullControlSetup),
           onForceStop: () => closeAndRun(
             () => _run(
               () =>
                   ref.read(fullControlProvider.notifier).forceStop(app.package),
+              app: app,
+              done: 'Stopped ${app.label}',
             ),
           ),
           onClearCache: () => closeAndRun(
@@ -132,6 +175,9 @@ class _AppsPageState extends ConsumerState<AppsPage> {
               () => ref
                   .read(fullControlProvider.notifier)
                   .clearCache(app.package),
+              app: app,
+              kind: _AppAction.clearCache,
+              done: 'Cleared cache for ${app.label}',
             ),
           ),
           onAppInfo: () => closeAndRun(
@@ -169,12 +215,6 @@ class _AppsPageState extends ConsumerState<AppsPage> {
     final control = ref.watch(fullControlProvider);
     final favourites = ref.watch(favouritesProvider);
     final connected = control.status == FullControlStatus.connected;
-    final session = ref.watch(tvSessionProvider);
-    final sessionStatus = ref
-        .watch(tvSessionStateProvider)
-        .asData
-        ?.value
-        .status;
     final apps = connected
         ? [
             for (final app in control.apps)
@@ -199,28 +239,23 @@ class _AppsPageState extends ConsumerState<AppsPage> {
               ),
           ];
     return AppsScreen(
-      deviceName: ref.watch(activeTvProvider)?.name ?? 'No TV',
-      connected: sessionStatus == SessionStatus.connected,
-      onSwitchDevice: widget.onSwitchDevice,
-      onAppSettings: widget.onAppSettings,
-      onPower: () => session?.press(RemoteButton.power),
-      onTvSettings: () => session?.press(RemoteButton.settings),
       onBack: () => Navigator.of(context).pop(),
       apps: apps,
       onOpen: _open,
       onShowActions: _showActions,
       onToggleFavourite: (app) => _toggle(app.package),
-      onNoticeTap: connected
-          ? null
-          : () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute<void>(builder: (_) => const UnlockPage())),
+      onNoticeTap: connected ? null : _openFullControlSetup,
       notice: !connected
-          ? 'Turn on full control to see every app on your TV.'
+          ? 'Turn on Full control to see every app on your TV.'
           : null,
       loading: control.appsLoading,
       errorText: connected ? control.error : null,
       onRetry: () => ref.read(fullControlProvider.notifier).loadApps(),
+      onRefresh: connected
+          ? () => ref.read(fullControlProvider.notifier).loadApps()
+          : null,
     );
   }
 }
+
+enum _AppAction { other, clearCache, uninstall }

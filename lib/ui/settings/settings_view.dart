@@ -38,12 +38,11 @@ class SettingsView extends StatelessWidget {
     required this.onSpeechLanguageTap,
     required this.adbConnected,
     required this.onNetworkDebuggingTap,
-    required this.companionInstalled,
-    required this.onCompanionTap,
     required this.themeLabel,
     required this.onThemeTap,
     required this.appVersion,
     required this.onAboutTap,
+    this.onTurnOffFullControl,
     this.onBack,
   });
   final List<SettingsDevice> devices;
@@ -57,11 +56,18 @@ class SettingsView extends StatelessWidget {
   final VoidCallback onMicButtonTap,
       onSpeechLanguageTap,
       onNetworkDebuggingTap,
-      onCompanionTap,
       onThemeTap,
       onAboutTap;
+  final VoidCallback? onTurnOffFullControl;
   final VoidCallback? onBack;
-  final bool adbConnected, companionInstalled;
+  final bool adbConnected;
+
+  String get _sensitivityLabel => swipeSensitivity < 1 / 3
+      ? 'Low'
+      : swipeSensitivity < 2 / 3
+      ? 'Medium'
+      : 'High';
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -73,6 +79,7 @@ class SettingsView extends StatelessWidget {
       VoidCallback? longPress,
       Widget? trailing,
       Widget? bottom,
+      bool mergeSemantics = false,
     }) => _Row(
       icon: icon,
       title: title,
@@ -81,6 +88,7 @@ class SettingsView extends StatelessWidget {
       longPress: longPress,
       trailing: trailing,
       bottom: bottom,
+      mergeSemantics: mergeSemantics,
     );
     Widget toggle(bool value, ValueChanged<bool> changed) =>
         Switch(value: value, onChanged: changed, activeTrackColor: c.primary);
@@ -118,6 +126,14 @@ class SettingsView extends StatelessWidget {
                     device.isActive ? 'Connected' : device.subtitle,
                     tap: () => onSelectDevice(device.id),
                     longPress: () => onRemoveDevice(device.id),
+                    trailing: IconButton(
+                      onPressed: () => onRemoveDevice(device.id),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: c.onSurfaceVariant,
+                      ),
+                      tooltip: 'Remove ${device.name}',
+                    ),
                   ),
                 row(Icons.add, 'Add a TV', null, tap: onAddTv),
               ],
@@ -129,14 +145,18 @@ class SettingsView extends StatelessWidget {
                   Icons.touch_app_outlined,
                   'Haptic feedback',
                   'Vibrate on key presses',
+                  tap: () => onHapticsChanged(!hapticsEnabled),
                   trailing: toggle(hapticsEnabled, onHapticsChanged),
+                  mergeSemantics: true,
                 ),
                 if (defaultTargetPlatform != TargetPlatform.iOS)
                   row(
                     Icons.volume_up_outlined,
                     'Volume keys control TV',
                     "Use your phone's volume buttons",
+                    tap: () => onVolumeKeysChanged(!volumeKeysEnabled),
                     trailing: toggle(volumeKeysEnabled, onVolumeKeysChanged),
+                    mergeSemantics: true,
                   ),
                 row(
                   Icons.swap_horiz,
@@ -145,17 +165,21 @@ class SettingsView extends StatelessWidget {
                   bottom: Row(
                     children: [
                       Expanded(
-                        child: Slider(
-                          value: swipeSensitivity.clamp(0.0, 1.0),
-                          onChanged: onSwipeSensitivityChanged,
+                        child: MergeSemantics(
+                          child: Semantics(
+                            label: 'Swipe sensitivity',
+                            value: _sensitivityLabel,
+                            child: Slider(
+                              value: swipeSensitivity.clamp(0.0, 1.0),
+                              onChanged: onSwipeSensitivityChanged,
+                              semanticFormatterCallback: (_) =>
+                                  _sensitivityLabel,
+                            ),
+                          ),
                         ),
                       ),
                       Text(
-                        swipeSensitivity < 1 / 3
-                            ? 'Low'
-                            : swipeSensitivity < 2 / 3
-                            ? 'Medium'
-                            : 'High',
+                        _sensitivityLabel,
                         style: context.appTextTheme.labelSmall!.copyWith(
                           color: c.onSurfaceVariant,
                         ),
@@ -183,12 +207,12 @@ class SettingsView extends StatelessWidget {
               ],
             ),
             _Section(
-              label: 'Full control',
+              label: 'Connection',
               children: [
                 row(
                   Icons.terminal,
-                  'Network debugging',
-                  adbConnected ? 'Connected' : 'Not connected',
+                  'Full control',
+                  adbConnected ? 'Connected' : 'Off · Tap to set up',
                   tap: onNetworkDebuggingTap,
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -210,12 +234,13 @@ class SettingsView extends StatelessWidget {
                     ],
                   ),
                 ),
-                row(
-                  Icons.phone_android,
-                  'Companion app',
-                  companionInstalled ? 'Installed' : 'Not installed',
-                  tap: onCompanionTap,
-                ),
+                if (adbConnected && onTurnOffFullControl != null)
+                  row(
+                    Icons.link_off,
+                    'Turn off Full control',
+                    'Stop controlling this TV over the network',
+                    tap: onTurnOffFullControl,
+                  ),
               ],
             ),
             _Section(
@@ -304,16 +329,18 @@ class _Row extends StatelessWidget {
     this.longPress,
     this.trailing,
     this.bottom,
+    this.mergeSemantics = false,
   });
   final IconData icon;
   final String title;
   final String? subtitle;
   final VoidCallback? tap, longPress;
   final Widget? trailing, bottom;
+  final bool mergeSemantics;
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return InkWell(
+    final content = InkWell(
       onTap: tap,
       onLongPress: longPress,
       borderRadius: BorderRadius.circular(12),
@@ -361,5 +388,6 @@ class _Row extends StatelessWidget {
         ),
       ),
     );
+    return mergeSemantics ? MergeSemantics(child: content) : content;
   }
 }

@@ -16,11 +16,13 @@ class AdbNowPlaying {
     required this.state,
     required this.positionMs,
     this.durationMs,
+    this.speed = 1,
   });
   final String package, title, subtitle;
   final AdbPlaybackState state;
   final int positionMs;
   final int? durationMs;
+  final double speed;
 }
 
 class AdbDeviceInfo {
@@ -110,10 +112,7 @@ class AdbCommands {
   }
 
   static (int, int) parseMusicVolume(String output) {
-    final section = RegExp(
-      r'- STREAM_MUSIC:\s*([\s\S]*?)(?=\n\s*- STREAM_|$(?![\s\S]))',
-    ).firstMatch(output)?.group(1);
-    if (section == null) throw AdbException('STREAM_MUSIC not found');
+    final section = _musicSection(output);
     final max = RegExp(
       r'^\s*Max:\s*(\d+)',
       multiLine: true,
@@ -169,7 +168,21 @@ class AdbCommands {
   Future<(int, int)> musicVolume() async =>
       parseMusicVolume(await client.shell('dumpsys audio'));
 
-  static AdbNowPlaying? parseNowPlaying(String output) {
+  static String _musicSection(String output) {
+    final section = RegExp(
+      r'- STREAM_MUSIC:\s*([\s\S]*?)(?=\n\s*- STREAM_|$(?![\s\S]))',
+    ).firstMatch(output)?.group(1);
+    if (section == null) throw AdbException('STREAM_MUSIC not found');
+    return section;
+  }
+
+  static bool parseMusicMuted(String output) => RegExp(
+    r'^\s*Muted:\s*true\b',
+    multiLine: true,
+  ).hasMatch(_musicSection(output));
+
+  /// [uptimeMs] is the TV's boot clock, used to advance a playing position.
+  static AdbNowPlaying? parseNowPlaying(String output, {int? uptimeMs}) {
     final packages = RegExp(
       r'^\s*package=([^\s]+)',
       multiLine: true,
@@ -180,7 +193,8 @@ class AdbCommands {
         i + 1 < packages.length ? packages[i + 1].start : output.length,
       );
       final state = RegExp(
-        r'PlaybackState\s*\{\s*state=(\d+),\s*position=(-?\d+)',
+        r'PlaybackState\s*\{\s*state=(\d+),\s*position=(-?\d+)'
+        r'(?:[^}]*?speed=(-?[\d.]+))?(?:[^}]*?updated=(\d+))?',
       ).firstMatch(section);
       if (state == null || (state.group(1) != '3' && state.group(1) != '2')) {
         continue;
@@ -195,6 +209,17 @@ class AdbCommands {
         r'(?:android\.media\.metadata\.DURATION|duration)\s*[=:]\s*(\d+)',
         caseSensitive: false,
       ).firstMatch(section);
+      final playing = state.group(1) == '3';
+      final speed = double.tryParse(state.group(3) ?? '') ?? 1;
+      final updated = int.tryParse(state.group(4) ?? '');
+      var position = int.parse(state.group(2)!);
+      if (playing && uptimeMs != null && updated != null && position >= 0) {
+        position += ((uptimeMs - updated).clamp(0, 1 << 31) * speed).round();
+      }
+      final durationMs = duration == null ? null : int.parse(duration.group(1)!);
+      if (durationMs != null && durationMs > 0 && position > durationMs) {
+        position = durationMs;
+      }
       return AdbNowPlaying(
         package: packages[i].group(1)!,
         title: description.isNotEmpty && description[0] != 'null'
@@ -203,18 +228,35 @@ class AdbCommands {
         subtitle: description.length > 1 && description[1] != 'null'
             ? description[1]
             : '',
-        state: state.group(1) == '3'
-            ? AdbPlaybackState.playing
-            : AdbPlaybackState.paused,
-        positionMs: int.parse(state.group(2)!),
-        durationMs: duration == null ? null : int.parse(duration.group(1)!),
+        state: playing ? AdbPlaybackState.playing : AdbPlaybackState.paused,
+        positionMs: position,
+        durationMs: durationMs,
+        speed: speed,
       );
     }
     return null;
   }
 
-  Future<AdbNowPlaying?> nowPlaying() async =>
-      parseNowPlaying(await client.shell('dumpsys media_session'));
+  static int? parseUptimeMs(String output) {
+    final match = RegExp(
+      r'^__UPTIME__\s+(\d+)(?:\.(\d+))?',
+      multiLine: true,
+    ).firstMatch(output);
+    if (match == null) return null;
+    final fraction = (match.group(2) ?? '0').padRight(3, '0').substring(0, 3);
+    return int.parse(match.group(1)!) * 1000 + int.parse(fraction);
+  }
+
+  Future<AdbNowPlaying?> nowPlaying() async {
+    final output = await client.shell(
+      'dumpsys media_session; echo; echo __UPTIME__ \$(cut -d" " -f1 /proc/uptime)',
+    );
+    return parseNowPlaying(output, uptimeMs: parseUptimeMs(output));
+  }
+
+  Future<void> openSettings() async {
+    await client.shell('am start -a android.settings.SETTINGS');
+  }
   Future<Uint8List> screencapPng() => client.exec('screencap -p');
   Future<AdbDeviceInfo> deviceInfo() async {
     final results = await Future.wait([

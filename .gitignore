@@ -53,3 +53,7 @@ design/screens_logs_*.txt
 tv_helper/build/
 test/shots/failures/
 design/icon/build/work/
+
+tv_cursor/.signing/
+tv_cursor/build/
+audit/
