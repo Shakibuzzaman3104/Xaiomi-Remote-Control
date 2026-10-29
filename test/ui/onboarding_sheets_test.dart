@@ -340,7 +340,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tap the mic to speak'), findsOneWidget);
-    expect(find.text('Ask Assistant'), findsOneWidget);
+    expect(find.text('Search YouTube'), findsOneWidget);
     expect(find.text('Type into field'), findsOneWidget);
     expect(tester.takeException(), isNull);
 

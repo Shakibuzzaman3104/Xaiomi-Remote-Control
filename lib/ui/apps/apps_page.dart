@@ -11,6 +11,7 @@ import '../../core/session/providers.dart';
 import '../../core/session/remote_button.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/favourites.dart';
+import '../onboarding/unlock_page.dart';
 import 'app_actions_sheet.dart';
 import 'apps_screen.dart';
 
@@ -196,6 +197,11 @@ class _AppsPageState extends ConsumerState<AppsPage> {
       onOpen: _open,
       onShowActions: _showActions,
       onToggleFavourite: (app) => _toggle(app.package),
+      onNoticeTap: connected
+          ? null
+          : () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const UnlockPage())),
       notice: !connected
           ? 'Turn on full control to see every app on your TV.'
           : control.appsLoading

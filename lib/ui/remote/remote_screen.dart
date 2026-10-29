@@ -8,6 +8,7 @@ import 'remote_models.dart';
 import 'widgets/device_header.dart';
 import 'widgets/now_playing_line.dart';
 import 'widgets/mode_switcher.dart';
+import 'widgets/mouse_unavailable.dart';
 import 'widgets/dpad.dart';
 import 'widgets/swipe_pad.dart';
 import 'widgets/trackpad.dart';
@@ -35,6 +36,7 @@ class RemoteScreen extends StatefulWidget {
     required this.onScroll,
     required this.onClick,
     required this.onAirMouseChanged,
+    this.mouseAvailable = true,
   });
   final RemoteViewState state;
   final RemoteMode initialMode;
@@ -50,6 +52,7 @@ class RemoteScreen extends StatefulWidget {
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
+  final bool mouseAvailable;
   @override
   State<RemoteScreen> createState() => _RemoteScreenState();
 }
@@ -167,6 +170,9 @@ class _RemoteScreenState extends State<RemoteScreen> {
             RemoteMode.swipe => SwipePad(
               onButton: widget.onButton,
               sensitivity: widget.swipeSensitivity,
+            ),
+            RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
+              onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
             ),
             RemoteMode.mouse => Trackpad(
               onPointerMove: widget.onPointerMove,

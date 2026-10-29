@@ -19,6 +19,7 @@ class UnlockScreen extends StatelessWidget {
     required this.onConnect,
     required this.onSkip,
     this.deviceName,
+    this.onBack,
   });
 
   final String statusText;
@@ -27,6 +28,9 @@ class UnlockScreen extends StatelessWidget {
   final VoidCallback onConnect;
   final VoidCallback onSkip;
   final String? deviceName;
+
+  /// Set when opened outside onboarding; shows a back arrow instead of the step dots.
+  final VoidCallback? onBack;
 
   static const _steps = [
     'On the TV open Settings › Device Preferences › About',
@@ -54,7 +58,21 @@ class UnlockScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (deviceName != null) ...[
+                      if (onBack != null) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            onPressed: onBack,
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: c.onSurfaceStrong,
+                            ),
+                            tooltip: 'Back',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ] else if (deviceName != null) ...[
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -116,17 +134,19 @@ class UnlockScreen extends StatelessWidget {
                         const SizedBox(height: 25),
                       ] else
                         const SizedBox(height: 20),
-                      Center(
-                        child: Text(
-                          '3 of 3',
-                          style: TextStyle(fontSize: 13, color: c.muted),
+                      if (onBack == null) ...[
+                        Center(
+                          child: Text(
+                            '3 of 3',
+                            style: TextStyle(fontSize: 13, color: c.muted),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Center(
-                        child: StepDots(current: 3, numbered: false),
-                      ),
-                      const SizedBox(height: 25),
+                        const SizedBox(height: 8),
+                        const Center(
+                          child: StepDots(current: 3, numbered: false),
+                        ),
+                        const SizedBox(height: 25),
+                      ],
                       Text(
                         'Unlock full control',
                         textAlign: TextAlign.center,
@@ -138,7 +158,7 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Optional. Lets you manage apps, see what\'s playing, take screenshots and mirror the TV.',
+                        'Optional. Shows every app on your TV and lets you force stop, clear cache or uninstall them.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -323,9 +343,9 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       child: Semantics(
                         button: true,
-                        label: 'Skip for now',
+                        label: onBack == null ? 'Skip for now' : 'Not now',
                         child: Text(
-                          'Skip for now',
+                          onBack == null ? 'Skip for now' : 'Not now',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

@@ -49,6 +49,7 @@ class SettingsView extends StatelessWidget {
     required this.onThemeTap,
     required this.appVersion,
     required this.onAboutTap,
+    this.onBack,
   });
   final String deviceName;
   final bool connected;
@@ -68,6 +69,7 @@ class SettingsView extends StatelessWidget {
       onCompanionTap,
       onThemeTap,
       onAboutTap;
+  final VoidCallback? onBack;
   final bool adbConnected, companionInstalled;
   @override
   Widget build(BuildContext context) {
@@ -105,13 +107,25 @@ class SettingsView extends StatelessWidget {
               onPower: onPower,
             ),
             const SizedBox(height: 18),
-            Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: c.onSurfaceStrong,
-              ),
+            Row(
+              children: [
+                if (onBack != null) ...[
+                  IconButton(
+                    onPressed: onBack,
+                    icon: Icon(Icons.arrow_back, color: c.onSurfaceStrong),
+                    tooltip: 'Back',
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: c.onSurfaceStrong,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 14),
             _Section(

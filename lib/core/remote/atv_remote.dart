@@ -186,6 +186,7 @@ class AtvRemoteClient {
         const AtvConnectionLostException('Connection closed'),
       );
     }
+    _abortFieldWait(const AtvConnectionLostException('Connection closed'));
     _update(_state.copyWith(connected: false, imeActive: false));
     await _states.close();
   }
@@ -201,6 +202,7 @@ class AtvRemoteClient {
     if (pending != null && !pending.isCompleted) {
       pending.completeError(exception);
     }
+    _abortFieldWait(exception);
     _update(_state.copyWith(connected: false, imeActive: false));
     _states.addError(exception);
     _states.close();
@@ -304,6 +306,11 @@ class AtvRemoteClient {
         pending.complete(message.remoteVoiceBegin.sessionId);
       }
     }
+  }
+
+  void _abortFieldWait(AtvConnectionLostException exception) {
+    final update = _fieldUpdate;
+    if (update != null && !update.isCompleted) update.completeError(exception);
   }
 
   void _completeFieldUpdate() {

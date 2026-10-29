@@ -93,6 +93,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onScroll: (_) {},
       onClick: (_) {},
       onAirMouseChanged: (_) {},
+      mouseAvailable: false,
     );
   }
 }

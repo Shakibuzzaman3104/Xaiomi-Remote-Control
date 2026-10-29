@@ -24,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _choose<T>(
     BuildContext context,
+    String title,
     T selected,
     Map<T, String> choices,
     ValueChanged<T> onSelected,
@@ -40,6 +41,16 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  title,
+                  style: Theme.of(sheetContext).textTheme.titleMedium,
+                ),
+              ),
+            ),
             for (final entry in choices.entries)
               RadioListTile<T>(title: Text(entry.value), value: entry.key),
           ],
@@ -66,6 +77,7 @@ class SettingsScreen extends ConsumerWidget {
       onSwitchDevice: onAddTv,
       onTvSettings: () => session?.press(RemoteButton.settings),
       onAppSettings: () {},
+      onBack: onBack,
       onPower: connected ? () => session?.press(RemoteButton.power) : null,
       devices: [
         for (final tv in paired?.tvs ?? const [])
@@ -121,17 +133,20 @@ class SettingsScreen extends ConsumerWidget {
       swipeSensitivity: prefs.swipeSensitivity,
       onSwipeSensitivityChanged: notifier.setSwipeSensitivity,
       micButtonLabel: prefs.micButton == VoiceTargetPreference.askAssistant
-          ? 'Ask Assistant'
+          ? 'Search YouTube'
           : 'Type into field',
-      onMicButtonTap: () => _choose(context, prefs.micButton, {
-        VoiceTargetPreference.askAssistant: 'Ask Assistant',
+      onMicButtonTap: () => _choose(context, 'Mic button', prefs.micButton, {
+        VoiceTargetPreference.askAssistant: 'Search YouTube',
         VoiceTargetPreference.typeIntoField: 'Type into field',
       }, notifier.setMicButton),
       speechLanguageLabel: prefs.speechLocale == 'bn_BD' ? 'বাংলা' : 'English',
-      onSpeechLanguageTap: () => _choose(context, prefs.speechLocale, {
-        'en_US': 'English (US)',
-        'bn_BD': 'বাংলা',
-      }, notifier.setSpeechLocale),
+      onSpeechLanguageTap: () => _choose(
+        context,
+        'Speech language',
+        prefs.speechLocale,
+        {'en_US': 'English (US)', 'bn_BD': 'বাংলা'},
+        notifier.setSpeechLocale,
+      ),
       adbConnected:
           ref.watch(fullControlProvider).status == FullControlStatus.connected,
       onNetworkDebuggingTap: onOpenFullControl,
@@ -142,7 +157,7 @@ class SettingsScreen extends ConsumerWidget {
         ThemeMode.light => 'Light',
         ThemeMode.dark => 'Dark',
       },
-      onThemeTap: () => _choose(context, theme, {
+      onThemeTap: () => _choose(context, 'Theme', theme, {
         ThemeMode.system: 'System',
         ThemeMode.light: 'Light',
         ThemeMode.dark: 'Dark',

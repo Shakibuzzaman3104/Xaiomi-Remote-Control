@@ -48,7 +48,7 @@ void main() {
     onVolumeKeysChanged: changed,
     swipeSensitivity: .5,
     onSwipeSensitivityChanged: (_) {},
-    micButtonLabel: 'Ask Assistant',
+    micButtonLabel: 'Search YouTube',
     onMicButtonTap: noop,
     speechLanguageLabel: 'English',
     onSpeechLanguageTap: noop,

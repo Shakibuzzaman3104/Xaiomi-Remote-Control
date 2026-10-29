@@ -67,6 +67,12 @@ _Tested live on 29/10/26 against the real box._
 | Wake via Bluetooth | Phone registers as BLE/BT HID remote (`BluetoothHidDevice`, Android 9+ phone) and sends POWER |
 | HDMI-CEC once enabled | TV on/off and volume through the box |
 
+### ✅ Verified protocol notes
+- IME edits: `imeCounter` must equal `remoteImeKeyInject.appInfo.counter`; `fieldCounter` comes from `textFieldStatus.counterField` or `remoteImeShowRequest.remoteTextFieldStatus.counterField`.
+- A batch edit inserts at the cursor; it does not replace the field. Replacing text = KEYCODE_DEL back to the common prefix, then insert the rest. The TV echoes a ShowRequest after every DEL and insert, so the client waits for the echo before the next edit and drops stale queued text.
+- Submitting a field: KEYCODE_ENTER presses the focused key of the TV's on-screen keyboard (typed "q"); KEYCODE_SEARCH opens Google Assistant; KEYCODE_NUMPAD_ENTER does nothing. Inserting "\n" through the IME triggers the field's action (search runs).
+- Mouse pointer is not available over Remote v2; it needs ADB (injected mouse events) and is shown as "coming soon".
+
 ## 3. Architecture
 
 - **Platform:** Flutter app, **Android phone only** for v0–v2 (ADB, mirroring and BT-HID need Android). The Remote v2 layer is pure Dart, so iOS can follow later with a reduced feature set.

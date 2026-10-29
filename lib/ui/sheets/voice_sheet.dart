@@ -157,8 +157,8 @@ class VoiceSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _TargetChip(
-                      label: 'Ask Assistant',
-                      icon: Icons.auto_awesome_rounded,
+                      label: 'Search YouTube',
+                      icon: Icons.smart_display_rounded,
                       selected: target == VoiceTarget.search,
                       enabled: true,
                       onTap: () => onTargetChanged(VoiceTarget.search),

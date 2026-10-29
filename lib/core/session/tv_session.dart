@@ -178,22 +178,20 @@ class TvSession {
     (c) => c.sendKey(keyCodeFor(button), direction: RemoteDirection.END_LONG),
   );
   void sendText(String text) => _command(
-    (c) => unawaited(
-      c.replaceText(text).catchError((Object error) {
-        if (error is AtvConnectionLostException) _failure(_generation, error);
-      }),
-    ),
+    (c) => unawaited(c.replaceText(text).catchError(_textFailure(_generation))),
   );
+
+  void Function(Object) _textFailure(int generation) => (Object error) {
+    if (error is AtvConnectionLostException) _failure(generation, error);
+  };
 
   /// Submits the TV field once pending edits land.
   /// A newline triggers the IME action; KEYCODE_ENTER would press the focused TV key.
   void submitText() => _command(
     (c) => unawaited(
-      c.textSettled.then((_) => c.insertText('\n')).catchError((Object error) {
-        if (error is AtvConnectionLostException) {
-          _failure(_generation, error);
-        }
-      }),
+      c.textSettled
+          .then((_) => c.insertText('\n'))
+          .catchError(_textFailure(_generation)),
     ),
   );
 

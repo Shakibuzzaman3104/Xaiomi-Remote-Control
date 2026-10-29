@@ -6,6 +6,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,13 @@ import 'package:xiaomi_remote/ui/sheets/keyboard_sheet.dart';
 import 'package:xiaomi_remote/ui/sheets/voice_sheet.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 
-const _size = Size(412, 915);
+final _env = Platform.environment;
+final _textScale = double.tryParse(_env['SHOT_TEXT_SCALE'] ?? '') ?? 1;
+final _size = Size(
+  double.tryParse(_env['SHOT_WIDTH'] ?? '') ?? 412,
+  double.tryParse(_env['SHOT_HEIGHT'] ?? '') ?? 915,
+);
+final _goldenDir = _env['SHOT_DIR'] ?? 'goldens';
 const _ratio = 1152 / 412;
 
 Future<void> _loadFonts() async {
@@ -169,7 +176,7 @@ final shots = <String, Widget Function()>{
     onVolumeKeysChanged: (_) {},
     swipeSensitivity: .5,
     onSwipeSensitivityChanged: (_) {},
-    micButtonLabel: 'Ask Assistant',
+    micButtonLabel: 'Search YouTube',
     onMicButtonTap: () {},
     speechLanguageLabel: 'English + বাংলা',
     onSpeechLanguageTap: () {},
@@ -258,6 +265,12 @@ void main() {
           MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: dark ? AppTheme.dark : AppTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(_textScale)),
+              child: child!,
+            ),
             home: entry.value(),
           ),
         );
@@ -272,7 +285,7 @@ void main() {
         }
         await expectLater(
           find.byType(MaterialApp),
-          matchesGoldenFile('goldens/$name.png'),
+          matchesGoldenFile('$_goldenDir/$name.png'),
         );
       });
     }

@@ -35,6 +35,7 @@ class AppsScreen extends StatefulWidget {
     required this.onShowActions,
     this.onToggleFavourite,
     this.notice,
+    this.onNoticeTap,
   });
   final String deviceName;
   final bool connected;
@@ -44,6 +45,7 @@ class AppsScreen extends StatefulWidget {
   final ValueChanged<TvAppItem> onOpen, onShowActions;
   final ValueChanged<TvAppItem>? onToggleFavourite;
   final String? notice;
+  final VoidCallback? onNoticeTap;
   @override
   State<AppsScreen> createState() => _AppsScreenState();
 }
@@ -179,9 +181,17 @@ class _AppsScreenState extends State<AppsScreen> {
                   padding: const EdgeInsets.only(top: 12),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.notice!,
-                      style: TextStyle(color: c.muted, fontSize: 12),
+                    child: InkWell(
+                      onTap: widget.onNoticeTap,
+                      child: Text(
+                        widget.notice!,
+                        style: TextStyle(
+                          color: widget.onNoticeTap == null
+                              ? c.muted
+                              : c.primary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                   ),
                 ),

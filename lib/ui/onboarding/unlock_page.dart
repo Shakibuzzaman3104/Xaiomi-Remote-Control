@@ -40,6 +40,7 @@ class UnlockPage extends ConsumerWidget {
         }
       },
       onSkip: () => Navigator.of(context).pop(),
+      onBack: () => Navigator.of(context).pop(),
     );
   }
 }
