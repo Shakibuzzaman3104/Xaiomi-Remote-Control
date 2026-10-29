@@ -1,0 +1,41 @@
+{
+  "mockup": "design/screens/mirror/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/mirror/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "\u201cConnected\u201d uses pale lavender text with approximately 2.8:1 contrast against the background, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the \u201cConnected\u201d label to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 190,
+            "y": 132,
+            "w": 122,
+            "h": 32
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.1
+        },
+        {
+          "category": "spacing",
+          "problem": "The preview, information banner, and control panel sit approximately 29\u201330 pixels from the screen edges, below the required 33 pixels (16 logical units).",
+          "edit": "Set the preview, information banner, and control panel to a minimum horizontal screen margin of 16 logical units (approximately 33 pixels).",
+          "bbox": {
+            "x": 29,
+            "y": 365,
+            "w": 797,
+            "h": 954
+          },
+          "scope": "screen",
+          "severity": "low",
+          "id": 2
+        }
+      ],
+      "weight": 3
+    }
+  ],
+  "best": "design/screens/mirror/mockup_v1.png"
+}

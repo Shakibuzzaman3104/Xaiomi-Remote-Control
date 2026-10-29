@@ -49,3 +49,4 @@ app.*.map.json
 
 # design pipeline scratch
 design/screens_logs_*.txt
+.commandcode/

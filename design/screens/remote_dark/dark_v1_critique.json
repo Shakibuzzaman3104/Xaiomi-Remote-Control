@@ -1,0 +1,11 @@
+{
+  "mockup": "design/screens/remote_dark/dark_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_dark/dark_v1.png",
+      "issues": [],
+      "weight": 0
+    }
+  ],
+  "best": "design/screens/remote_dark/dark_v1.png"
+}

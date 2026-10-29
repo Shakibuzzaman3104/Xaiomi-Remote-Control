@@ -1,0 +1,662 @@
+{
+  "mockup": "mockup.png",
+  "width": 853,
+  "height": 1843,
+  "platform": "android",
+  "screen_dp": 412,
+  "assets": [
+    {
+      "animated": false,
+      "bbox": {
+        "x": 44,
+        "y": 103,
+        "w": 57,
+        "h": 44
+      },
+      "colors": [
+        "#39324F"
+      ],
+      "description": "Outline television with a wide rectangular screen, slightly rounded corners, a short central stem and a horizontal foot. Approximately 4 px dark charcoal-purple strokes with rounded joins; transparent screen interior.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "tv",
+      "name": "television",
+      "sf_symbol": "tv",
+      "transparent": true,
+      "dp": {
+        "w": 27.5,
+        "h": 21.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 150,
+        "y": 133,
+        "w": 29,
+        "h": 22
+      },
+      "colors": [
+        "#48405F"
+      ],
+      "description": "Wi-Fi connection glyph consisting of two nested upward-curving arcs above a small central dot, all in muted dark purple. Rounded stroke caps; no background.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "wifi",
+      "name": "wifi",
+      "sf_symbol": "wifi",
+      "transparent": true,
+      "dp": {
+        "w": 14.0,
+        "h": 10.6
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 405,
+        "y": 798,
+        "w": 44,
+        "h": 25
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Downward chevron formed by two equal diagonal strokes meeting at a low central point, approximately 4 px thick with rounded ends. Also used at a smaller size beside the device title at approximately x486, y101, width19, height12.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "keyboard_arrow_down",
+      "name": "chevron_down",
+      "sf_symbol": "chevron.down",
+      "transparent": true,
+      "dp": {
+        "w": 21.3,
+        "h": 12.1
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 795,
+        "y": 104,
+        "w": 9,
+        "h": 34
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Three small filled dark-purple circular dots arranged vertically with equal spacing.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "more_vert",
+      "name": "more_vertical",
+      "sf_symbol": "ellipsis",
+      "transparent": true,
+      "dp": {
+        "w": 4.3,
+        "h": 16.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 40,
+        "y": 206,
+        "w": 64,
+        "h": 45
+      },
+      "colors": [
+        "#FF111B",
+        "#E90913",
+        "#FFFFFF"
+      ],
+      "description": "YouTube logo: bright-red horizontal rounded rectangle with subtly bowed edges and a centered white right-pointing play triangle. Very slight red tonal variation. Repeated at approximately x79, y1458, width68, height46 in the favorite-app row.",
+      "format": "svg",
+      "kind": "logo",
+      "material_symbol": "",
+      "name": "youtube",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 30.9,
+        "h": 21.7
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 77,
+        "y": 317,
+        "w": 39,
+        "h": 40
+      },
+      "colors": [
+        "#FAF7FF"
+      ],
+      "description": "Directional-pad mode glyph made from four separate small rounded white lobes arranged above, below, left and right of an empty center. Vertical lobes are slightly taller; horizontal lobes are slightly wider.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "control_camera",
+      "name": "directional_pad",
+      "sf_symbol": "dpad.fill",
+      "transparent": true,
+      "dp": {
+        "w": 18.8,
+        "h": 19.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 277,
+        "y": 317,
+        "w": 32,
+        "h": 40
+      },
+      "colors": [
+        "#39324F"
+      ],
+      "description": "Outlined upright hand with its index finger extended, three bent fingers stepping down toward the right, an outward bent thumb on the left and a rounded palm. Small curved touch indication above the fingertip. Thin dark-purple strokes with rounded joins and transparent interior.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "swipe",
+      "name": "swipe_hand",
+      "sf_symbol": "hand.draw",
+      "transparent": true,
+      "dp": {
+        "w": 15.5,
+        "h": 19.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 468,
+        "y": 317,
+        "w": 28,
+        "h": 39
+      },
+      "colors": [
+        "#39324F"
+      ],
+      "description": "Vertical computer-mouse outline shaped as a tall rounded capsule. A horizontal line separates the buttons from the lower body, and a vertical central line divides the upper buttons. Approximately 3 px dark-purple strokes.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "mouse",
+      "name": "mouse",
+      "sf_symbol": "computermouse",
+      "transparent": true,
+      "dp": {
+        "w": 13.5,
+        "h": 18.8
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 646,
+        "y": 321,
+        "w": 33,
+        "h": 33
+      },
+      "colors": [
+        "#39324F"
+      ],
+      "description": "Nine identical filled dark-purple circles arranged in a regular three-by-three grid with equal horizontal and vertical spacing.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "dialpad",
+      "name": "numpad",
+      "sf_symbol": "circle.grid.3x3.fill",
+      "transparent": true,
+      "dp": {
+        "w": 15.9,
+        "h": 15.9
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 405,
+        "y": 493,
+        "w": 44,
+        "h": 25
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Upward chevron formed by two diagonal strokes meeting at a high central point. Approximately 4 px dark-purple strokes with rounded caps and join.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "keyboard_arrow_up",
+      "name": "chevron_up",
+      "sf_symbol": "chevron.up",
+      "transparent": true,
+      "dp": {
+        "w": 21.3,
+        "h": 12.1
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 255,
+        "y": 636,
+        "w": 25,
+        "h": 44
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Left-pointing chevron formed by two diagonal strokes meeting at the left midpoint. Approximately 4 px dark-purple strokes with rounded caps and join.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "chevron_left",
+      "name": "chevron_left",
+      "sf_symbol": "chevron.left",
+      "transparent": true,
+      "dp": {
+        "w": 12.1,
+        "h": 21.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 573,
+        "y": 636,
+        "w": 25,
+        "h": 44
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Right-pointing chevron formed by two diagonal strokes meeting at the right midpoint. Approximately 4 px dark-purple strokes with rounded caps and join.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "chevron_right",
+      "name": "chevron_right",
+      "sf_symbol": "chevron.right",
+      "transparent": true,
+      "dp": {
+        "w": 12.1,
+        "h": 21.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 163,
+        "y": 958,
+        "w": 40,
+        "h": 38
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Left arrow with a horizontal shaft and two diagonal arrowhead strokes. Approximately 4 px dark-purple strokes with rounded caps; no surrounding circle.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "arrow_back",
+      "name": "arrow_back",
+      "sf_symbol": "arrow.left",
+      "transparent": true,
+      "dp": {
+        "w": 19.3,
+        "h": 18.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 407,
+        "y": 956,
+        "w": 40,
+        "h": 43
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Outline house with a peaked roof, vertical side walls and a flat base interrupted by a narrow central doorway. Approximately 4 px dark-purple strokes with rounded corners and transparent interior.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "home",
+      "name": "home",
+      "sf_symbol": "house",
+      "transparent": true,
+      "dp": {
+        "w": 19.3,
+        "h": 20.8
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 649,
+        "y": 955,
+        "w": 44,
+        "h": 44
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Outlined eight-tooth gear with a circular hole centered inside a rounded irregular gear ring. Approximately 4 px dark-purple strokes and softly rounded corners.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "settings",
+      "name": "settings",
+      "sf_symbol": "gearshape",
+      "transparent": true,
+      "dp": {
+        "w": 21.3,
+        "h": 21.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 135,
+        "y": 1158,
+        "w": 31,
+        "h": 5
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Single short horizontal dark-purple minus stroke with rounded caps, approximately 4 px thick.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "remove",
+      "name": "minus",
+      "sf_symbol": "minus",
+      "transparent": true,
+      "dp": {
+        "w": 15.0,
+        "h": 2.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 526,
+        "y": 1142,
+        "w": 36,
+        "h": 38
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Plus sign made from centered horizontal and vertical dark-purple strokes, approximately 4 px thick with rounded caps.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "add",
+      "name": "plus",
+      "sf_symbol": "plus",
+      "transparent": true,
+      "dp": {
+        "w": 17.4,
+        "h": 18.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 690,
+        "y": 1137,
+        "w": 46,
+        "h": 44
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Outlined speaker with a rectangular left opening and flared triangular body, two curved sound-wave marks at right, and a diagonal slash descending from upper left to lower right across the glyph. Dark-purple strokes approximately 4 px thick.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "volume_off",
+      "name": "mute",
+      "sf_symbol": "speaker.slash",
+      "transparent": true,
+      "dp": {
+        "w": 22.2,
+        "h": 21.3
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 211,
+        "y": 1290,
+        "w": 47,
+        "h": 30
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Two adjacent solid left-pointing triangles with subtly rounded corners, aligned vertically to form a rewind glyph.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "fast_rewind",
+      "name": "rewind",
+      "sf_symbol": "backward.fill",
+      "transparent": true,
+      "dp": {
+        "w": 22.7,
+        "h": 14.5
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 411,
+        "y": 1285,
+        "w": 32,
+        "h": 41
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Two equal filled vertical dark-purple bars with gently rounded corners, separated by a narrow transparent gap.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "pause",
+      "name": "pause",
+      "sf_symbol": "pause.fill",
+      "transparent": true,
+      "dp": {
+        "w": 15.5,
+        "h": 19.8
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 595,
+        "y": 1290,
+        "w": 47,
+        "h": 30
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Two adjacent solid right-pointing triangles with subtly rounded corners, aligned vertically to form a fast-forward glyph.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "fast_forward",
+      "name": "fast_forward",
+      "sf_symbol": "forward.fill",
+      "transparent": true,
+      "dp": {
+        "w": 22.7,
+        "h": 14.5
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 265,
+        "y": 1449,
+        "w": 37,
+        "h": 65
+      },
+      "colors": [
+        "#E50914",
+        "#B20710",
+        "#FF1721"
+      ],
+      "description": "Netflix N monogram formed by two upright red strips and a diagonal ribbon descending from upper left to lower right in front. Dark-red inner faces and brighter red diagonal produce a folded-ribbon appearance; bottom edges are subtly angled.",
+      "format": "svg",
+      "kind": "logo",
+      "material_symbol": "",
+      "name": "netflix",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 17.9,
+        "h": 31.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 438,
+        "y": 1449,
+        "w": 36,
+        "h": 65
+      },
+      "colors": [
+        "#FF151B",
+        "#E50910"
+      ],
+      "description": "Hoichoi red lowercase h monogram with a tall narrow left stem and rounded arch flowing into a shorter right stem. Rounded lower ends, a slightly angled top on the tall stem, and subtle red tonal variation.",
+      "format": "svg",
+      "kind": "logo",
+      "material_symbol": "",
+      "name": "hoichoi",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 17.4,
+        "h": 31.4
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 589,
+        "y": 1457,
+        "w": 73,
+        "h": 51
+      },
+      "colors": [
+        "#ED008C",
+        "#CE009B",
+        "#FF249E"
+      ],
+      "description": "Toffee magenta ribbon emblem. A broad tapered flourish sweeps from the upper left into a long central downward curl with a rounded pointed foot. Two shorter overlapping ribbon loops extend across the upper right. Dark purple-magenta folds and brighter pink faces define the layered ribbons.",
+      "format": "svg",
+      "kind": "logo",
+      "material_symbol": "",
+      "name": "toffee",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 35.3,
+        "h": 24.6
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 766,
+        "y": 1450,
+        "w": 47,
+        "h": 64
+      },
+      "colors": [
+        "#FF8A00",
+        "#FFA31A",
+        "#FFFFFF"
+      ],
+      "description": "VLC traffic-cone logo with a rounded orange tip, tapering orange cone, two curved white horizontal bands and a broad orange trapezoidal base. Slight orange shading. The screenshot clips the right side at the favorite-app viewport edge; recreate the complete cone for the source asset.",
+      "format": "svg",
+      "kind": "logo",
+      "material_symbol": "",
+      "name": "vlc",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 22.7,
+        "h": 30.9
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 206,
+        "y": 1668,
+        "w": 45,
+        "h": 32
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Compact keyboard outline with rounded rectangular frame, three rows of small filled square keys and a longer horizontal space bar near the bottom. Dark-purple frame approximately 4 px thick with transparent interior.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "keyboard",
+      "name": "keyboard",
+      "sf_symbol": "keyboard",
+      "transparent": true,
+      "dp": {
+        "w": 21.7,
+        "h": 15.5
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 405,
+        "y": 1655,
+        "w": 43,
+        "h": 56
+      },
+      "colors": [
+        "#FFFFFF"
+      ],
+      "description": "White microphone with a filled vertical rounded capsule above a separate U-shaped pickup cradle. The cradle joins a short centered vertical stem. Rounded stroke ends; excludes the purple circular button.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "mic",
+      "name": "microphone",
+      "sf_symbol": "mic.fill",
+      "transparent": true,
+      "dp": {
+        "w": 20.8,
+        "h": 27.0
+      }
+    },
+    {
+      "animated": false,
+      "bbox": {
+        "x": 603,
+        "y": 1660,
+        "w": 45,
+        "h": 48
+      },
+      "colors": [
+        "#373049"
+      ],
+      "description": "Power symbol comprising an open circular arc with a gap at the top and a separate vertical stem descending into the gap. Approximately 5 px dark-purple strokes with rounded ends.",
+      "format": "svg",
+      "kind": "icon",
+      "material_symbol": "power_settings_new",
+      "name": "power",
+      "sf_symbol": "power",
+      "transparent": true,
+      "dp": {
+        "w": 21.7,
+        "h": 23.2
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "mockup": "design/screens/remote_swipe/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_swipe/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "\u201cConnected\u201d and \u201cSwipe to move \u00b7 Tap to select \u00b7 Two fingers to go back\u201d fall below 4.5:1 contrast, and the swipe illustration falls below 3:1.",
+          "edit": "Darken the connection label, swipe instructions, and gesture illustration to meet their respective text and icon contrast thresholds.",
+          "bbox": {
+            "x": 143,
+            "y": 130,
+            "w": 572,
+            "h": 670
+          },
+          "scope": "local",
+          "severity": "low",
+          "id": 1,
+          "measured_contrast": 6.3,
+          "measured_passes": 4.5
+        },
+        {
+          "category": "spacing",
+          "problem": "\u201cFavourite apps\u201d sits closer to the playback controls than its cards, while the app labels and bottom actions have less separation than items within the bottom action group.",
+          "edit": "Increase separation before \u201cFavourite apps\u201d and between the app shortcuts and bottom actions, keeping each heading closer to its own content.",
+          "bbox": {
+            "x": 40,
+            "y": 1335,
+            "w": 773,
+            "h": 471
+          },
+          "scope": "screen",
+          "severity": "medium",
+          "id": 2
+        }
+      ],
+      "weight": 3
+    }
+  ],
+  "best": "design/screens/remote_swipe/mockup_v1.png"
+}

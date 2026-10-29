@@ -1,0 +1,28 @@
+{
+  "mockup": "design/screens/onboard_pair/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/onboard_pair/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The two inactive progress dots have approximately 1.5:1 contrast against the background, below the 3:1 required for graphical indicators that communicate the number of steps.",
+          "edit": "Darken the inactive progress dots to achieve at least 3:1 contrast against the background.",
+          "bbox": {
+            "x": 364,
+            "y": 126,
+            "w": 125,
+            "h": 26
+          },
+          "scope": "local",
+          "severity": "low",
+          "id": 1,
+          "measured_contrast": 7.3,
+          "measured_passes": 3.0
+        }
+      ],
+      "weight": 1
+    }
+  ],
+  "best": "design/screens/onboard_pair/mockup_v1.png"
+}

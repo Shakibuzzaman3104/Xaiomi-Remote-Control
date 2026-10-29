@@ -36,3 +36,7 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+    # File headers use the /** @author */ block required by the project style.
+    slash_for_doc_comments: false
+    dangling_library_doc_comments: false

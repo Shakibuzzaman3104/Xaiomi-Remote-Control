@@ -1,0 +1,69 @@
+{
+  "mockup": "design/screens/settings/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/settings/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "Muted subtitles, including \u201cConnected\u201d and \u201cVibrate on key presses,\u201d have approximately 3:1 contrast against the pale background, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the muted subtitle color throughout the screen to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 165,
+            "y": 376,
+            "w": 243,
+            "h": 30
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.0
+        },
+        {
+          "category": "text",
+          "problem": "The Theme value is misspelled as \u201cSysm\u201d.",
+          "edit": "Replace \u201cSysm\u201d with \u201cSystem\u201d.",
+          "bbox": {
+            "x": 168,
+            "y": 1548,
+            "w": 77,
+            "h": 32
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 2
+        },
+        {
+          "category": "consistency",
+          "problem": "The bottom-right control changes from \u201cPower\u201d with a power icon on the approved screen to \u201cSettings\u201d with a gear icon on this screen.",
+          "edit": "Restore the approved Keyboard, Voice, and Power bottom controls, keeping Settings accessible through its existing entry point.",
+          "bbox": {
+            "x": 584,
+            "y": 1710,
+            "w": 117,
+            "h": 113
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 3
+        },
+        {
+          "category": "overlap",
+          "problem": "The bottom Keyboard, Voice, and Settings controls overlap the lower portion and bottom edge of the About row.",
+          "edit": "Reserve space above the bottom controls so the About card ends before their circular buttons begin.",
+          "bbox": {
+            "x": 181,
+            "y": 1708,
+            "w": 507,
+            "h": 89
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 4
+        }
+      ],
+      "weight": 8
+    }
+  ],
+  "best": "design/screens/settings/mockup_v1.png"
+}

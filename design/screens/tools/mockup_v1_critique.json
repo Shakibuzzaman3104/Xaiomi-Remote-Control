@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/tools/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/tools/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The pale \u201cConnected\u201d status text has insufficient contrast against the background for the 4.5:1 body-text requirement.",
+          "edit": "Darken the \u201cConnected\u201d text to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 189,
+            "y": 130,
+            "w": 126,
+            "h": 31
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.0
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/tools/mockup_v1.png"
+}

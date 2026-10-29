@@ -1,0 +1,11 @@
+{
+  "platform": "android",
+  "device": "phone",
+  "orientation": null,
+  "posture": null,
+  "page": null,
+  "screen_dp": 412,
+  "logical_h": 915,
+  "canvas": "1152x2496",
+  "hinge": null
+}

@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/remote_disconnected/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_disconnected/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "\u201cReconnecting...\u201d and \u201cWake it with the physical remote.\u201d fall below 4.5:1 contrast against their backgrounds, making connection status and recovery instructions difficult to read.",
+          "edit": "Darken both informational labels to achieve at least 4.5:1 contrast against their respective backgrounds.",
+          "bbox": {
+            "x": 192,
+            "y": 130,
+            "w": 177,
+            "h": 37
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.3
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/remote_disconnected/mockup_v1.png"
+}

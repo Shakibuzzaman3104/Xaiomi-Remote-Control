@@ -1,0 +1,26 @@
+{
+  "mockup": "design/screens/remote_dark/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_dark/mockup_v1.png",
+      "issues": [
+        {
+          "category": "consistency",
+          "problem": "The near-black background, dark control surfaces, and light text differ from the approved screen\u2019s light lavender palette and dark foregrounds.",
+          "edit": "Apply the approved screen\u2019s light lavender background, pale control surfaces, dark text and icons, and purple accents.",
+          "bbox": {
+            "x": 0,
+            "y": 0,
+            "w": 853,
+            "h": 1844
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/remote_dark/mockup_v1.png"
+}

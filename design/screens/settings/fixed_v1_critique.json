@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/settings/fixed_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/settings/fixed_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "Light lavender secondary text, including \u201cConnected\u201d, \u201cVibrate on key presses\u201d, \u201cUse your phone\u2019s volume buttons\u201d, \u201cAdjust how sensitive swipe gestures are\u201d and \u201cApp version 1.0.0\u201d, has approximately 3:1 contrast, below WCAG AA\u2019s 4.5:1 requirement.",
+          "edit": "Darken the light lavender secondary text to achieve at least 4.5:1 contrast against its background throughout the screen.",
+          "bbox": {
+            "x": 189,
+            "y": 130,
+            "w": 129,
+            "h": 29
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.9
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/settings/fixed_v1.png"
+}

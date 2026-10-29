@@ -1,0 +1,422 @@
+{
+  "Status bar time and battery percentage": {
+    "sample": "9:41 \u00b7 100%",
+    "found": false
+  },
+  "Connected device title": {
+    "sample": "Living Room \u00b7 Mi Box S",
+    "found": true,
+    "source": "component: Device title",
+    "search_box": [
+      148,
+      85,
+      324,
+      42
+    ],
+    "line_height_px": null,
+    "box": [
+      151,
+      91,
+      316,
+      31
+    ],
+    "bg": "#F8F7FC",
+    "ink": "#050520",
+    "baseline": 115,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Living Room \u00b7 Mi Box S",
+        "component": "Device title",
+        "search_box": [
+          148,
+          85,
+          324,
+          42
+        ],
+        "box": [
+          151,
+          91,
+          316,
+          31
+        ],
+        "bg": "#F8F7FC",
+        "ink": "#050520",
+        "baseline": 115,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Device connection subtitle": {
+    "sample": "Connected",
+    "found": true,
+    "source": "component: Connected status",
+    "search_box": [
+      149,
+      130,
+      166,
+      35
+    ],
+    "line_height_px": null,
+    "box": [
+      192,
+      135,
+      112,
+      19
+    ],
+    "bg": "#F8F7FC",
+    "ink": "#81799E",
+    "baseline": 153,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Connected",
+        "component": "Connected status",
+        "search_box": [
+          149,
+          130,
+          166,
+          35
+        ],
+        "box": [
+          192,
+          135,
+          112,
+          19
+        ],
+        "bg": "#F8F7FC",
+        "ink": "#81799E",
+        "baseline": 153,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Current media title": {
+    "sample": "Me at the zoo",
+    "found": true,
+    "source": "component: Current media title",
+    "search_box": [
+      127,
+      201,
+      203,
+      39
+    ],
+    "line_height_px": null,
+    "box": [
+      129,
+      205,
+      182,
+      24
+    ],
+    "bg": "#F8F7FC",
+    "ink": "#040322",
+    "baseline": 229,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Me at the zoo",
+        "component": "Current media title",
+        "search_box": [
+          127,
+          201,
+          203,
+          39
+        ],
+        "box": [
+          129,
+          205,
+          182,
+          24
+        ],
+        "bg": "#F8F7FC",
+        "ink": "#040322",
+        "baseline": 229,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Elapsed playback time": {
+    "sample": "0:12",
+    "found": true,
+    "source": "component: Playback time",
+    "search_box": [
+      694,
+      204,
+      119,
+      34
+    ],
+    "line_height_px": null,
+    "box": [
+      696,
+      209,
+      47,
+      18
+    ],
+    "bg": "#F9F7FD",
+    "ink": "#582CC9",
+    "baseline": 226,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "0:12",
+        "component": "Playback time",
+        "search_box": [
+          694,
+          204,
+          119,
+          34
+        ],
+        "box": [
+          696,
+          209,
+          47,
+          18
+        ],
+        "bg": "#F9F7FD",
+        "ink": "#582CC9",
+        "baseline": 226,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Playback separator and total duration": {
+    "sample": "/ 0:19",
+    "found": true,
+    "source": "component: Playback time",
+    "search_box": [
+      694,
+      204,
+      119,
+      34
+    ],
+    "line_height_px": null,
+    "box": [
+      766,
+      210,
+      45,
+      17
+    ],
+    "bg": "#F9F7FD",
+    "ink": "#8983A6",
+    "baseline": 226,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "/ 0:19",
+        "component": "Playback time",
+        "search_box": [
+          694,
+          204,
+          119,
+          34
+        ],
+        "box": [
+          766,
+          210,
+          45,
+          17
+        ],
+        "bg": "#F9F7FD",
+        "ink": "#8983A6",
+        "baseline": 226,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Selected input mode": {
+    "sample": "D-pad",
+    "found": false
+  },
+  "Unselected input modes": {
+    "sample": "Swipe \u00b7 Mouse \u00b7 Numpad",
+    "found": false
+  },
+  "Directional-pad confirm label": {
+    "sample": "OK",
+    "found": true,
+    "source": "component: D-pad OK button",
+    "search_box": [
+      342,
+      573,
+      169,
+      169
+    ],
+    "line_height_px": null,
+    "box": [
+      396,
+      642,
+      62,
+      32
+    ],
+    "bg": "#E3DCF7",
+    "ink": "#07052B",
+    "baseline": 673,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "OK",
+        "component": "D-pad OK button",
+        "search_box": [
+          342,
+          573,
+          169,
+          169
+        ],
+        "box": [
+          396,
+          642,
+          62,
+          32
+        ],
+        "bg": "#E3DCF7",
+        "ink": "#07052B",
+        "baseline": 673,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Remote action captions": {
+    "sample": "Back \u00b7 Home \u00b7 Settings \u00b7 Mute",
+    "found": false
+  },
+  "Volume readout": {
+    "sample": "Volume 12",
+    "found": true,
+    "source": "component: Volume value",
+    "search_box": [
+      277,
+      1144,
+      151,
+      38
+    ],
+    "line_height_px": null,
+    "box": [
+      279,
+      1149,
+      130,
+      22
+    ],
+    "bg": "#EBE8F5",
+    "ink": "#201A42",
+    "baseline": 1170,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Volume 12",
+        "component": "Volume value",
+        "search_box": [
+          277,
+          1144,
+          151,
+          38
+        ],
+        "box": [
+          279,
+          1149,
+          130,
+          22
+        ],
+        "bg": "#EBE8F5",
+        "ink": "#201A42",
+        "baseline": 1170,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Favourite apps section heading": {
+    "sample": "Favourite apps",
+    "found": true,
+    "source": "component: Favourite apps title",
+    "search_box": [
+      40,
+      1388,
+      172,
+      31
+    ],
+    "line_height_px": null,
+    "box": [
+      42,
+      1392,
+      151,
+      22
+    ],
+    "bg": "#F8F7FC",
+    "ink": "#312C49",
+    "baseline": 1409,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Favourite apps",
+        "component": "Favourite apps title",
+        "search_box": [
+          40,
+          1388,
+          172,
+          31
+        ],
+        "box": [
+          42,
+          1392,
+          151,
+          22
+        ],
+        "bg": "#F8F7FC",
+        "ink": "#312C49",
+        "baseline": 1409,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Edit favourites text action": {
+    "sample": "Edit",
+    "found": true,
+    "source": "component: Edit favourite apps",
+    "search_box": [
+      758,
+      1382,
+      55,
+      40
+    ],
+    "line_height_px": null,
+    "box": [
+      773,
+      1391,
+      39,
+      18
+    ],
+    "bg": "#F9F7FD",
+    "ink": "#5524D3",
+    "baseline": 1409,
+    "line_pitch": null,
+    "instances": [
+      {
+        "sample": "Edit",
+        "component": "Edit favourite apps",
+        "search_box": [
+          758,
+          1382,
+          55,
+          40
+        ],
+        "box": [
+          773,
+          1391,
+          39,
+          18
+        ],
+        "bg": "#F9F7FD",
+        "ink": "#5524D3",
+        "baseline": 1409,
+        "line_pitch": null
+      }
+    ]
+  },
+  "Favourite app captions": {
+    "sample": "YouTube \u00b7 Netflix \u00b7 Hoichoi \u00b7 Toffee \u00b7 VLC",
+    "found": false
+  },
+  "Bottom utility action captions": {
+    "sample": "Keyboard \u00b7 Voice \u00b7 Power",
+    "found": false
+  }
+}

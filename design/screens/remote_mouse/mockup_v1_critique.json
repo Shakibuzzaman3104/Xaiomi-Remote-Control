@@ -1,0 +1,41 @@
+{
+  "mockup": "design/screens/remote_mouse/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_mouse/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "\u201cConnected\u201d and \u201cMove cursor by tilting your phone\u201d have insufficient text contrast, and the touchpad\u2019s scroll thumb and arrows fall below the 3:1 contrast requirement for controls.",
+          "edit": "Darken the muted text to at least 4.5:1 contrast and the scroll thumb and arrows to at least 3:1 against their backgrounds.",
+          "bbox": {
+            "x": 188,
+            "y": 129,
+            "w": 157,
+            "h": 36
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.7
+        },
+        {
+          "category": "icons",
+          "problem": "The \u201cRight click\u201d icon highlights the mouse\u2019s upper-left button, contradicting its label.",
+          "edit": "Move the highlighted mouse segment to the upper-right button in the \u201cRight click\u201d icon.",
+          "bbox": {
+            "x": 534,
+            "y": 859,
+            "w": 37,
+            "h": 51
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 2
+        }
+      ],
+      "weight": 4
+    }
+  ],
+  "best": "design/screens/remote_mouse/mockup_v1.png"
+}

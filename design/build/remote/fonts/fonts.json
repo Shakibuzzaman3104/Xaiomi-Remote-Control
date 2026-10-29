@@ -1,0 +1,647 @@
+{
+  "families": [
+    {
+      "family": "Open Sans",
+      "category": "Sans Serif",
+      "license": "OFL",
+      "source": "ofl/opensans",
+      "files": [
+        {
+          "weight": 500,
+          "italic": false,
+          "ttf": "ttf/OpenSans-Medium.ttf",
+          "android": "open_sans_medium",
+          "postscript": "OpenSans-Medium",
+          "woff2": "ttf/OpenSans-Medium.woff2"
+        },
+        {
+          "weight": 600,
+          "italic": false,
+          "ttf": "ttf/OpenSans-SemiBold.ttf",
+          "android": "open_sans_semibold",
+          "postscript": "OpenSans-SemiBold",
+          "woff2": "ttf/OpenSans-SemiBold.woff2"
+        },
+        {
+          "weight": 700,
+          "italic": false,
+          "ttf": "ttf/OpenSans-Bold.ttf",
+          "android": "open_sans_bold",
+          "postscript": "OpenSans-Bold",
+          "woff2": "ttf/OpenSans-Bold.woff2"
+        }
+      ],
+      "postscript": {
+        "500": "OpenSans-Medium",
+        "600": "OpenSans-SemiBold",
+        "700": "OpenSans-Bold"
+      },
+      "android_family": "@font/open_sans",
+      "css": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@500;600;700&display=swap",
+      "css_fallback": "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    }
+  ],
+  "groups": [
+    {
+      "guess": "Roboto",
+      "category": "Sans Serif",
+      "italic": false,
+      "winner": "Open Sans",
+      "decided_by": "best measured",
+      "ranking": [
+        [
+          "Open Sans",
+          0.962
+        ],
+        [
+          "Inter",
+          0.926
+        ],
+        [
+          "Figtree",
+          0.9196
+        ],
+        [
+          "Google Sans",
+          0.9194
+        ],
+        [
+          "Roboto",
+          0.9139
+        ],
+        [
+          "Rubik",
+          0.904
+        ],
+        [
+          "Merriweather Sans",
+          0.8991
+        ],
+        [
+          "Nunito Sans",
+          0.8987
+        ]
+      ],
+      "styles": [
+        "Connected device title",
+        "Device connection subtitle",
+        "Current media title",
+        "Elapsed playback time",
+        "Playback separator and total duration",
+        "Directional-pad confirm label",
+        "Volume readout",
+        "Favourite apps section heading",
+        "Edit favourites text action"
+      ],
+      "downloads_failed": []
+    }
+  ],
+  "styles": [
+    {
+      "role": "Connected device title",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 31.3,
+      "tracking_em": -0.018,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.759,
+          0.74
+        ]
+      },
+      "similarity": 0.74,
+      "word_mode": true,
+      "natural_line_height_em": 1.408,
+      "ascent_em": 1.088,
+      "spec": {
+        "size_px": 32.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Inter",
+          500,
+          0.8037
+        ],
+        [
+          "Inter",
+          600,
+          0.7887
+        ],
+        [
+          "Figtree",
+          600,
+          0.7778
+        ],
+        [
+          "Google Sans",
+          500,
+          0.7692
+        ],
+        [
+          "Roboto",
+          500,
+          0.7602
+        ],
+        [
+          "DM Sans",
+          500,
+          0.7592
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.759 vs 0.740); kept the spec's 500"
+    },
+    {
+      "role": "Device connection subtitle",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 23.1,
+      "tracking_em": -0.016,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.7842,
+          0.7576
+        ]
+      },
+      "similarity": 0.7576,
+      "word_mode": false,
+      "natural_line_height_em": 1.384,
+      "ascent_em": 1.081,
+      "spec": {
+        "size_px": 24.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Merriweather Sans",
+          400,
+          0.788
+        ],
+        [
+          "Open Sans",
+          600,
+          0.7842
+        ],
+        [
+          "Merriweather Sans",
+          600,
+          0.773
+        ],
+        [
+          "Nunito Sans",
+          500,
+          0.7707
+        ],
+        [
+          "Merriweather Sans",
+          500,
+          0.7664
+        ],
+        [
+          "PT Sans",
+          700,
+          0.7622
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.784 vs 0.758); kept the spec's 500"
+    },
+    {
+      "role": "Current media title",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 30.1,
+      "tracking_em": -0.022,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.7706,
+          0.7434
+        ]
+      },
+      "similarity": 0.7434,
+      "word_mode": true,
+      "natural_line_height_em": 1.395,
+      "ascent_em": 1.096,
+      "spec": {
+        "size_px": 30.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "PT Sans",
+          700,
+          0.7889
+        ],
+        [
+          "Open Sans",
+          600,
+          0.7706
+        ],
+        [
+          "Merriweather Sans",
+          500,
+          0.7657
+        ],
+        [
+          "DM Sans",
+          600,
+          0.7652
+        ],
+        [
+          "Lato",
+          700,
+          0.7631
+        ],
+        [
+          "Kanit",
+          400,
+          0.7603
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.771 vs 0.743); kept the spec's 500"
+    },
+    {
+      "role": "Elapsed playback time",
+      "family": "Open Sans",
+      "weight": 600,
+      "italic": false,
+      "size_px": 23.6,
+      "tracking_em": 0.014,
+      "reliable": true,
+      "weight_tie": null,
+      "similarity": 0.737,
+      "word_mode": false,
+      "natural_line_height_em": 1.397,
+      "ascent_em": 1.1,
+      "spec": {
+        "size_px": 24.0,
+        "weight": 600,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Arimo",
+          600,
+          0.8087
+        ],
+        [
+          "Arimo",
+          500,
+          0.8031
+        ],
+        [
+          "Nunito Sans",
+          700,
+          0.8002
+        ],
+        [
+          "Lato",
+          700,
+          0.7994
+        ],
+        [
+          "Nunito Sans",
+          600,
+          0.7977
+        ],
+        [
+          "Nunito",
+          600,
+          0.7932
+        ]
+      ]
+    },
+    {
+      "role": "Playback separator and total duration",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": null,
+      "tracking_em": 0,
+      "reliable": false,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.3488,
+          0.3446
+        ]
+      },
+      "similarity": 0.3446,
+      "word_mode": true,
+      "natural_line_height_em": 1.386,
+      "ascent_em": 1.073,
+      "spec": {
+        "size_px": 24.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Kanit",
+          500,
+          0.3569
+        ],
+        [
+          "Rajdhani",
+          600,
+          0.3557
+        ],
+        [
+          "Work Sans",
+          600,
+          0.3533
+        ],
+        [
+          "Outfit",
+          500,
+          0.3521
+        ],
+        [
+          "Work Sans",
+          500,
+          0.3519
+        ],
+        [
+          "Outfit",
+          600,
+          0.3513
+        ]
+      ],
+      "warning": "unreliable measurement (best fit 0.36); kept the spec's size/weight/tracking; check its box in text_boxes.png",
+      "note": "weights 600 and 500 tie within 0.07 (0.349 vs 0.345); kept the spec's 500"
+    },
+    {
+      "role": "Directional-pad confirm label",
+      "family": "Open Sans",
+      "weight": 700,
+      "italic": false,
+      "size_px": 42.5,
+      "tracking_em": 0.024,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 800,
+        "chosen": 700,
+        "similarity": [
+          0.7549,
+          0.7238
+        ]
+      },
+      "similarity": 0.7238,
+      "word_mode": false,
+      "natural_line_height_em": 1.388,
+      "ascent_em": 1.082,
+      "spec": {
+        "size_px": 44.0,
+        "weight": 700,
+        "letter_spacing_em": -0.02,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Kanit",
+          600,
+          0.8634
+        ],
+        [
+          "Poppins",
+          700,
+          0.8319
+        ],
+        [
+          "Lato",
+          900,
+          0.8256
+        ],
+        [
+          "Outfit",
+          700,
+          0.8054
+        ],
+        [
+          "Nunito Sans",
+          800,
+          0.8033
+        ],
+        [
+          "Archivo",
+          700,
+          0.7956
+        ]
+      ],
+      "warning": "fits Open Sans poorly (0.72); Kanit 600 fits this style much better (0.86)",
+      "note": "weights 800 and 700 tie within 0.07 (0.755 vs 0.724); kept the spec's 700"
+    },
+    {
+      "role": "Volume readout",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 27.7,
+      "tracking_em": -0.041,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.7198,
+          0.6997
+        ]
+      },
+      "similarity": 0.6997,
+      "word_mode": true,
+      "natural_line_height_em": 1.41,
+      "ascent_em": 1.084,
+      "spec": {
+        "size_px": 28.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Inter",
+          600,
+          0.7272
+        ],
+        [
+          "Open Sans",
+          600,
+          0.7198
+        ],
+        [
+          "PT Sans",
+          400,
+          0.7174
+        ],
+        [
+          "Arimo",
+          600,
+          0.7161
+        ],
+        [
+          "Archivo",
+          600,
+          0.7154
+        ],
+        [
+          "Google Sans",
+          600,
+          0.7152
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.720 vs 0.700); kept the spec's 500"
+    },
+    {
+      "role": "Favourite apps section heading",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 21.7,
+      "tracking_em": 0.0,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.8407,
+          0.8257
+        ]
+      },
+      "similarity": 0.8257,
+      "word_mode": true,
+      "natural_line_height_em": 1.426,
+      "ascent_em": 1.104,
+      "spec": {
+        "size_px": 23.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Open Sans",
+          600,
+          0.8407
+        ],
+        [
+          "Open Sans",
+          500,
+          0.8257
+        ],
+        [
+          "Figtree",
+          600,
+          0.7885
+        ],
+        [
+          "Open Sans",
+          400,
+          0.7791
+        ],
+        [
+          "Figtree",
+          500,
+          0.7784
+        ],
+        [
+          "Kanit",
+          400,
+          0.7775
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.841 vs 0.826); kept the spec's 500"
+    },
+    {
+      "role": "Edit favourites text action",
+      "family": "Open Sans",
+      "weight": 500,
+      "italic": false,
+      "size_px": 22.5,
+      "tracking_em": 0.0,
+      "reliable": true,
+      "weight_tie": {
+        "measured": 600,
+        "chosen": 500,
+        "similarity": [
+          0.8406,
+          0.8391
+        ]
+      },
+      "similarity": 0.8391,
+      "word_mode": false,
+      "natural_line_height_em": 1.422,
+      "ascent_em": 1.111,
+      "spec": {
+        "size_px": 23.0,
+        "weight": 500,
+        "letter_spacing_em": 0,
+        "family_guess": "Roboto"
+      },
+      "alternatives": [
+        [
+          "Merriweather Sans",
+          400,
+          0.8429
+        ],
+        [
+          "Rajdhani",
+          600,
+          0.8417
+        ],
+        [
+          "Open Sans",
+          600,
+          0.8406
+        ],
+        [
+          "Open Sans",
+          500,
+          0.8391
+        ],
+        [
+          "Merriweather Sans",
+          600,
+          0.8224
+        ],
+        [
+          "Merriweather Sans",
+          500,
+          0.8181
+        ]
+      ],
+      "note": "weights 600 and 500 tie within 0.07 (0.841 vs 0.839); kept the spec's 500"
+    }
+  ],
+  "unmatched": [
+    "Status bar time and battery percentage",
+    "Selected input mode",
+    "Unselected input modes",
+    "Remote action captions",
+    "Favourite app captions",
+    "Bottom utility action captions"
+  ],
+  "downloads_failed": [],
+  "link_html": "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Open+Sans:wght@500;600;700&display=swap\" rel=\"stylesheet\">",
+  "aapt2": "aapt2 compile+link ok (android-37.0) (app: attributes against androidx.core's FontFamilyFont declaration)",
+  "paths_relative_to": "design/build/remote/fonts"
+}

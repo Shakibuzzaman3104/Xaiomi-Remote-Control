@@ -1,0 +1,1020 @@
+{
+  "components": [
+    {
+      "name": "Screen background",
+      "native": "custom",
+      "notes": "Reference canvas is 853 \u00d7 1843 px; logical width is 412 dp. Convert all image measurements to dp or sp by multiplying by 412/853 = 0.4830. Background is very pale lavender with subtle soft variation. Sampled colors and geometry are visual estimates.",
+      "bbox": {
+        "x": 0,
+        "y": 0,
+        "w": 853,
+        "h": 1843
+      }
+    },
+    {
+      "name": "Android status bar",
+      "native": "system",
+      "notes": "Transparent background; dark icons. Time at approximately x48 y24; connectivity, battery, and percentage occupy x630\u2013802. Match OS status-bar insets rather than rendering these as application content.",
+      "bbox": {
+        "x": 0,
+        "y": 0,
+        "w": 853,
+        "h": 66
+      }
+    },
+    {
+      "name": "Device connection app bar",
+      "native": "TopAppBar (small)",
+      "notes": "Transparent container. Custom two-line title content, leading display icon, dropdown chevron after device name, and trailing overflow action. Standard Material app-bar default dimensions require adjustment to match this reference.",
+      "bbox": {
+        "x": 40,
+        "y": 77,
+        "w": 773,
+        "h": 104
+      }
+    },
+    {
+      "name": "Connected-device display icon",
+      "native": "custom",
+      "notes": "Outlined television icon; visible artwork approximately x45 y104, 55 \u00d7 42 px. Dark purple stroke approximately 4 px.",
+      "bbox": {
+        "x": 40,
+        "y": 94,
+        "w": 64,
+        "h": 62
+      }
+    },
+    {
+      "name": "Device title",
+      "native": "custom",
+      "notes": "Single-line text: Living Room \u00b7 Mi Box S. Baseline approximately y115.",
+      "bbox": {
+        "x": 148,
+        "y": 85,
+        "w": 324,
+        "h": 42
+      }
+    },
+    {
+      "name": "Device dropdown chevron",
+      "native": "custom",
+      "notes": "Down chevron with approximately 3 px stroke. Device title and chevron share the device-selector click target.",
+      "bbox": {
+        "x": 481,
+        "y": 92,
+        "w": 28,
+        "h": 28
+      }
+    },
+    {
+      "name": "Connected status",
+      "native": "custom",
+      "notes": "Wi-Fi icon at x151 y134, approximately 27 \u00d7 22 px; Connected text starts at x191. Full component includes icon and status text.",
+      "bbox": {
+        "x": 149,
+        "y": 130,
+        "w": 166,
+        "h": 35
+      }
+    },
+    {
+      "name": "More options",
+      "native": "Buttons (text)",
+      "notes": "Icon-only overflow action with three vertical dark dots. Visible artwork approximately x796\u2013804, y106\u2013137. Use an IconButton implementation with a minimum 48 dp interaction target.",
+      "bbox": {
+        "x": 771,
+        "y": 86,
+        "w": 58,
+        "h": 74
+      }
+    },
+    {
+      "name": "Current media summary",
+      "native": "custom",
+      "notes": "Horizontal media row containing YouTube artwork, title, elapsed/total time, and a thin seek-progress line beneath the text.",
+      "bbox": {
+        "x": 40,
+        "y": 202,
+        "w": 773,
+        "h": 61
+      }
+    },
+    {
+      "name": "Current media YouTube logo",
+      "native": "custom",
+      "notes": "Red rounded YouTube badge with white play triangle. Preserve the branded silhouette using a vector asset.",
+      "bbox": {
+        "x": 40,
+        "y": 206,
+        "w": 64,
+        "h": 45
+      }
+    },
+    {
+      "name": "Current media title",
+      "native": "custom",
+      "notes": "Single-line text: Me at the zoo.",
+      "bbox": {
+        "x": 127,
+        "y": 201,
+        "w": 203,
+        "h": 39
+      }
+    },
+    {
+      "name": "Playback time",
+      "native": "custom",
+      "notes": "One text block: 0:12 / 0:19. Elapsed time is purple; slash and total are muted lavender.",
+      "bbox": {
+        "x": 694,
+        "y": 204,
+        "w": 119,
+        "h": 34
+      }
+    },
+    {
+      "name": "Playback progress",
+      "native": "progress indicators (linear determinate)",
+      "notes": "Rounded 7 px track; active segment approximately 432 px, ending at x559. Progress is approximately 63%. No thumb or stop marker.",
+      "bbox": {
+        "x": 127,
+        "y": 248,
+        "w": 686,
+        "h": 7
+      }
+    },
+    {
+      "name": "Remote input mode selector",
+      "native": "SegmentedButton (single-choice)",
+      "notes": "Four icon-and-label segments in one pale lavender pill. D-pad selected. Remove standard outlined borders and checkmark; selected segment is a solid purple pill. Content order: D-pad, Swipe, Mouse, Numpad.",
+      "bbox": {
+        "x": 40,
+        "y": 294,
+        "w": 773,
+        "h": 86
+      }
+    },
+    {
+      "name": "D-pad mode segment",
+      "native": "SegmentedButton (single-choice, selected)",
+      "notes": "White four-direction icon at approximately x77 y317, 39 \u00d7 40 px; label at x134 y324. Entire segment is selected.",
+      "bbox": {
+        "x": 40,
+        "y": 294,
+        "w": 197,
+        "h": 86
+      }
+    },
+    {
+      "name": "Swipe mode segment",
+      "native": "SegmentedButton (single-choice, unselected)",
+      "notes": "Outlined gesture-hand icon at approximately x277 y318, 32 \u00d7 39 px; label begins x331.",
+      "bbox": {
+        "x": 237,
+        "y": 294,
+        "w": 192,
+        "h": 86
+      }
+    },
+    {
+      "name": "Mouse mode segment",
+      "native": "SegmentedButton (single-choice, unselected)",
+      "notes": "Outlined mouse icon at approximately x469 y318, 26 \u00d7 39 px; label begins x518.",
+      "bbox": {
+        "x": 429,
+        "y": 294,
+        "w": 192,
+        "h": 86
+      }
+    },
+    {
+      "name": "Numpad mode segment",
+      "native": "SegmentedButton (single-choice, unselected)",
+      "notes": "Nine-dot icon at approximately x647 y322, 32 \u00d7 32 px; label begins x699.",
+      "bbox": {
+        "x": 621,
+        "y": 294,
+        "w": 192,
+        "h": 86
+      }
+    },
+    {
+      "name": "Circular directional pad",
+      "native": "custom",
+      "notes": "480 px diameter, approximately 232 dp. Center at approximately (427, 658). Pale lavender fill, 1\u20131.5 px outline, four diagonal separators, and a central circular OK button. Use Canvas or custom-shaped clickable regions; clip every region to the disk. Outer stroke and separators are faint lavender.",
+      "bbox": {
+        "x": 187,
+        "y": 418,
+        "w": 480,
+        "h": 480
+      }
+    },
+    {
+      "name": "D-pad up region",
+      "native": "custom",
+      "notes": "Upper annular sector; bbox describes the entire curved sector, not just its chevron. Chevron artwork approximately x406\u2013447, y494\u2013516.",
+      "bbox": {
+        "x": 257,
+        "y": 418,
+        "w": 340,
+        "h": 180
+      }
+    },
+    {
+      "name": "D-pad right region",
+      "native": "custom",
+      "notes": "Right annular sector. Chevron artwork approximately x575\u2013596, y638\u2013678.",
+      "bbox": {
+        "x": 487,
+        "y": 488,
+        "w": 180,
+        "h": 340
+      }
+    },
+    {
+      "name": "D-pad down region",
+      "native": "custom",
+      "notes": "Lower annular sector. Chevron artwork approximately x406\u2013447, y800\u2013822.",
+      "bbox": {
+        "x": 257,
+        "y": 718,
+        "w": 340,
+        "h": 180
+      }
+    },
+    {
+      "name": "D-pad left region",
+      "native": "custom",
+      "notes": "Left annular sector. Chevron artwork approximately x257\u2013278, y638\u2013678.",
+      "bbox": {
+        "x": 187,
+        "y": 488,
+        "w": 180,
+        "h": 340
+      }
+    },
+    {
+      "name": "D-pad OK button",
+      "native": "Buttons (tonal)",
+      "notes": "Circular button with slightly stronger lavender fill and a thin lavender border. Centered OK label. No elevation.",
+      "bbox": {
+        "x": 342,
+        "y": 573,
+        "w": 169,
+        "h": 169
+      }
+    },
+    {
+      "name": "Back action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes 110 \u00d7 110 px circular icon button and Back label below. Circle at x127 y922; arrow artwork approximately x165 y960, 37 \u00d7 35 px. Text centered around x182.",
+      "bbox": {
+        "x": 127,
+        "y": 922,
+        "w": 110,
+        "h": 147
+      }
+    },
+    {
+      "name": "Home action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes 110 \u00d7 110 px circle and Home label. House icon approximately x408 y959, 38 \u00d7 39 px.",
+      "bbox": {
+        "x": 372,
+        "y": 922,
+        "w": 110,
+        "h": 147
+      }
+    },
+    {
+      "name": "Settings action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes 110 \u00d7 110 px circle and Settings label. Thin circle outline; gear artwork approximately x650 y957, 42 \u00d7 42 px.",
+      "bbox": {
+        "x": 616,
+        "y": 922,
+        "w": 110,
+        "h": 147
+      }
+    },
+    {
+      "name": "Volume control group",
+      "native": "custom",
+      "notes": "Large filled lavender capsule containing separate minus and plus tonal buttons and centered Volume 12 text. This is a stepper, with no visible slider track.",
+      "bbox": {
+        "x": 85,
+        "y": 1101,
+        "w": 525,
+        "h": 119
+      }
+    },
+    {
+      "name": "Decrease volume",
+      "native": "Buttons (tonal)",
+      "notes": "Circular inset button. Minus artwork approximately x135\u2013166, y1159\u20131163.",
+      "bbox": {
+        "x": 105,
+        "y": 1116,
+        "w": 90,
+        "h": 90
+      }
+    },
+    {
+      "name": "Volume value",
+      "native": "custom",
+      "notes": "Single centered text block: Volume 12.",
+      "bbox": {
+        "x": 277,
+        "y": 1144,
+        "w": 151,
+        "h": 38
+      }
+    },
+    {
+      "name": "Increase volume",
+      "native": "Buttons (tonal)",
+      "notes": "Circular inset button. Plus artwork approximately x527\u2013562, y1143\u20131179.",
+      "bbox": {
+        "x": 499,
+        "y": 1116,
+        "w": 90,
+        "h": 90
+      }
+    },
+    {
+      "name": "Mute action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes 111 \u00d7 111 px circular icon button and Mute label. Slashed-speaker icon approximately x689 y1138, 47 \u00d7 43 px.",
+      "bbox": {
+        "x": 657,
+        "y": 1101,
+        "w": 111,
+        "h": 145
+      }
+    },
+    {
+      "name": "Previous / rewind",
+      "native": "Buttons (tonal)",
+      "notes": "Circular button. Filled double-left-triangle artwork approximately x212 y1291, 46 \u00d7 29 px.",
+      "bbox": {
+        "x": 179,
+        "y": 1248,
+        "w": 114,
+        "h": 114
+      }
+    },
+    {
+      "name": "Pause playback",
+      "native": "Buttons (tonal)",
+      "notes": "Circular button, larger than adjacent transport buttons. Two filled dark pause bars approximately x412 y1286 through x442 y1325.",
+      "bbox": {
+        "x": 364,
+        "y": 1242,
+        "w": 126,
+        "h": 126
+      }
+    },
+    {
+      "name": "Next / fast forward",
+      "native": "Buttons (tonal)",
+      "notes": "Circular button. Filled double-right-triangle artwork approximately x596 y1291, 46 \u00d7 29 px.",
+      "bbox": {
+        "x": 561,
+        "y": 1248,
+        "w": 114,
+        "h": 114
+      }
+    },
+    {
+      "name": "Favourite apps header row",
+      "native": "custom",
+      "notes": "Section title left-aligned with screen margin; Edit text action aligned to x813 at the right.",
+      "bbox": {
+        "x": 40,
+        "y": 1387,
+        "w": 773,
+        "h": 36
+      }
+    },
+    {
+      "name": "Favourite apps title",
+      "native": "custom",
+      "notes": "Single-line section title: Favourite apps.",
+      "bbox": {
+        "x": 40,
+        "y": 1388,
+        "w": 172,
+        "h": 31
+      }
+    },
+    {
+      "name": "Edit favourite apps",
+      "native": "Buttons (text)",
+      "notes": "Purple Edit label; visible glyphs approximately x771 y1392. Expand interaction target to 48 dp without shifting the artwork.",
+      "bbox": {
+        "x": 758,
+        "y": 1382,
+        "w": 55,
+        "h": 40
+      }
+    },
+    {
+      "name": "Favourite apps horizontal carousel",
+      "native": "custom",
+      "notes": "Compose LazyRow with 24 px item spacing. Each full item is approximately 146\u2013148 px wide. Viewport clips the right side of VLC at x813, retaining the 40 px right page gutter.",
+      "bbox": {
+        "x": 40,
+        "y": 1426,
+        "w": 773,
+        "h": 151
+      }
+    },
+    {
+      "name": "YouTube favourite app",
+      "native": "Cards (outlined)",
+      "notes": "Whole item includes a 146 \u00d7 109 px outlined logo tile and YouTube label below. Tile corners approximately 26 px. Red logo artwork approximately x79 y1457, 68 \u00d7 47 px. Label centered below tile.",
+      "bbox": {
+        "x": 40,
+        "y": 1426,
+        "w": 146,
+        "h": 146
+      }
+    },
+    {
+      "name": "Netflix favourite app",
+      "native": "Cards (outlined)",
+      "notes": "Whole item includes a 148 \u00d7 109 px tile and Netflix label. Red N artwork approximately x266 y1450, 37 \u00d7 64 px.",
+      "bbox": {
+        "x": 209,
+        "y": 1426,
+        "w": 148,
+        "h": 146
+      }
+    },
+    {
+      "name": "Hoichoi favourite app",
+      "native": "Cards (outlined)",
+      "notes": "Whole item includes a 148 \u00d7 109 px tile and Hoichoi label. Red h artwork approximately x439 y1450, 35 \u00d7 63 px.",
+      "bbox": {
+        "x": 381,
+        "y": 1426,
+        "w": 148,
+        "h": 146
+      }
+    },
+    {
+      "name": "Toffee favourite app",
+      "native": "Cards (outlined)",
+      "notes": "Whole item includes a 148 \u00d7 109 px tile and Toffee label. Magenta logo artwork approximately x589 y1457, 72 \u00d7 51 px.",
+      "bbox": {
+        "x": 553,
+        "y": 1426,
+        "w": 148,
+        "h": 146
+      }
+    },
+    {
+      "name": "VLC favourite app, visible portion",
+      "native": "Cards (outlined)",
+      "notes": "BBox covers the entire visible clipped component, including the visible tile and VLC label. Logical item width is approximately 148 px, extending to x872; carousel viewport ends at x813. Orange cone asset is also clipped by that viewport.",
+      "bbox": {
+        "x": 724,
+        "y": 1426,
+        "w": 89,
+        "h": 146
+      }
+    },
+    {
+      "name": "Bottom action separator",
+      "native": "custom",
+      "notes": "Single faint lavender horizontal divider. Use HorizontalDivider.",
+      "bbox": {
+        "x": 40,
+        "y": 1602,
+        "w": 773,
+        "h": 1
+      }
+    },
+    {
+      "name": "Keyboard action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes a 112 \u00d7 112 px circular button and Keyboard label. Keyboard icon approximately x207 y1669, 43 \u00d7 30 px.",
+      "bbox": {
+        "x": 173,
+        "y": 1628,
+        "w": 112,
+        "h": 147
+      }
+    },
+    {
+      "name": "Voice action",
+      "native": "FloatingActionButton (large)",
+      "notes": "Custom circular 135 \u00d7 135 px purple button with Voice label below. White microphone icon approximately x407 y1656, 40 \u00d7 54 px. Remove FAB elevation and override default shape and size; this is the most prominent bottom action.",
+      "bbox": {
+        "x": 359,
+        "y": 1615,
+        "w": 135,
+        "h": 170
+      }
+    },
+    {
+      "name": "Power action",
+      "native": "Buttons (tonal)",
+      "notes": "Whole component includes a 111 \u00d7 112 px circle and Power label. Power icon approximately x605 y1663, 44 \u00d7 46 px. Bottom actions are commands, so do not implement them as navigation destinations.",
+      "bbox": {
+        "x": 570,
+        "y": 1628,
+        "w": 111,
+        "h": 147
+      }
+    },
+    {
+      "name": "System gesture navigation area",
+      "native": "system",
+      "notes": "Transparent system navigation area. Visible rounded gesture handle approximately x334 y1817, 185 \u00d7 8 px, muted lavender.",
+      "bbox": {
+        "x": 0,
+        "y": 1802,
+        "w": 853,
+        "h": 41
+      }
+    }
+  ],
+  "palette": [
+    {
+      "hex": "#F8F6FD",
+      "name": "Background",
+      "usage": "Main screen and transparent system-bar backdrop; approximate base of the subtle lavender variation."
+    },
+    {
+      "hex": "#EEEAF6",
+      "name": "Surface container",
+      "usage": "Mode selector track, circular action buttons, transport controls, D-pad outer surface, and volume capsule."
+    },
+    {
+      "hex": "#E7E1F2",
+      "name": "Surface container stronger",
+      "usage": "Inset plus/minus volume buttons."
+    },
+    {
+      "hex": "#E5DCF8",
+      "name": "D-pad center",
+      "usage": "OK button fill."
+    },
+    {
+      "hex": "#643BB6",
+      "name": "Primary",
+      "usage": "Selected D-pad segment and large voice button; fills show slight tonal variation."
+    },
+    {
+      "hex": "#713DE0",
+      "name": "Primary text",
+      "usage": "Elapsed playback time and Edit action."
+    },
+    {
+      "hex": "#603BBC",
+      "name": "Progress active",
+      "usage": "Filled portion of playback progress."
+    },
+    {
+      "hex": "#0C0826",
+      "name": "On surface strongest",
+      "usage": "Device title, media title, and OK text."
+    },
+    {
+      "hex": "#352E4B",
+      "name": "On surface",
+      "usage": "Most control icons, volume text, unselected mode labels, and status-bar icons."
+    },
+    {
+      "hex": "#504865",
+      "name": "On surface variant",
+      "usage": "Action captions and favourite app labels."
+    },
+    {
+      "hex": "#9790AF",
+      "name": "Muted text",
+      "usage": "Connected status and total playback time."
+    },
+    {
+      "hex": "#DFDAED",
+      "name": "Progress track",
+      "usage": "Inactive progress line."
+    },
+    {
+      "hex": "#D9CDF4",
+      "name": "D-pad outline",
+      "usage": "Outer directional-pad border, radial separators, and center-button outline."
+    },
+    {
+      "hex": "#E8E1F5",
+      "name": "Subtle outline",
+      "usage": "Favourite app card borders, Settings circle border, and bottom divider."
+    },
+    {
+      "hex": "#FCFAFF",
+      "name": "App tile surface",
+      "usage": "Near-white favourite app tiles."
+    },
+    {
+      "hex": "#FAF7FF",
+      "name": "On primary",
+      "usage": "Selected D-pad mode icon/text and microphone icon."
+    },
+    {
+      "hex": "#AAA2BF",
+      "name": "Gesture handle",
+      "usage": "System home gesture indicator."
+    },
+    {
+      "hex": "#FF0814",
+      "name": "YouTube red",
+      "usage": "YouTube brand assets; preserve original asset shading."
+    },
+    {
+      "hex": "#E50914",
+      "name": "Netflix red",
+      "usage": "Netflix N brand asset, with darker folded ribbon shading."
+    },
+    {
+      "hex": "#FF050A",
+      "name": "Hoichoi red",
+      "usage": "Hoichoi h brand asset."
+    },
+    {
+      "hex": "#EC009A",
+      "name": "Toffee magenta",
+      "usage": "Toffee brand asset, with pink tonal variations."
+    },
+    {
+      "hex": "#FF8C00",
+      "name": "VLC orange",
+      "usage": "VLC traffic-cone brand asset."
+    },
+    {
+      "hex": "#FFFFFF",
+      "name": "Brand white",
+      "usage": "YouTube play triangles and VLC cone stripes."
+    }
+  ],
+  "radii": [
+    {
+      "element": "Mode selector outer container",
+      "px": 32
+    },
+    {
+      "element": "Selected D-pad segment",
+      "px": 32
+    },
+    {
+      "element": "Circular D-pad outer edge",
+      "px": 240
+    },
+    {
+      "element": "D-pad OK button",
+      "px": 84.5
+    },
+    {
+      "element": "Back, Home, and Settings button circles",
+      "px": 55
+    },
+    {
+      "element": "Volume capsule",
+      "px": 59.5
+    },
+    {
+      "element": "Volume minus and plus buttons",
+      "px": 45
+    },
+    {
+      "element": "Mute button",
+      "px": 55.5
+    },
+    {
+      "element": "Previous and next transport buttons",
+      "px": 57
+    },
+    {
+      "element": "Pause button",
+      "px": 63
+    },
+    {
+      "element": "Favourite app tiles",
+      "px": 26
+    },
+    {
+      "element": "Keyboard and Power buttons",
+      "px": 56
+    },
+    {
+      "element": "Voice button",
+      "px": 67.5
+    },
+    {
+      "element": "Playback progress track and fill",
+      "px": 3.5
+    },
+    {
+      "element": "System gesture handle",
+      "px": 4
+    },
+    {
+      "element": "Current media YouTube badge, approximate",
+      "px": 13
+    }
+  ],
+  "spacing": [
+    {
+      "between": "Conversion: one logical dp to image pixels",
+      "px": 2.0704
+    },
+    {
+      "between": "Main content and left/right screen edges",
+      "px": 40
+    },
+    {
+      "between": "Device icon left edge and device title left edge",
+      "px": 103
+    },
+    {
+      "between": "Device title and connection status line, approximate visible ink gap",
+      "px": 10
+    },
+    {
+      "between": "Current media logo right edge and title/progress left edge",
+      "px": 23
+    },
+    {
+      "between": "Media progress bottom and mode selector top",
+      "px": 39
+    },
+    {
+      "between": "Mode selector bottom and directional-pad top",
+      "px": 38
+    },
+    {
+      "between": "Directional-pad side edges and screen edges",
+      "px": 187
+    },
+    {
+      "between": "Directional-pad bottom and Back/Home/Settings circle tops",
+      "px": 24
+    },
+    {
+      "between": "Back and Home button centers",
+      "px": 245
+    },
+    {
+      "between": "Home and Settings button centers",
+      "px": 244
+    },
+    {
+      "between": "Back/Home/Settings circles and caption line boxes",
+      "px": 7
+    },
+    {
+      "between": "Back/Home/Settings full row bottom and volume capsule top",
+      "px": 32
+    },
+    {
+      "between": "Volume capsule left edge and minus-button left edge",
+      "px": 20
+    },
+    {
+      "between": "Volume capsule right edge and Mute circle left edge",
+      "px": 47
+    },
+    {
+      "between": "Volume capsule top and inset buttons top",
+      "px": 15
+    },
+    {
+      "between": "Volume capsule bottom and pause-button top",
+      "px": 22
+    },
+    {
+      "between": "Transport button centers horizontally",
+      "px": 191
+    },
+    {
+      "between": "Pause-button bottom and Favourite apps text block top",
+      "px": 20
+    },
+    {
+      "between": "Favourite apps header block bottom and app tiles top",
+      "px": 7
+    },
+    {
+      "between": "Favourite app tile edges horizontally",
+      "px": 24
+    },
+    {
+      "between": "Favourite app tile bottom and caption line box top",
+      "px": 7
+    },
+    {
+      "between": "Favourite app caption block bottom and divider",
+      "px": 30
+    },
+    {
+      "between": "Divider and Keyboard/Power circle tops",
+      "px": 25
+    },
+    {
+      "between": "Divider and Voice circle top",
+      "px": 12
+    },
+    {
+      "between": "Keyboard, Voice, and Power action centers horizontally",
+      "px": 198
+    },
+    {
+      "between": "Keyboard/Power circles and caption line boxes",
+      "px": 7
+    },
+    {
+      "between": "Voice circle bottom and caption line box top",
+      "px": 8
+    },
+    {
+      "between": "Voice caption block bottom and system gesture handle top",
+      "px": 32
+    }
+  ],
+  "typography": [
+    {
+      "color": "#352E4B",
+      "family_guess": "Roboto / Android system sans-serif",
+      "letter_spacing_em": 0,
+      "platform_style": "bodyMedium",
+      "role": "Status bar time and battery percentage",
+      "sample": "9:41 \u00b7 100%",
+      "size_px": 25,
+      "weight": 500
+    },
+    {
+      "color": "#0C0826",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "titleLarge",
+      "role": "Connected device title",
+      "sample": "Living Room \u00b7 Mi Box S",
+      "size_px": 32,
+      "weight": 500
+    },
+    {
+      "color": "#9790AF",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "bodyMedium",
+      "role": "Device connection subtitle",
+      "sample": "Connected",
+      "size_px": 24,
+      "weight": 500
+    },
+    {
+      "color": "#0C0826",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "titleMedium",
+      "role": "Current media title",
+      "sample": "Me at the zoo",
+      "size_px": 30,
+      "weight": 500
+    },
+    {
+      "color": "#713DE0",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "labelLarge",
+      "role": "Elapsed playback time",
+      "sample": "0:12",
+      "size_px": 24,
+      "weight": 600
+    },
+    {
+      "color": "#9790AF",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "labelLarge",
+      "role": "Playback separator and total duration",
+      "sample": "/ 0:19",
+      "size_px": 24,
+      "weight": 500
+    },
+    {
+      "color": "#FAF7FF",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0.01,
+      "platform_style": "labelLarge",
+      "role": "Selected input mode",
+      "sample": "D-pad",
+      "size_px": 23,
+      "weight": 500
+    },
+    {
+      "color": "#352E4B",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0.01,
+      "platform_style": "labelLarge",
+      "role": "Unselected input modes",
+      "sample": "Swipe \u00b7 Mouse \u00b7 Numpad",
+      "size_px": 22,
+      "weight": 400
+    },
+    {
+      "color": "#0C0826",
+      "family_guess": "Roboto",
+      "letter_spacing_em": -0.02,
+      "platform_style": "titleLarge",
+      "role": "Directional-pad confirm label",
+      "sample": "OK",
+      "size_px": 44,
+      "weight": 700
+    },
+    {
+      "color": "#504865",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0.005,
+      "platform_style": "bodySmall",
+      "role": "Remote action captions",
+      "sample": "Back \u00b7 Home \u00b7 Settings \u00b7 Mute",
+      "size_px": 22,
+      "weight": 400
+    },
+    {
+      "color": "#352E4B",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "titleMedium",
+      "role": "Volume readout",
+      "sample": "Volume 12",
+      "size_px": 28,
+      "weight": 500
+    },
+    {
+      "color": "#352E4B",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "titleSmall",
+      "role": "Favourite apps section heading",
+      "sample": "Favourite apps",
+      "size_px": 23,
+      "weight": 500
+    },
+    {
+      "color": "#713DE0",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "labelLarge",
+      "role": "Edit favourites text action",
+      "sample": "Edit",
+      "size_px": 23,
+      "weight": 500
+    },
+    {
+      "color": "#504865",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "bodySmall",
+      "role": "Favourite app captions",
+      "sample": "YouTube \u00b7 Netflix \u00b7 Hoichoi \u00b7 Toffee \u00b7 VLC",
+      "size_px": 21,
+      "weight": 400
+    },
+    {
+      "color": "#504865",
+      "family_guess": "Roboto",
+      "letter_spacing_em": 0,
+      "platform_style": "bodySmall",
+      "role": "Bottom utility action captions",
+      "sample": "Keyboard \u00b7 Voice \u00b7 Power",
+      "size_px": 22,
+      "weight": 400
+    }
+  ],
+  "platform": "android",
+  "px_to_dp": 0.483,
+  "px_to_dp_design": 0.483,
+  "native_scale": {
+    "factor": 0.978,
+    "px_to_dp_native": 0.4724,
+    "anchors": [
+      {
+        "component": "Device connection app bar",
+        "native": "TopAppBar (small)",
+        "px": 104,
+        "dp": 64,
+        "k": 0.6153846153846154
+      },
+      {
+        "component": "Voice action",
+        "native": "FloatingActionButton (large)",
+        "px": 170,
+        "dp": 56,
+        "k": 0.32941176470588235
+      }
+    ],
+    "applied": false
+  }
+}

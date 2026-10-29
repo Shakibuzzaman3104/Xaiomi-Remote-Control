@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/onboard_discover/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/onboard_discover/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The secondary labels \u201cConnected\u201d and \u201cSearching...\u201d have insufficient contrast against the pale background for normal-sized text, falling below WCAG AA\u2019s 4.5:1 requirement.",
+          "edit": "Darken the secondary text color used for \u201cConnected\u201d and \u201cSearching...\u201d to achieve at least 4.5:1 contrast against their backgrounds.",
+          "bbox": {
+            "x": 188,
+            "y": 128,
+            "w": 131,
+            "h": 34
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.4
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/onboard_discover/mockup_v1.png"
+}

@@ -1,0 +1,11 @@
+{
+  "mockup": "design/screens/onboard_discover/fixed_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/onboard_discover/fixed_v1.png",
+      "issues": [],
+      "weight": 0
+    }
+  ],
+  "best": "design/screens/onboard_discover/fixed_v1.png"
+}

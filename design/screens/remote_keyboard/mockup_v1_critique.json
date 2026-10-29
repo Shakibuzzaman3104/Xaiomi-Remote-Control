@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/remote_keyboard/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_keyboard/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The white clear-field \u201c\u00d7\u201d glyph has approximately 2:1 contrast against its pale lavender circle, below the 3:1 minimum for control icons.",
+          "edit": "Darken the clear-field glyph to achieve at least 3:1 contrast against its circular background.",
+          "bbox": {
+            "x": 732,
+            "y": 910,
+            "w": 47,
+            "h": 47
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 1.8
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/remote_keyboard/mockup_v1.png"
+}

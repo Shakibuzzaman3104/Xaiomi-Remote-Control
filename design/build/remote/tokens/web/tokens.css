@@ -1,0 +1,209 @@
+@import "../../fonts/web/fonts.css";
+
+:root {
+  --color-background: #F7F5FC;
+  --color-surface-container: #ECE9F5;
+  --color-surface-container-stronger: #E4E0F0;
+  --color-d-pad-center: #E4DDF7;
+  --color-primary: #6041B4;
+  --color-primary-text: #5628CE;
+  --color-progress-active: #5F3DB8;
+  --color-on-surface-strongest: #050425;
+  --color-on-surface: #3C3654;
+  --color-on-surface-variant: #464261;
+  --color-muted-text: #857EA2;
+  --color-progress-track: #DEDBED;
+  --color-d-pad-outline: #DFDAF1;
+  --color-subtle-outline: #ECEAF8;
+  --color-app-tile-surface: #FBFAFE;
+  --color-on-primary: #F7F5FC;
+  --color-gesture-handle: #A7A2BE;
+  --color-youtube-red: #E22024;
+  --color-netflix-red: #EF0104;
+  --color-hoichoi-red: #F50304;
+  --color-toffee-magenta: #F326A1;
+  --color-vlc-orange: #F88005;
+  --color-brand-white: #FCF8FA;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-open-sans: "Open Sans", sans-serif;
+  --radius-mode-selector-outer-container: 15px;
+  --radius-selected-d-pad-segment: 15px;
+  --radius-circular-d-pad-outer-edge: 116px;
+  --radius-d-pad-ok-button: 41px;
+  --radius-back-home-and-settings-button-circles: 26.5px;
+  --radius-volume-capsule: 28.5px;
+  --radius-volume-minus-and-plus-buttons: 21px;
+  --radius-mute-button: 27px;
+  --radius-previous-and-next-transport-buttons: 27px;
+  --radius-pause-button: 30px;
+  --radius-favourite-app-tiles: 12.5px;
+  --radius-keyboard-and-power-buttons: 23px;
+  --radius-voice-button: 32.5px;
+  --radius-playback-progress-track-and-fill: 1.5px;
+  --radius-system-gesture-handle: 2px;
+  --radius-current-media-youtube-badge-approximate: 6.5px;
+  --space-conversion-one-logical-dp-to-image: 1px;
+  --space-main-content-and-left-right-screen: 233.5px;
+  --space-device-icon-left-edge-and-device: 73px;
+  --space-device-title-and-connection-status-line: 25px;
+  --space-current-media-logo-right-edge-and: 19.5px;
+  --space-media-progress-bottom-and-mode-selector: 0px;
+  --space-mode-selector-bottom-and-directional-pad: 0px;
+  --space-directional-pad-side-edges-and-screen: 123.5px;
+  --space-directional-pad-bottom-and-back-home: 11.5px;
+  --space-back-and-home-button-centers: 26px;
+  --space-home-and-settings-button-centers: 26px;
+  --space-back-home-settings-circles-and-caption: 3.5px;
+  --space-back-home-settings-full-row-bottom: 15.5px;
+  --space-volume-capsule-left-edge-and-minus: 165px;
+  --space-volume-capsule-right-edge-and-mute: 233.5px;
+  --space-volume-capsule-top-and-inset-buttons: 26px;
+  --space-volume-capsule-bottom-and-pause-button: 33px;
+  --space-transport-button-centers-horizontally: 26px;
+  --space-pause-button-bottom-and-favourite-apps: 9.5px;
+  --space-favourite-apps-header-block-bottom-and: 3.5px;
+  --space-favourite-app-tile-edges-horizontally: 35.5px;
+  --space-favourite-app-tile-bottom-and-caption: 3.5px;
+  --space-favourite-app-caption-block-bottom-and: 14.5px;
+  --space-divider-and-keyboard-power-circle-tops: 19.5px;
+  --space-divider-and-voice-circle-top: 6px;
+  --space-keyboard-voice-and-power-action-centers: 95.5px;
+  --space-keyboard-power-circles-and-caption-line: 15px;
+  --space-voice-circle-bottom-and-caption-line: 4px;
+  --space-voice-caption-block-bottom-and-system: 15.5px;
+}
+
+.text-status-bar-time-and-battery-percentage {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 17.5px;
+  letter-spacing: 0em;
+  color: var(--color-on-surface);
+}
+
+.text-connected-device-title {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 19.5px;
+  letter-spacing: -0.018em;
+  color: var(--color-on-surface-strongest);
+}
+
+.text-device-connection-subtitle {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: -0.016em;
+  color: var(--color-muted-text);
+}
+
+.text-current-media-title {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 14.5px;
+  line-height: 21.5px;
+  letter-spacing: -0.022em;
+  color: var(--color-on-surface-strongest);
+}
+
+.text-elapsed-playback-time {
+  font-family: var(--font-open-sans);
+  font-weight: 600;
+  font-size: 11.5px;
+  line-height: 16.5px;
+  letter-spacing: 0.014em;
+  color: var(--color-primary-text);
+}
+
+.text-playback-separator-and-total-duration {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 11.5px;
+  line-height: 16.5px;
+  letter-spacing: 0em;
+  color: var(--color-muted-text);
+}
+
+.text-selected-input-mode {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.01em;
+  color: var(--color-on-primary);
+}
+
+.text-unselected-input-modes {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 15px;
+  letter-spacing: 0.01em;
+  color: var(--color-on-surface);
+}
+
+.text-directional-pad-confirm-label {
+  font-family: var(--font-open-sans);
+  font-weight: 700;
+  font-size: 20.5px;
+  line-height: 26px;
+  letter-spacing: 0.024em;
+  color: var(--color-on-surface-strongest);
+}
+
+.text-remote-action-captions {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 14px;
+  letter-spacing: 0.005em;
+  color: var(--color-on-surface-variant);
+}
+
+.text-volume-readout {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 13.5px;
+  line-height: 20.5px;
+  letter-spacing: -0.041em;
+  color: var(--color-on-surface);
+}
+
+.text-favourite-apps-section-heading {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 10.5px;
+  line-height: 15px;
+  letter-spacing: 0em;
+  color: var(--color-on-surface);
+}
+
+.text-edit-favourites-text-action {
+  font-family: var(--font-open-sans);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 15.5px;
+  letter-spacing: 0em;
+  color: var(--color-primary-text);
+}
+
+.text-favourite-app-captions {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 13.5px;
+  letter-spacing: 0em;
+  color: var(--color-on-surface-variant);
+}
+
+.text-bottom-utility-action-captions {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10.5px;
+  line-height: 14px;
+  letter-spacing: 0em;
+  color: var(--color-on-surface-variant);
+}

@@ -1,0 +1,2586 @@
+{
+  "px_to_dp": 0.483,
+  "items": [
+    {
+      "name": "Android status bar",
+      "asset": null,
+      "spec_px": [
+        0,
+        0,
+        853,
+        66
+      ],
+      "kind": "object",
+      "px": [
+        49.0,
+        23.0,
+        752.0,
+        25.0
+      ],
+      "dp": [
+        23.7,
+        11.1,
+        363.2,
+        12.1
+      ],
+      "gap_below_dp": [
+        "Device connection app bar",
+        20.8
+      ]
+    },
+    {
+      "name": "Device connection app bar",
+      "asset": null,
+      "spec_px": [
+        40,
+        77,
+        773,
+        104
+      ],
+      "kind": "object",
+      "px": [
+        44.0,
+        91.0,
+        760.0,
+        62.0
+      ],
+      "dp": [
+        21.3,
+        44.0,
+        367.1,
+        29.9
+      ],
+      "gap_below_dp": [
+        "text: Me at the zoo",
+        25.1
+      ]
+    },
+    {
+      "name": "Connected-device display icon",
+      "asset": "television",
+      "spec_px": [
+        40,
+        94,
+        64,
+        62
+      ],
+      "kind": "object",
+      "px": [
+        44.0,
+        103.0,
+        57.0,
+        43.0
+      ],
+      "dp": [
+        21.3,
+        49.7,
+        27.5,
+        20.8
+      ],
+      "gap_below_dp": [
+        "Current media summary",
+        29.0
+      ]
+    },
+    {
+      "name": "Device title",
+      "asset": null,
+      "spec_px": [
+        148,
+        85,
+        324,
+        42
+      ],
+      "kind": "object",
+      "px": [
+        151.0,
+        91.0,
+        316.0,
+        31.0
+      ],
+      "dp": [
+        72.9,
+        44.0,
+        152.6,
+        15.0
+      ],
+      "gap_below_dp": [
+        "Connected status",
+        5.8
+      ]
+    },
+    {
+      "name": "Device dropdown chevron",
+      "asset": null,
+      "spec_px": [
+        481,
+        92,
+        28,
+        28
+      ],
+      "kind": "object",
+      "px": [
+        486.0,
+        101.0,
+        18.0,
+        11.0
+      ],
+      "dp": [
+        234.7,
+        48.8,
+        8.7,
+        5.3
+      ],
+      "gap_below_dp": [
+        "Current media summary",
+        45.4
+      ]
+    },
+    {
+      "name": "Connected status",
+      "asset": null,
+      "spec_px": [
+        149,
+        130,
+        166,
+        35
+      ],
+      "kind": "object",
+      "px": [
+        151.0,
+        134.0,
+        154.0,
+        21.0
+      ],
+      "dp": [
+        72.9,
+        64.7,
+        74.4,
+        10.1
+      ],
+      "gap_below_dp": [
+        "text: Me at the zoo",
+        24.1
+      ]
+    },
+    {
+      "name": "More options",
+      "asset": null,
+      "spec_px": [
+        771,
+        86,
+        58,
+        74
+      ],
+      "kind": "object",
+      "px": [
+        796.0,
+        105.0,
+        8.0,
+        33.0
+      ],
+      "dp": [
+        384.5,
+        50.7,
+        3.9,
+        15.9
+      ],
+      "gap_below_dp": [
+        "Current media summary",
+        32.8
+      ]
+    },
+    {
+      "name": "Current media summary",
+      "asset": null,
+      "spec_px": [
+        40,
+        202,
+        773,
+        61
+      ],
+      "kind": "object",
+      "px": [
+        40.0,
+        206.0,
+        772.0,
+        50.0
+      ],
+      "dp": [
+        19.3,
+        99.5,
+        372.9,
+        24.1
+      ],
+      "gap_below_dp": [
+        "Remote input mode selector",
+        18.4
+      ]
+    },
+    {
+      "name": "Current media YouTube logo",
+      "asset": "youtube",
+      "spec_px": [
+        40,
+        206,
+        64,
+        45
+      ],
+      "kind": "surface",
+      "px": [
+        40.5,
+        206.3,
+        63.1,
+        43.8
+      ],
+      "radius_px": 13.1,
+      "corner_radii_px": [
+        13.2,
+        13.0,
+        13.5,
+        12.2
+      ],
+      "fill": "#FDF9FA",
+      "shape": "rect",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        19.6,
+        99.6,
+        30.5,
+        21.2
+      ],
+      "radius_dp": 6.3,
+      "gap_below_dp": [
+        "Remote input mode selector",
+        21.2
+      ]
+    },
+    {
+      "name": "Current media title",
+      "asset": null,
+      "spec_px": [
+        127,
+        201,
+        203,
+        39
+      ],
+      "kind": "object",
+      "px": [
+        129.0,
+        206.0,
+        182.0,
+        23.0
+      ],
+      "dp": [
+        62.3,
+        99.5,
+        87.9,
+        11.1
+      ],
+      "gap_below_dp": [
+        "Playback progress",
+        9.2
+      ]
+    },
+    {
+      "name": "Playback time",
+      "asset": null,
+      "spec_px": [
+        694,
+        204,
+        119,
+        34
+      ],
+      "kind": "object",
+      "px": [
+        695.0,
+        209.0,
+        117.0,
+        18.0
+      ],
+      "dp": [
+        335.7,
+        100.9,
+        56.5,
+        8.7
+      ],
+      "gap_below_dp": [
+        "Remote input mode selector",
+        32.4
+      ]
+    },
+    {
+      "name": "Playback progress",
+      "asset": null,
+      "spec_px": [
+        127,
+        248,
+        686,
+        7
+      ],
+      "kind": "object",
+      "px": [
+        127.0,
+        248.0,
+        432.0,
+        8.0
+      ],
+      "dp": [
+        61.3,
+        119.8,
+        208.7,
+        3.9
+      ],
+      "gap_below_dp": [
+        "Remote input mode selector",
+        18.4
+      ]
+    },
+    {
+      "name": "Remote input mode selector",
+      "asset": null,
+      "spec_px": [
+        40,
+        294,
+        773,
+        86
+      ],
+      "kind": "surface",
+      "px": [
+        40.2,
+        294.0,
+        772.6,
+        85.9
+      ],
+      "radius_px": 30.6,
+      "corner_radii_px": [
+        30.8,
+        31.0,
+        30.5,
+        30.5
+      ],
+      "fill": "#EBE8F5",
+      "shape": "rect",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        19.4,
+        142.0,
+        373.2,
+        41.5
+      ],
+      "radius_dp": 14.8,
+      "gap_below_dp": [
+        "D-pad up region",
+        17.9
+      ]
+    },
+    {
+      "name": "D-pad mode segment",
+      "asset": null,
+      "spec_px": [
+        40,
+        294,
+        197,
+        86
+      ],
+      "kind": "surface",
+      "px": [
+        40.2,
+        294.0,
+        196.5,
+        85.9
+      ],
+      "radius_px": 30.9,
+      "corner_radii_px": [
+        30.8,
+        31.0,
+        30.5,
+        31.0
+      ],
+      "fill": "#6242B6",
+      "shape": "rect",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        19.4,
+        142.0,
+        94.9,
+        41.5
+      ],
+      "radius_dp": 14.9,
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 0.0,
+        "top": 0.0,
+        "right": 278.3,
+        "bottom": -0.0
+      }
+    },
+    {
+      "name": "Swipe mode segment",
+      "asset": null,
+      "spec_px": [
+        237,
+        294,
+        192,
+        86
+      ],
+      "kind": "object",
+      "px": [
+        233.0,
+        312.0,
+        157.0,
+        49.0
+      ],
+      "dp": [
+        112.5,
+        150.7,
+        75.8,
+        23.7
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 93.1,
+        "top": 8.7,
+        "right": 204.2,
+        "bottom": 9.1
+      }
+    },
+    {
+      "name": "Mouse mode segment",
+      "asset": null,
+      "spec_px": [
+        429,
+        294,
+        192,
+        86
+      ],
+      "kind": "object",
+      "px": [
+        468.0,
+        318.0,
+        114.0,
+        39.0
+      ],
+      "dp": [
+        226.0,
+        153.6,
+        55.1,
+        18.8
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 206.6,
+        "top": 11.6,
+        "right": 111.5,
+        "bottom": 11.1
+      }
+    },
+    {
+      "name": "Numpad mode segment",
+      "asset": null,
+      "spec_px": [
+        621,
+        294,
+        192,
+        86
+      ],
+      "kind": "object",
+      "px": [
+        647.0,
+        322.0,
+        136.0,
+        31.0
+      ],
+      "dp": [
+        312.5,
+        155.5,
+        65.7,
+        15.0
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 293.1,
+        "top": 13.5,
+        "right": 14.4,
+        "bottom": 13.0
+      }
+    },
+    {
+      "name": "Circular directional pad",
+      "asset": null,
+      "spec_px": [
+        187,
+        418,
+        480,
+        480
+      ],
+      "kind": "object",
+      "px": [
+        256.0,
+        493.0,
+        341.0,
+        329.0
+      ],
+      "dp": [
+        123.6,
+        238.1,
+        164.7,
+        158.9
+      ],
+      "gap_below_dp": [
+        "Home action",
+        65.2
+      ]
+    },
+    {
+      "name": "D-pad up region",
+      "asset": null,
+      "spec_px": [
+        257,
+        418,
+        340,
+        180
+      ],
+      "kind": "object",
+      "px": [
+        253.0,
+        417.0,
+        342.0,
+        185.0
+      ],
+      "dp": [
+        122.2,
+        201.4,
+        165.2,
+        89.4
+      ],
+      "gap_below_dp": [
+        "chevron_left",
+        16.9
+      ]
+    },
+    {
+      "name": "D-pad right region",
+      "asset": null,
+      "spec_px": [
+        487,
+        488,
+        180,
+        340
+      ],
+      "kind": "object",
+      "px": [
+        483.0,
+        489.0,
+        183.0,
+        337.0
+      ],
+      "dp": [
+        233.3,
+        236.2,
+        88.4,
+        162.8
+      ],
+      "gap_below_dp": [
+        "Settings action",
+        62.8
+      ]
+    },
+    {
+      "name": "D-pad down region",
+      "asset": null,
+      "spec_px": [
+        257,
+        718,
+        340,
+        180
+      ],
+      "kind": "object",
+      "px": [
+        258.0,
+        714.0,
+        336.0,
+        183.0
+      ],
+      "dp": [
+        124.6,
+        344.9,
+        162.3,
+        88.4
+      ],
+      "gap_below_dp": [
+        "Home action",
+        29.0
+      ]
+    },
+    {
+      "name": "D-pad left region",
+      "asset": null,
+      "spec_px": [
+        187,
+        488,
+        180,
+        340
+      ],
+      "kind": "object",
+      "px": [
+        187.0,
+        489.0,
+        184.0,
+        337.0
+      ],
+      "dp": [
+        90.3,
+        236.2,
+        88.9,
+        162.8
+      ],
+      "gap_below_dp": [
+        "Back action",
+        64.2
+      ]
+    },
+    {
+      "name": "D-pad OK button",
+      "asset": null,
+      "spec_px": [
+        342,
+        573,
+        169,
+        169
+      ],
+      "kind": "surface",
+      "px": [
+        341.9,
+        573.1,
+        169.1,
+        168.9
+      ],
+      "radius_px": 29.5,
+      "corner_radii_px": [
+        41.0,
+        40.8,
+        18.2,
+        0.0
+      ],
+      "fill": "#E3DCF7",
+      "shape": "rect",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        165.1,
+        276.8,
+        81.7,
+        81.6
+      ],
+      "radius_dp": 14.2,
+      "gap_below_dp": [
+        "chevron_down",
+        27.0
+      ]
+    },
+    {
+      "name": "Back action",
+      "asset": null,
+      "spec_px": [
+        127,
+        922,
+        110,
+        147
+      ],
+      "kind": "object",
+      "px": [
+        159.0,
+        959.0,
+        46.0,
+        101.0
+      ],
+      "dp": [
+        76.8,
+        463.2,
+        22.2,
+        48.8
+      ],
+      "gap_below_dp": [
+        "Volume control group",
+        19.9
+      ]
+    },
+    {
+      "name": "Home action",
+      "asset": null,
+      "spec_px": [
+        372,
+        922,
+        110,
+        147
+      ],
+      "kind": "object",
+      "px": [
+        398.0,
+        957.0,
+        58.0,
+        103.0
+      ],
+      "dp": [
+        192.2,
+        462.2,
+        28.0,
+        49.7
+      ],
+      "gap_below_dp": [
+        "Volume control group",
+        19.9
+      ]
+    },
+    {
+      "name": "Settings action",
+      "asset": null,
+      "spec_px": [
+        616,
+        922,
+        110,
+        147
+      ],
+      "kind": "object",
+      "px": [
+        630.0,
+        956.0,
+        81.0,
+        109.0
+      ],
+      "dp": [
+        304.3,
+        461.7,
+        39.1,
+        52.6
+      ],
+      "gap_below_dp": [
+        "Mute action",
+        35.3
+      ]
+    },
+    {
+      "name": "Volume control group",
+      "asset": null,
+      "spec_px": [
+        85,
+        1101,
+        525,
+        119
+      ],
+      "kind": "surface",
+      "px": [
+        85.7,
+        1101.1,
+        523.0,
+        118.9
+      ],
+      "radius_px": 59.4,
+      "corner_radii_px": [
+        57.0,
+        57.2,
+        58.2,
+        58.0
+      ],
+      "fill": "#ECE9F5",
+      "shape": "pill",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        41.4,
+        531.8,
+        252.6,
+        57.4
+      ],
+      "radius_dp": 28.7,
+      "gap_below_dp": [
+        "Pause playback",
+        10.8
+      ]
+    },
+    {
+      "name": "Decrease volume",
+      "asset": null,
+      "spec_px": [
+        105,
+        1116,
+        90,
+        90
+      ],
+      "kind": "surface",
+      "px": [
+        106.2,
+        1117.0,
+        88.3,
+        87.5
+      ],
+      "radius_px": 43.8,
+      "corner_radii_px": [
+        43.8,
+        44.0,
+        43.0,
+        44.0
+      ],
+      "fill": "#E5E2F1",
+      "shape": "circle",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        51.3,
+        539.5,
+        42.6,
+        42.3
+      ],
+      "radius_dp": 21.2,
+      "parent": "Volume control group",
+      "inset_dp": {
+        "left": 9.9,
+        "top": 7.7,
+        "right": 200.1,
+        "bottom": 7.5
+      }
+    },
+    {
+      "name": "Volume value",
+      "asset": null,
+      "spec_px": [
+        277,
+        1144,
+        151,
+        38
+      ],
+      "kind": "object",
+      "px": [
+        279.0,
+        1149.0,
+        130.0,
+        22.0
+      ],
+      "dp": [
+        134.8,
+        555.0,
+        62.8,
+        10.6
+      ],
+      "parent": "Volume control group",
+      "inset_dp": {
+        "left": 93.4,
+        "top": 23.1,
+        "right": 96.5,
+        "bottom": 23.7
+      }
+    },
+    {
+      "name": "Increase volume",
+      "asset": null,
+      "spec_px": [
+        499,
+        1116,
+        90,
+        90
+      ],
+      "kind": "surface",
+      "px": [
+        500.1,
+        1117.0,
+        88.5,
+        87.4
+      ],
+      "radius_px": 43.7,
+      "corner_radii_px": [
+        43.8,
+        43.2,
+        43.2,
+        43.5
+      ],
+      "fill": "#E7E4F2",
+      "shape": "circle",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        241.5,
+        539.5,
+        42.7,
+        42.2
+      ],
+      "radius_dp": 21.1,
+      "parent": "Volume control group",
+      "inset_dp": {
+        "left": 200.2,
+        "top": 7.7,
+        "right": 9.7,
+        "bottom": 7.5
+      }
+    },
+    {
+      "name": "Mute action",
+      "asset": null,
+      "spec_px": [
+        657,
+        1101,
+        111,
+        145
+      ],
+      "kind": "object",
+      "px": [
+        689.0,
+        1138.0,
+        47.0,
+        99.0
+      ],
+      "dp": [
+        332.8,
+        549.7,
+        22.7,
+        47.8
+      ],
+      "gap_below_dp": [
+        "Favourite apps header row",
+        74.4
+      ]
+    },
+    {
+      "name": "Previous / rewind",
+      "asset": null,
+      "spec_px": [
+        179,
+        1248,
+        114,
+        114
+      ],
+      "kind": "surface",
+      "px": [
+        179.3,
+        1248.2,
+        112.6,
+        113.0
+      ],
+      "radius_px": 56.3,
+      "corner_radii_px": [
+        56.0,
+        55.5,
+        56.0,
+        55.5
+      ],
+      "fill": "#EBE8F5",
+      "shape": "circle",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        86.6,
+        602.9,
+        54.4,
+        54.6
+      ],
+      "radius_dp": 27.2,
+      "gap_below_dp": [
+        "Favourite apps header row",
+        14.4
+      ]
+    },
+    {
+      "name": "Pause playback",
+      "asset": null,
+      "spec_px": [
+        364,
+        1242,
+        126,
+        126
+      ],
+      "kind": "surface",
+      "px": [
+        364.2,
+        1242.3,
+        124.6,
+        125.2
+      ],
+      "radius_px": 62.3,
+      "corner_radii_px": [
+        62.0,
+        61.8,
+        61.5,
+        61.5
+      ],
+      "fill": "#EAE7F4",
+      "shape": "circle",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        175.9,
+        600.0,
+        60.2,
+        60.5
+      ],
+      "radius_dp": 30.1,
+      "gap_below_dp": [
+        "Favourite apps header row",
+        11.4
+      ]
+    },
+    {
+      "name": "Next / fast forward",
+      "asset": null,
+      "spec_px": [
+        561,
+        1248,
+        114,
+        114
+      ],
+      "kind": "surface",
+      "px": [
+        561.4,
+        1248.1,
+        112.5,
+        112.9
+      ],
+      "radius_px": 56.3,
+      "corner_radii_px": [
+        55.8,
+        56.0,
+        54.8,
+        55.0
+      ],
+      "fill": "#EBE8F5",
+      "shape": "circle",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        271.2,
+        602.8,
+        54.3,
+        54.5
+      ],
+      "radius_dp": 27.2,
+      "gap_below_dp": [
+        "Favourite apps header row",
+        14.5
+      ]
+    },
+    {
+      "name": "Favourite apps header row",
+      "asset": null,
+      "spec_px": [
+        40,
+        1387,
+        773,
+        36
+      ],
+      "kind": "object",
+      "px": [
+        42.0,
+        1391.0,
+        770.0,
+        23.0
+      ],
+      "dp": [
+        20.3,
+        671.9,
+        371.9,
+        11.1
+      ],
+      "gap_below_dp": [
+        "Favourite apps horizontal carousel",
+        17.4
+      ]
+    },
+    {
+      "name": "Favourite apps title",
+      "asset": null,
+      "spec_px": [
+        40,
+        1388,
+        172,
+        31
+      ],
+      "kind": "object",
+      "px": [
+        42.0,
+        1392.0,
+        151.0,
+        22.0
+      ],
+      "dp": [
+        20.3,
+        672.3,
+        72.9,
+        10.6
+      ],
+      "gap_below_dp": [
+        "Favourite apps horizontal carousel",
+        17.4
+      ]
+    },
+    {
+      "name": "Edit favourite apps",
+      "asset": null,
+      "spec_px": [
+        758,
+        1382,
+        55,
+        40
+      ],
+      "kind": "object",
+      "px": [
+        773.0,
+        1391.0,
+        39.0,
+        18.0
+      ],
+      "dp": [
+        373.4,
+        671.9,
+        18.8,
+        8.7
+      ],
+      "gap_below_dp": [
+        "Favourite apps horizontal carousel",
+        19.8
+      ]
+    },
+    {
+      "name": "Favourite apps horizontal carousel",
+      "asset": null,
+      "spec_px": [
+        40,
+        1426,
+        773,
+        151
+      ],
+      "kind": "object",
+      "px": [
+        73.0,
+        1450.0,
+        740.0,
+        114.0
+      ],
+      "dp": [
+        35.3,
+        700.4,
+        357.4,
+        55.1
+      ],
+      "gap_below_dp": [
+        "Voice action",
+        24.6
+      ]
+    },
+    {
+      "name": "YouTube favourite app",
+      "asset": null,
+      "spec_px": [
+        40,
+        1426,
+        146,
+        146
+      ],
+      "kind": "object",
+      "px": [
+        73.0,
+        1457.0,
+        79.0,
+        106.0
+      ],
+      "dp": [
+        35.3,
+        703.7,
+        38.2,
+        51.2
+      ]
+    },
+    {
+      "name": "Netflix favourite app",
+      "asset": null,
+      "spec_px": [
+        209,
+        1426,
+        148,
+        146
+      ],
+      "kind": "object",
+      "px": [
+        254.0,
+        1450.0,
+        59.0,
+        113.0
+      ],
+      "dp": [
+        122.7,
+        700.4,
+        28.5,
+        54.6
+      ],
+      "gap_below_dp": [
+        "Keyboard action",
+        31.7
+      ]
+    },
+    {
+      "name": "Hoichoi favourite app",
+      "asset": null,
+      "spec_px": [
+        381,
+        1426,
+        148,
+        146
+      ],
+      "kind": "object",
+      "px": [
+        421.0,
+        1450.0,
+        69.0,
+        113.0
+      ],
+      "dp": [
+        203.3,
+        700.4,
+        33.3,
+        54.6
+      ],
+      "gap_below_dp": [
+        "Voice action",
+        25.1
+      ]
+    },
+    {
+      "name": "Toffee favourite app",
+      "asset": null,
+      "spec_px": [
+        553,
+        1426,
+        148,
+        146
+      ],
+      "kind": "object",
+      "px": [
+        590.0,
+        1458.0,
+        72.0,
+        106.0
+      ],
+      "dp": [
+        285.0,
+        704.2,
+        34.8,
+        51.2
+      ],
+      "gap_below_dp": [
+        "Power action",
+        47.8
+      ]
+    },
+    {
+      "name": "VLC favourite app, visible portion",
+      "asset": null,
+      "spec_px": [
+        724,
+        1426,
+        89,
+        146
+      ],
+      "kind": "object",
+      "px": [
+        767.0,
+        1451.0,
+        46.0,
+        113.0
+      ],
+      "dp": [
+        370.5,
+        700.8,
+        22.2,
+        54.6
+      ]
+    },
+    {
+      "name": "Bottom action separator",
+      "asset": null,
+      "spec_px": [
+        40,
+        1602,
+        773,
+        1
+      ],
+      "kind": "unmeasured",
+      "px": [
+        40.0,
+        1602.0,
+        773.0,
+        1.0
+      ],
+      "reason": "no edge or object stands out from its surroundings near the bbox"
+    },
+    {
+      "name": "Keyboard action",
+      "asset": null,
+      "spec_px": [
+        173,
+        1628,
+        112,
+        147
+      ],
+      "kind": "surface",
+      "px": [
+        175.3,
+        1628.7,
+        106.2,
+        139.0
+      ],
+      "radius_px": 47.4,
+      "corner_radii_px": [
+        50.2,
+        50.5,
+        44.5,
+        43.0
+      ],
+      "fill": "#EBE8F5",
+      "shape": "rect",
+      "shadow": false,
+      "full_bleed": [],
+      "dp": [
+        84.7,
+        786.7,
+        51.3,
+        67.1
+      ],
+      "radius_dp": 22.9
+    },
+    {
+      "name": "Voice action",
+      "asset": null,
+      "spec_px": [
+        359,
+        1615,
+        135,
+        170
+      ],
+      "kind": "object",
+      "px": [
+        359.0,
+        1615.0,
+        135.0,
+        163.0
+      ],
+      "dp": [
+        173.4,
+        780.0,
+        65.2,
+        78.7
+      ],
+      "gap_below_dp": [
+        "System gesture navigation area",
+        18.8
+      ]
+    },
+    {
+      "name": "Power action",
+      "asset": null,
+      "spec_px": [
+        570,
+        1628,
+        111,
+        147
+      ],
+      "kind": "object",
+      "px": [
+        596.0,
+        1663.0,
+        59.0,
+        106.0
+      ],
+      "dp": [
+        287.9,
+        803.2,
+        28.5,
+        51.2
+      ]
+    },
+    {
+      "name": "System gesture navigation area",
+      "asset": null,
+      "spec_px": [
+        0,
+        1802,
+        853,
+        41
+      ],
+      "kind": "object",
+      "px": [
+        334.0,
+        1817.0,
+        185.0,
+        8.0
+      ],
+      "dp": [
+        161.3,
+        877.6,
+        89.4,
+        3.9
+      ]
+    },
+    {
+      "name": "wifi",
+      "asset": "wifi",
+      "spec_px": [
+        150,
+        133,
+        29,
+        22
+      ],
+      "kind": "object",
+      "px": [
+        151.0,
+        134.0,
+        27.0,
+        21.0
+      ],
+      "dp": [
+        72.9,
+        64.7,
+        13.0,
+        10.1
+      ],
+      "gap_below_dp": [
+        "text: Me at the zoo",
+        24.1
+      ]
+    },
+    {
+      "name": "chevron_down",
+      "asset": "chevron_down",
+      "spec_px": [
+        405,
+        798,
+        44,
+        25
+      ],
+      "kind": "object",
+      "px": [
+        405.0,
+        798.0,
+        43.0,
+        24.0
+      ],
+      "dp": [
+        195.6,
+        385.4,
+        20.8,
+        11.6
+      ],
+      "gap_below_dp": [
+        "Home action",
+        65.2
+      ]
+    },
+    {
+      "name": "more_vertical",
+      "asset": "more_vertical",
+      "spec_px": [
+        795,
+        104,
+        9,
+        34
+      ],
+      "kind": "object",
+      "px": [
+        796.0,
+        105.0,
+        8.0,
+        33.0
+      ],
+      "dp": [
+        384.5,
+        50.7,
+        3.9,
+        15.9
+      ],
+      "gap_below_dp": [
+        "Current media summary",
+        32.8
+      ]
+    },
+    {
+      "name": "directional_pad",
+      "asset": "directional_pad",
+      "spec_px": [
+        77,
+        317,
+        39,
+        40
+      ],
+      "kind": "object",
+      "px": [
+        77.0,
+        318.0,
+        39.0,
+        39.0
+      ],
+      "dp": [
+        37.2,
+        153.6,
+        18.8,
+        18.8
+      ],
+      "parent": "D-pad mode segment",
+      "inset_dp": {
+        "left": 17.8,
+        "top": 11.6,
+        "right": 58.3,
+        "bottom": 11.1
+      }
+    },
+    {
+      "name": "swipe_hand",
+      "asset": "swipe_hand",
+      "spec_px": [
+        277,
+        317,
+        32,
+        40
+      ],
+      "kind": "object",
+      "px": [
+        278.0,
+        319.0,
+        31.0,
+        38.0
+      ],
+      "dp": [
+        134.3,
+        154.1,
+        15.0,
+        18.4
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 114.9,
+        "top": 12.1,
+        "right": 243.3,
+        "bottom": 11.1
+      }
+    },
+    {
+      "name": "mouse",
+      "asset": "mouse",
+      "spec_px": [
+        468,
+        317,
+        28,
+        39
+      ],
+      "kind": "object",
+      "px": [
+        469.0,
+        318.0,
+        26.0,
+        39.0
+      ],
+      "dp": [
+        226.5,
+        153.6,
+        12.6,
+        18.8
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 207.1,
+        "top": 11.6,
+        "right": 153.5,
+        "bottom": 11.1
+      }
+    },
+    {
+      "name": "numpad",
+      "asset": "numpad",
+      "spec_px": [
+        646,
+        321,
+        33,
+        33
+      ],
+      "kind": "object",
+      "px": [
+        647.0,
+        322.0,
+        31.0,
+        31.0
+      ],
+      "dp": [
+        312.5,
+        155.5,
+        15.0,
+        15.0
+      ],
+      "parent": "Remote input mode selector",
+      "inset_dp": {
+        "left": 293.1,
+        "top": 13.5,
+        "right": 65.1,
+        "bottom": 13.0
+      }
+    },
+    {
+      "name": "chevron_up",
+      "asset": "chevron_up",
+      "spec_px": [
+        405,
+        493,
+        44,
+        25
+      ],
+      "kind": "object",
+      "px": [
+        405.0,
+        493.0,
+        43.0,
+        24.0
+      ],
+      "dp": [
+        195.6,
+        238.1,
+        20.8,
+        11.6
+      ],
+      "gap_below_dp": [
+        "D-pad OK button",
+        27.1
+      ]
+    },
+    {
+      "name": "chevron_left",
+      "asset": "chevron_left",
+      "spec_px": [
+        255,
+        636,
+        25,
+        44
+      ],
+      "kind": "object",
+      "px": [
+        256.0,
+        637.0,
+        24.0,
+        42.0
+      ],
+      "dp": [
+        123.6,
+        307.7,
+        11.6,
+        20.3
+      ],
+      "gap_below_dp": [
+        "D-pad down region",
+        16.9
+      ]
+    },
+    {
+      "name": "chevron_right",
+      "asset": "chevron_right",
+      "spec_px": [
+        573,
+        636,
+        25,
+        44
+      ],
+      "kind": "object",
+      "px": [
+        573.0,
+        637.0,
+        24.0,
+        42.0
+      ],
+      "dp": [
+        276.8,
+        307.7,
+        11.6,
+        20.3
+      ],
+      "gap_below_dp": [
+        "D-pad down region",
+        16.9
+      ]
+    },
+    {
+      "name": "arrow_back",
+      "asset": "arrow_back",
+      "spec_px": [
+        163,
+        958,
+        40,
+        38
+      ],
+      "kind": "object",
+      "px": [
+        164.0,
+        959.0,
+        38.0,
+        36.0
+      ],
+      "dp": [
+        79.2,
+        463.2,
+        18.4,
+        17.4
+      ],
+      "gap_below_dp": [
+        "Volume control group",
+        51.2
+      ]
+    },
+    {
+      "name": "home",
+      "asset": "home",
+      "spec_px": [
+        407,
+        956,
+        40,
+        43
+      ],
+      "kind": "object",
+      "px": [
+        407.0,
+        958.0,
+        39.0,
+        40.0
+      ],
+      "dp": [
+        196.6,
+        462.7,
+        18.8,
+        19.3
+      ],
+      "gap_below_dp": [
+        "Volume control group",
+        49.8
+      ]
+    },
+    {
+      "name": "settings",
+      "asset": "settings",
+      "spec_px": [
+        649,
+        955,
+        44,
+        44
+      ],
+      "kind": "object",
+      "px": [
+        649.0,
+        956.0,
+        43.0,
+        43.0
+      ],
+      "dp": [
+        313.5,
+        461.7,
+        20.8,
+        20.8
+      ],
+      "gap_below_dp": [
+        "Next / fast forward",
+        120.3
+      ]
+    },
+    {
+      "name": "minus",
+      "asset": "minus",
+      "spec_px": [
+        135,
+        1158,
+        31,
+        5
+      ],
+      "kind": "object",
+      "px": [
+        135.0,
+        1159.0,
+        31.0,
+        4.0
+      ],
+      "dp": [
+        65.2,
+        559.8,
+        15.0,
+        1.9
+      ],
+      "parent": "Decrease volume",
+      "inset_dp": {
+        "left": 13.9,
+        "top": 20.3,
+        "right": 13.8,
+        "bottom": 20.0
+      }
+    },
+    {
+      "name": "plus",
+      "asset": "plus",
+      "spec_px": [
+        526,
+        1142,
+        36,
+        38
+      ],
+      "kind": "object",
+      "px": [
+        527.0,
+        1143.0,
+        35.0,
+        36.0
+      ],
+      "dp": [
+        254.5,
+        552.1,
+        16.9,
+        17.4
+      ],
+      "parent": "Increase volume",
+      "inset_dp": {
+        "left": 13.0,
+        "top": 12.6,
+        "right": 12.8,
+        "bottom": 12.3
+      }
+    },
+    {
+      "name": "mute",
+      "asset": "mute",
+      "spec_px": [
+        690,
+        1137,
+        46,
+        44
+      ],
+      "kind": "object",
+      "px": [
+        690.0,
+        1138.0,
+        45.0,
+        41.0
+      ],
+      "dp": [
+        333.3,
+        549.7,
+        21.7,
+        19.8
+      ],
+      "gap_below_dp": [
+        "Favourite apps header row",
+        102.4
+      ]
+    },
+    {
+      "name": "rewind",
+      "asset": "rewind",
+      "spec_px": [
+        211,
+        1290,
+        47,
+        30
+      ],
+      "kind": "object",
+      "px": [
+        212.0,
+        1291.0,
+        46.0,
+        29.0
+      ],
+      "dp": [
+        102.4,
+        623.6,
+        22.2,
+        14.0
+      ],
+      "parent": "Previous / rewind",
+      "inset_dp": {
+        "left": 15.8,
+        "top": 20.7,
+        "right": 16.4,
+        "bottom": 19.9
+      }
+    },
+    {
+      "name": "pause",
+      "asset": "pause",
+      "spec_px": [
+        411,
+        1285,
+        32,
+        41
+      ],
+      "kind": "object",
+      "px": [
+        411.0,
+        1286.0,
+        31.0,
+        40.0
+      ],
+      "dp": [
+        198.5,
+        621.1,
+        15.0,
+        19.3
+      ],
+      "parent": "Pause playback",
+      "inset_dp": {
+        "left": 22.6,
+        "top": 21.1,
+        "right": 22.6,
+        "bottom": 20.0
+      }
+    },
+    {
+      "name": "fast_forward",
+      "asset": "fast_forward",
+      "spec_px": [
+        595,
+        1290,
+        47,
+        30
+      ],
+      "kind": "object",
+      "px": [
+        596.0,
+        1291.0,
+        46.0,
+        29.0
+      ],
+      "dp": [
+        287.9,
+        623.6,
+        22.2,
+        14.0
+      ],
+      "parent": "Next / fast forward",
+      "inset_dp": {
+        "left": 16.7,
+        "top": 20.7,
+        "right": 15.4,
+        "bottom": 19.8
+      }
+    },
+    {
+      "name": "netflix",
+      "asset": "netflix",
+      "spec_px": [
+        265,
+        1449,
+        37,
+        65
+      ],
+      "kind": "object",
+      "px": [
+        266.0,
+        1450.0,
+        36.0,
+        63.0
+      ],
+      "dp": [
+        128.5,
+        700.4,
+        17.4,
+        30.4
+      ],
+      "gap_below_dp": [
+        "Keyboard action",
+        55.9
+      ]
+    },
+    {
+      "name": "hoichoi",
+      "asset": "hoichoi",
+      "spec_px": [
+        438,
+        1449,
+        36,
+        65
+      ],
+      "kind": "object",
+      "px": [
+        439.0,
+        1450.0,
+        35.0,
+        63.0
+      ],
+      "dp": [
+        212.0,
+        700.4,
+        16.9,
+        30.4
+      ],
+      "gap_below_dp": [
+        "Voice action",
+        49.3
+      ]
+    },
+    {
+      "name": "toffee",
+      "asset": "toffee",
+      "spec_px": [
+        589,
+        1457,
+        73,
+        51
+      ],
+      "kind": "object",
+      "px": [
+        590.0,
+        1458.0,
+        72.0,
+        49.0
+      ],
+      "dp": [
+        285.0,
+        704.2,
+        34.8,
+        23.7
+      ],
+      "gap_below_dp": [
+        "Power action",
+        75.3
+      ]
+    },
+    {
+      "name": "vlc",
+      "asset": "vlc",
+      "spec_px": [
+        766,
+        1450,
+        47,
+        64
+      ],
+      "kind": "object",
+      "px": [
+        767.0,
+        1451.0,
+        46.0,
+        63.0
+      ],
+      "dp": [
+        370.5,
+        700.8,
+        22.2,
+        30.4
+      ]
+    },
+    {
+      "name": "keyboard",
+      "asset": "keyboard",
+      "spec_px": [
+        206,
+        1668,
+        45,
+        32
+      ],
+      "kind": "object",
+      "px": [
+        206.0,
+        1669.0,
+        45.0,
+        31.0
+      ],
+      "dp": [
+        99.5,
+        806.1,
+        21.7,
+        15.0
+      ],
+      "parent": "Keyboard action",
+      "inset_dp": {
+        "left": 14.8,
+        "top": 19.5,
+        "right": 14.7,
+        "bottom": 32.7
+      }
+    },
+    {
+      "name": "microphone",
+      "asset": "microphone",
+      "spec_px": [
+        405,
+        1655,
+        43,
+        56
+      ],
+      "kind": "object",
+      "px": [
+        406.0,
+        1655.0,
+        41.0,
+        55.0
+      ],
+      "dp": [
+        196.1,
+        799.4,
+        19.8,
+        26.6
+      ],
+      "gap_below_dp": [
+        "System gesture navigation area",
+        51.7
+      ]
+    },
+    {
+      "name": "power",
+      "asset": "power",
+      "spec_px": [
+        603,
+        1660,
+        45,
+        48
+      ],
+      "kind": "object",
+      "px": [
+        604.0,
+        1663.0,
+        44.0,
+        45.0
+      ],
+      "dp": [
+        291.7,
+        803.2,
+        21.3,
+        21.7
+      ]
+    },
+    {
+      "name": "text: Living Room \u00b7 Mi Box S",
+      "role": "Connected device title",
+      "kind": "text",
+      "px": [
+        151,
+        91,
+        316,
+        31
+      ],
+      "dp": [
+        72.9,
+        44.0,
+        152.6,
+        15.0
+      ],
+      "baseline_px": 115,
+      "baseline_dp": 55.5,
+      "ink": "#050520",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Connected status",
+        5.8
+      ]
+    },
+    {
+      "name": "text: Connected",
+      "role": "Device connection subtitle",
+      "kind": "text",
+      "px": [
+        192,
+        135,
+        112,
+        19
+      ],
+      "dp": [
+        92.7,
+        65.2,
+        54.1,
+        9.2
+      ],
+      "baseline_px": 153,
+      "baseline_dp": 73.9,
+      "ink": "#81799E",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "text: Me at the zoo",
+        24.6
+      ]
+    },
+    {
+      "name": "text: Me at the zoo",
+      "role": "Current media title",
+      "kind": "text",
+      "px": [
+        129,
+        205,
+        182,
+        24
+      ],
+      "dp": [
+        62.3,
+        99.0,
+        87.9,
+        11.6
+      ],
+      "baseline_px": 229,
+      "baseline_dp": 110.6,
+      "ink": "#040322",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Playback progress",
+        9.2
+      ]
+    },
+    {
+      "name": "text: 0:12",
+      "role": "Elapsed playback time",
+      "kind": "text",
+      "px": [
+        696,
+        209,
+        47,
+        18
+      ],
+      "dp": [
+        336.2,
+        100.9,
+        22.7,
+        8.7
+      ],
+      "baseline_px": 226,
+      "baseline_dp": 109.2,
+      "ink": "#582CC9",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Remote input mode selector",
+        32.4
+      ]
+    },
+    {
+      "name": "text: / 0:19",
+      "role": "Playback separator and total duration",
+      "kind": "text",
+      "px": [
+        766,
+        210,
+        45,
+        17
+      ],
+      "dp": [
+        370.0,
+        101.4,
+        21.7,
+        8.2
+      ],
+      "baseline_px": 226,
+      "baseline_dp": 109.2,
+      "ink": "#8983A6",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Remote input mode selector",
+        32.4
+      ]
+    },
+    {
+      "name": "text: OK",
+      "role": "Directional-pad confirm label",
+      "kind": "text",
+      "px": [
+        396,
+        642,
+        62,
+        32
+      ],
+      "dp": [
+        191.3,
+        310.1,
+        29.9,
+        15.5
+      ],
+      "baseline_px": 673,
+      "baseline_dp": 325.1,
+      "ink": "#07052B",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "parent": "D-pad OK button",
+      "inset_dp": {
+        "left": 26.1,
+        "top": 33.3,
+        "right": 25.6,
+        "bottom": 32.8
+      },
+      "baseline_inset_dp": 48.3,
+      "layout_top_inset_dp": 26.0
+    },
+    {
+      "name": "text: Volume 12",
+      "role": "Volume readout",
+      "kind": "text",
+      "px": [
+        279,
+        1149,
+        130,
+        22
+      ],
+      "dp": [
+        134.8,
+        555.0,
+        62.8,
+        10.6
+      ],
+      "baseline_px": 1170,
+      "baseline_dp": 565.1,
+      "ink": "#201A42",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "parent": "Volume control group",
+      "inset_dp": {
+        "left": 93.4,
+        "top": 23.1,
+        "right": 96.5,
+        "bottom": 23.7
+      },
+      "baseline_inset_dp": 33.3,
+      "layout_top_inset_dp": 18.8
+    },
+    {
+      "name": "text: Favourite apps",
+      "role": "Favourite apps section heading",
+      "kind": "text",
+      "px": [
+        42,
+        1392,
+        151,
+        22
+      ],
+      "dp": [
+        20.3,
+        672.3,
+        72.9,
+        10.6
+      ],
+      "baseline_px": 1409,
+      "baseline_dp": 680.5,
+      "ink": "#312C49",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Favourite apps horizontal carousel",
+        17.4
+      ]
+    },
+    {
+      "name": "text: Edit",
+      "role": "Edit favourites text action",
+      "kind": "text",
+      "px": [
+        773,
+        1391,
+        39,
+        18
+      ],
+      "dp": [
+        373.4,
+        671.9,
+        18.8,
+        8.7
+      ],
+      "baseline_px": 1409,
+      "baseline_dp": 680.5,
+      "ink": "#5524D3",
+      "note": "px/dp are the ink box; pad from baseline_inset_dp or layout_top_inset_dp",
+      "gap_below_dp": [
+        "Favourite apps horizontal carousel",
+        19.8
+      ]
+    }
+  ],
+  "radii": [
+    {
+      "element": "Mode selector outer container",
+      "spec_px": 32,
+      "measured_px": 30.6,
+      "corner_radii_px": [
+        30.8,
+        31.0,
+        30.5,
+        30.5
+      ],
+      "component": "Remote input mode selector",
+      "shape": "rect",
+      "native": "SegmentedButton (single-choice)",
+      "match_score": 3.65
+    },
+    {
+      "element": "Selected D-pad segment",
+      "spec_px": 32,
+      "measured_px": 30.9,
+      "corner_radii_px": [
+        30.8,
+        31.0,
+        30.5,
+        31.0
+      ],
+      "component": "D-pad mode segment",
+      "shape": "rect",
+      "native": "SegmentedButton (single-choice, selected)",
+      "match_score": 4.82
+    },
+    {
+      "element": "Circular D-pad outer edge",
+      "spec_px": 240,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "D-pad OK button",
+      "spec_px": 84.5,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Back, Home, and Settings button circles",
+      "spec_px": 55,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Volume capsule",
+      "spec_px": 59.5,
+      "measured_px": 59.4,
+      "corner_radii_px": [
+        57.0,
+        57.2,
+        58.2,
+        58.0
+      ],
+      "component": "Volume control group",
+      "shape": "pill",
+      "native": "custom",
+      "match_score": 2.27
+    },
+    {
+      "element": "Volume minus and plus buttons",
+      "spec_px": 45,
+      "measured_px": 43.8,
+      "corner_radii_px": [
+        43.8,
+        44.0,
+        43.0,
+        44.0
+      ],
+      "component": "Decrease volume",
+      "shape": "circle",
+      "native": "Buttons (tonal)",
+      "match_score": 2.19
+    },
+    {
+      "element": "Mute button",
+      "spec_px": 55.5,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Previous and next transport buttons",
+      "spec_px": 57,
+      "measured_px": 56.3,
+      "corner_radii_px": [
+        56.0,
+        55.5,
+        56.0,
+        55.5
+      ],
+      "component": "Previous / rewind",
+      "shape": "circle",
+      "native": "Buttons (tonal)",
+      "match_score": 2.25
+    },
+    {
+      "element": "Pause button",
+      "spec_px": 63,
+      "measured_px": 62.3,
+      "corner_radii_px": [
+        62.0,
+        61.8,
+        61.5,
+        61.5
+      ],
+      "component": "Pause playback",
+      "shape": "circle",
+      "native": "Buttons (tonal)",
+      "match_score": 2.25
+    },
+    {
+      "element": "Favourite app tiles",
+      "spec_px": 26,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Keyboard and Power buttons",
+      "spec_px": 56,
+      "measured_px": 47.4,
+      "corner_radii_px": [
+        50.2,
+        50.5,
+        44.5,
+        43.0
+      ],
+      "component": "Keyboard action",
+      "shape": "rect",
+      "native": "Buttons (tonal)",
+      "match_score": 2.25
+    },
+    {
+      "element": "Voice button",
+      "spec_px": 67.5,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Playback progress track and fill",
+      "spec_px": 3.5,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "System gesture handle",
+      "spec_px": 4,
+      "measured_px": null,
+      "corner_radii_px": null,
+      "component": null,
+      "shape": null,
+      "native": null,
+      "match_score": null
+    },
+    {
+      "element": "Current media YouTube badge, approximate",
+      "spec_px": 13,
+      "measured_px": 13.1,
+      "corner_radii_px": [
+        13.2,
+        13.0,
+        13.5,
+        12.2
+      ],
+      "component": "Current media YouTube logo",
+      "shape": "rect",
+      "native": "custom",
+      "match_score": 7.28
+    }
+  ]
+}
