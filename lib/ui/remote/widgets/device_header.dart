@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 class DeviceHeader extends StatelessWidget {
   const DeviceHeader({
@@ -52,10 +53,8 @@ class DeviceHeader extends StatelessWidget {
                             name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: context.appTextTheme.titleSmall!.copyWith(
                               color: c.onSurfaceStrong,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -83,7 +82,9 @@ class DeviceHeader extends StatelessWidget {
                         const SizedBox(width: 5),
                         Text(
                           connected ? 'Connected' : 'Reconnecting…',
-                          style: TextStyle(color: c.muted, fontSize: 12),
+                          style: context.appTextTheme.labelMedium!.copyWith(
+                            color: c.muted,
+                          ),
                         ),
                       ],
                     ),

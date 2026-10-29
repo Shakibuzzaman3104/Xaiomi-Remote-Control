@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../remote/widgets/device_header.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 class SettingsDevice {
   const SettingsDevice({
@@ -119,9 +120,7 @@ class SettingsView extends StatelessWidget {
                 ],
                 Text(
                   'Settings',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  style: context.appTextTheme.headlineSmall!.copyWith(
                     color: c.onSurfaceStrong,
                   ),
                 ),
@@ -175,9 +174,8 @@ class SettingsView extends StatelessWidget {
                             : swipeSensitivity < 2 / 3
                             ? 'Medium'
                             : 'High',
-                        style: TextStyle(
+                        style: context.appTextTheme.labelSmall!.copyWith(
                           color: c.onSurfaceVariant,
-                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -283,9 +281,9 @@ class _Section extends StatelessWidget {
             padding: const EdgeInsets.only(left: 3, bottom: 5),
             child: Text(
               label,
-              style: TextStyle(
+              style: context.appTextTheme.labelMedium!.copyWith(
                 color: c.onSurfaceVariant,
-                fontSize: 12,
+
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -358,16 +356,16 @@ class _Row extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                    style: context.appTextTheme.labelLarge!.copyWith(
                       color: c.onSurfaceStrong,
                     ),
                   ),
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: TextStyle(fontSize: 11, color: c.muted),
+                      style: context.appTextTheme.labelSmall!.copyWith(
+                        color: c.muted,
+                      ),
                     ),
                   ?bottom,
                 ],

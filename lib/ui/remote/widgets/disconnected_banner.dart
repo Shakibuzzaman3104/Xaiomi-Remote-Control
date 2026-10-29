@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 class DisconnectedBanner extends StatelessWidget {
   const DisconnectedBanner({super.key, required this.onRetry});
@@ -27,7 +28,9 @@ class DisconnectedBanner extends StatelessWidget {
           Expanded(
             child: Text(
               'TV is asleep or off Wi-Fi. Wake it with the physical remote.',
-              style: TextStyle(color: c.onSurface, fontSize: 12),
+              style: context.appTextTheme.labelMedium!.copyWith(
+                color: c.onSurface,
+              ),
             ),
           ),
           TextButton(

@@ -98,9 +98,7 @@ class _AppsScreenState extends State<AppsScreen> {
                   Expanded(
                     child: Text(
                       'Apps',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                      style: context.appTextTheme.headlineSmall!.copyWith(
                         color: c.onSurfaceStrong,
                       ),
                     ),
@@ -192,11 +190,10 @@ class _AppsScreenState extends State<AppsScreen> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               widget.notice!,
-                              style: TextStyle(
+                              style: context.appTextTheme.labelMedium!.copyWith(
                                 color: widget.onNoticeTap == null
                                     ? c.muted
                                     : c.primary,
-                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -309,11 +306,13 @@ class _AppsScreenState extends State<AppsScreen> {
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            height: 1.2,
-                                            color: c.onSurfaceStrong,
-                                          ),
+                                          style: context
+                                              .appTextTheme
+                                              .labelMedium!
+                                              .copyWith(
+                                                height: 1.2,
+                                                color: c.onSurfaceStrong,
+                                              ),
                                         ),
                                       ),
                                     ],

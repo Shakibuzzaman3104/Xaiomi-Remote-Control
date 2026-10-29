@@ -172,9 +172,7 @@ class _PairScreenState extends State<PairScreen> {
                       Text(
                         'Pair with $deviceLabel',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                        style: context.appTextTheme.headlineMedium!.copyWith(
                           color: c.onSurfaceStrong,
                         ),
                       ),
@@ -182,8 +180,7 @@ class _PairScreenState extends State<PairScreen> {
                       Text(
                         'Enter the code shown on your TV.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: context.appTextTheme.bodyLarge!.copyWith(
                           color: c.onSurfaceVariant,
                         ),
                       ),
@@ -222,11 +219,12 @@ class _PairScreenState extends State<PairScreen> {
                                     child: isFilled
                                         ? Text(
                                             char,
-                                            style: TextStyle(
-                                              fontSize: 28,
-                                              fontWeight: FontWeight.bold,
-                                              color: c.onSurfaceStrong,
-                                            ),
+                                            style: context
+                                                .appTextTheme
+                                                .headlineMedium!
+                                                .copyWith(
+                                                  color: c.onSurfaceStrong,
+                                                ),
                                           )
                                         : (isFocusedBox && index == text.length
                                               ? Container(
@@ -273,9 +271,7 @@ class _PairScreenState extends State<PairScreen> {
                         Text(
                           _error!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                          style: context.appTextTheme.labelLarge!.copyWith(
                             color: c.danger,
                           ),
                         ),
@@ -307,11 +303,8 @@ class _PairScreenState extends State<PairScreen> {
                             Expanded(
                               child: Text(
                                 "Can't see a code? Turn on the TV and keep it on the home screen.",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: c.onSurface,
-                                  height: 1.35,
-                                ),
+                                style: context.appTextTheme.bodyMedium!
+                                    .copyWith(color: c.onSurface, height: 1.35),
                               ),
                             ),
                           ],
@@ -355,10 +348,9 @@ class _PairScreenState extends State<PairScreen> {
                                 color: c.onPrimary,
                               ),
                             )
-                          : const Text(
+                          : Text(
                               'Pair',
-                              style: TextStyle(
-                                fontSize: 16,
+                              style: context.appTextTheme.bodyLarge!.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -393,9 +385,7 @@ class _PairScreenState extends State<PairScreen> {
                           child: Text(
                             'Read code automatically (needs full control)',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                            style: context.appTextTheme.labelLarge!.copyWith(
                               color: c.primaryText,
                             ),
                           ),

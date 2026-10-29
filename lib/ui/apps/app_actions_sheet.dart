@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import 'apps_screen.dart';
+import '../theme/app_theme.dart';
 
 class AppActionsSheet extends StatelessWidget {
   const AppActionsSheet({
@@ -81,16 +82,16 @@ class AppActionsSheet extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: TextStyle(
+                            style: context.appTextTheme.labelLarge!.copyWith(
                               color: color,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           if (!enabled)
                             Text(
                               'Needs full control',
-                              style: TextStyle(color: c.muted, fontSize: 11),
+                              style: context.appTextTheme.labelSmall!.copyWith(
+                                color: c.muted,
+                              ),
                             ),
                         ],
                       ),
@@ -133,9 +134,7 @@ class AppActionsSheet extends StatelessWidget {
                       children: [
                         Text(
                           app.label,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                          style: context.appTextTheme.titleLarge!.copyWith(
                             color: c.onSurfaceStrong,
                           ),
                         ),
@@ -143,7 +142,9 @@ class AppActionsSheet extends StatelessWidget {
                           sizeLabel == null
                               ? app.package
                               : '${app.package} · $sizeLabel',
-                          style: TextStyle(fontSize: 13, color: c.muted),
+                          style: context.appTextTheme.bodySmall!.copyWith(
+                            color: c.muted,
+                          ),
                         ),
                       ],
                     ),

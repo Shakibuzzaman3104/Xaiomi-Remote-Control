@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 /// Shown in Mouse mode until the TV pointer is available.
 class MouseUnavailable extends StatelessWidget {
@@ -33,9 +34,7 @@ class MouseUnavailable extends StatelessWidget {
               Text(
                 'Mouse pointer is coming soon',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                style: context.appTextTheme.titleMedium!.copyWith(
                   color: c.onSurfaceStrong,
                 ),
               ),

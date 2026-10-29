@@ -51,7 +51,7 @@ abstract final class AppTheme {
     );
 
     return base.copyWith(
-      extensions: [colors],
+      extensions: [colors, const AppTypography()],
       textTheme: base.textTheme.apply(
         bodyColor: colors.onSurface,
         displayColor: colors.onSurfaceStrong,
@@ -85,4 +85,37 @@ abstract final class AppTheme {
       ),
     );
   }
+}
+
+class AppTypography extends ThemeExtension<AppTypography> {
+  const AppTypography();
+
+  static const _textTheme = TextTheme(
+    headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    titleMedium: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+    titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    bodyLarge: TextStyle(fontSize: 16),
+    bodyMedium: TextStyle(fontSize: 14),
+    bodySmall: TextStyle(fontSize: 13),
+    labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+    labelMedium: TextStyle(fontSize: 12),
+    labelSmall: TextStyle(fontSize: 11),
+    displaySmall: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+  );
+
+  TextTheme get textTheme => _textTheme;
+
+  @override
+  AppTypography copyWith() => this;
+
+  @override
+  AppTypography lerp(AppTypography? other, double t) => this;
+}
+
+extension AppTypographyContext on BuildContext {
+  TextTheme get appTextTheme =>
+      Theme.of(this).extension<AppTypography>()?.textTheme ??
+      AppTypography._textTheme;
 }

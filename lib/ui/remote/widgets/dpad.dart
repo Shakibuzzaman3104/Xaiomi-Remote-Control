@@ -11,6 +11,7 @@ import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
+import '../../theme/app_theme.dart';
 
 class Dpad extends StatefulWidget {
   const Dpad({super.key, required this.onButton});
@@ -75,10 +76,8 @@ class _DpadState extends State<Dpad> {
                   Center(
                     child: Text(
                       'OK',
-                      style: TextStyle(
+                      style: context.appTextTheme.titleLarge!.copyWith(
                         color: c.onSurfaceStrong,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 class RoundActionButton extends StatefulWidget {
   const RoundActionButton({
@@ -102,7 +103,9 @@ class _RoundActionButtonState extends State<RoundActionButton> {
                 Text(
                   widget.label,
                   maxLines: 1,
-                  style: TextStyle(fontSize: 11, color: c.onSurface),
+                  style: context.appTextTheme.labelSmall!.copyWith(
+                    color: c.onSurface,
+                  ),
                 ),
               ],
             ],

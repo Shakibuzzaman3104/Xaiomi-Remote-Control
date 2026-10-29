@@ -137,7 +137,7 @@ class VoiceSheet extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: context.appTextTheme.bodyLarge!.copyWith(
                             fontSize: 17,
                             fontWeight: FontWeight.w400,
                             color: textColor,
@@ -200,9 +200,7 @@ class VoiceSheet extends StatelessWidget {
                       label: 'Cancel',
                       child: Text(
                         'Cancel',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                        style: context.appTextTheme.displaySmall!.copyWith(
                           color: c.primaryText,
                         ),
                       ),
@@ -286,9 +284,7 @@ class _TargetChip extends StatelessWidget {
                       label,
                       maxLines: 2,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                      style: context.appTextTheme.labelLarge!.copyWith(
                         color: contentColor,
                       ),
                     ),

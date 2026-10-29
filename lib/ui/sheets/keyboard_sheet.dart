@@ -111,9 +111,7 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 widget.fieldLabel.isEmpty
                     ? 'Typing on TV'
                     : 'Typing on TV · ${widget.fieldLabel}',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                style: context.appTextTheme.titleMedium!.copyWith(
                   color: c.onSurfaceStrong,
                 ),
                 maxLines: 1,
@@ -124,7 +122,9 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 controller: _controller,
                 autofocus: true,
                 textInputAction: TextInputAction.send,
-                style: TextStyle(fontSize: 16, color: c.onSurfaceStrong),
+                style: context.appTextTheme.bodyLarge!.copyWith(
+                  color: c.onSurfaceStrong,
+                ),
                 cursorColor: c.primary,
                 decoration: InputDecoration(
                   filled: true,
@@ -204,8 +204,7 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                           Flexible(
                             child: Text(
                               widget.languageLabel,
-                              style: TextStyle(
-                                fontSize: 13,
+                              style: context.appTextTheme.bodySmall!.copyWith(
                                 color: c.onSurface,
                               ),
                             ),
@@ -234,12 +233,9 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                         child: TextButton.icon(
                           onPressed: _handleClear,
                           icon: const Icon(Icons.backspace_outlined, size: 20),
-                          label: const Text(
+                          label: Text(
                             'Clear',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: context.appTextTheme.displaySmall!,
                           ),
                           style: TextButton.styleFrom(
                             backgroundColor: c.surfaceContainer,
@@ -266,12 +262,9 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                         child: ElevatedButton.icon(
                           onPressed: _handleSend,
                           icon: const Icon(Icons.send_outlined, size: 20),
-                          label: const Text(
+                          label: Text(
                             'Send',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: context.appTextTheme.displaySmall!,
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: c.primary,

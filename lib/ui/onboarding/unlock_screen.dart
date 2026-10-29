@@ -93,11 +93,12 @@ class UnlockScreen extends StatelessWidget {
                                           deviceName!,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: c.onSurfaceStrong,
-                                          ),
+                                          style: context
+                                              .appTextTheme
+                                              .titleSmall!
+                                              .copyWith(
+                                                color: c.onSurfaceStrong,
+                                              ),
                                         ),
                                       ),
                                       const SizedBox(width: 6),
@@ -118,10 +119,8 @@ class UnlockScreen extends StatelessWidget {
                                       const SizedBox(width: 6),
                                       Text(
                                         'Connected',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: c.muted,
-                                        ),
+                                        style: context.appTextTheme.labelMedium!
+                                            .copyWith(color: c.muted),
                                       ),
                                     ],
                                   ),
@@ -138,7 +137,9 @@ class UnlockScreen extends StatelessWidget {
                         Center(
                           child: Text(
                             '3 of 3',
-                            style: TextStyle(fontSize: 13, color: c.muted),
+                            style: context.appTextTheme.bodySmall!.copyWith(
+                              color: c.muted,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -150,9 +151,7 @@ class UnlockScreen extends StatelessWidget {
                       Text(
                         'Unlock full control',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                        style: context.appTextTheme.headlineMedium!.copyWith(
                           color: c.onSurfaceStrong,
                         ),
                       ),
@@ -160,8 +159,7 @@ class UnlockScreen extends StatelessWidget {
                       Text(
                         'Optional. Shows every app on your TV and lets you force stop, clear cache or uninstall them.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: context.appTextTheme.bodyMedium!.copyWith(
                           color: c.muted,
                           height: 1.35,
                         ),
@@ -196,11 +194,11 @@ class UnlockScreen extends StatelessWidget {
                                 alignment: Alignment.center,
                                 child: Text(
                                   '${i + 1}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: c.onSurfaceStrong,
-                                  ),
+                                  style: context.appTextTheme.bodySmall!
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: c.onSurfaceStrong,
+                                      ),
                                 ),
                               ),
                               const SizedBox(width: 20),
@@ -209,11 +207,11 @@ class UnlockScreen extends StatelessWidget {
                                   padding: const EdgeInsets.only(top: 4),
                                   child: Text(
                                     _steps[i],
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: c.onSurfaceStrong,
-                                      height: 1.3,
-                                    ),
+                                    style: context.appTextTheme.bodyMedium!
+                                        .copyWith(
+                                          color: c.onSurfaceStrong,
+                                          height: 1.3,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -251,11 +249,11 @@ class UnlockScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 statusText,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: c.onSurfaceStrong,
-                                ),
+                                style: context.appTextTheme.bodyMedium!
+                                    .copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: c.onSurfaceStrong,
+                                    ),
                               ),
                             ),
                           ],
@@ -310,10 +308,8 @@ class UnlockScreen extends StatelessWidget {
                                 ],
                                 Text(
                                   connected ? 'Continue' : 'Connect',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: context.appTextTheme.bodyLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -346,9 +342,7 @@ class UnlockScreen extends StatelessWidget {
                         label: onBack == null ? 'Skip for now' : 'Not now',
                         child: Text(
                           onBack == null ? 'Skip for now' : 'Not now',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                          style: context.appTextTheme.displaySmall!.copyWith(
                             color: c.primaryText,
                           ),
                         ),

@@ -8,6 +8,7 @@ import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
+import '../../theme/app_theme.dart';
 
 class Numpad extends StatelessWidget {
   const Numpad({super.key, required this.onButton});
@@ -72,7 +73,7 @@ class Numpad extends StatelessWidget {
                 child: Center(
                   child: Text(
                     labels[i],
-                    style: TextStyle(
+                    style: context.appTextTheme.bodyMedium!.copyWith(
                       color: c.onSurfaceStrong,
                       fontSize: i == 9 || i == 11 ? 14 : 22,
                     ),

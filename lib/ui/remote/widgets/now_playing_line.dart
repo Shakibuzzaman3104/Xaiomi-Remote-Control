@@ -8,6 +8,7 @@ import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
+import '../../theme/app_theme.dart';
 
 class NowPlayingLine extends StatelessWidget {
   const NowPlayingLine({super.key, required this.playing, required this.onTap});
@@ -64,11 +65,15 @@ class NowPlayingLine extends StatelessWidget {
                         ),
                         Text(
                           time(playing.position),
-                          style: TextStyle(color: c.primaryText, fontSize: 12),
+                          style: context.appTextTheme.labelMedium!.copyWith(
+                            color: c.primaryText,
+                          ),
                         ),
                         Text(
                           ' / ${time(playing.duration)}',
-                          style: TextStyle(color: c.muted, fontSize: 12),
+                          style: context.appTextTheme.labelMedium!.copyWith(
+                            color: c.muted,
+                          ),
                         ),
                       ],
                     ),

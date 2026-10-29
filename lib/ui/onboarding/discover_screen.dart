@@ -8,6 +8,7 @@ import '../haptics.dart';
 
 import '../theme/app_colors.dart';
 import 'step_dots.dart';
+import '../theme/app_theme.dart';
 
 class DiscoverItem {
   const DiscoverItem({
@@ -50,9 +51,7 @@ class DiscoverScreen extends StatelessWidget {
               Text(
                 'Find your TV',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
+                style: context.appTextTheme.headlineMedium!.copyWith(
                   color: c.onSurfaceStrong,
                 ),
               ),
@@ -62,8 +61,7 @@ class DiscoverScreen extends StatelessWidget {
                 child: Text(
                   'Make sure your phone and TV are on the same Wi-Fi.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.appTextTheme.bodyLarge!.copyWith(
                     height: 1.3,
                     color: c.onSurfaceVariant,
                   ),
@@ -85,9 +83,7 @@ class DiscoverScreen extends StatelessWidget {
               const SizedBox(height: 34),
               Text(
                 'Available devices',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                style: context.appTextTheme.displaySmall!.copyWith(
                   color: c.onSurfaceStrong,
                 ),
               ),
@@ -127,7 +123,9 @@ class DiscoverScreen extends StatelessWidget {
                           devices.isEmpty
                               ? 'Searching…'
                               : 'Still looking for more TVs…',
-                          style: TextStyle(fontSize: 13, color: c.muted),
+                          style: context.appTextTheme.bodySmall!.copyWith(
+                            color: c.muted,
+                          ),
                         ),
                       ),
                     ],
@@ -144,9 +142,9 @@ class DiscoverScreen extends StatelessWidget {
                     foregroundColor: c.primaryText,
                     minimumSize: const Size(48, 48),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Enter IP address manually',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    style: context.appTextTheme.labelLarge!,
                   ),
                 ),
               ),
@@ -201,9 +199,7 @@ class _DeviceTile extends StatelessWidget {
                         item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                        style: context.appTextTheme.displaySmall!.copyWith(
                           color: c.onSurfaceStrong,
                         ),
                       ),
@@ -212,8 +208,7 @@ class _DeviceTile extends StatelessWidget {
                         item.subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: context.appTextTheme.bodySmall!.copyWith(
                           color: c.onSurfaceVariant,
                         ),
                       ),

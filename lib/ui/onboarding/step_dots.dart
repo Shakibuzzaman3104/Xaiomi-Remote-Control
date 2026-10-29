@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 class StepDots extends StatelessWidget {
   const StepDots({
@@ -51,8 +52,7 @@ class StepDots extends StatelessWidget {
               child: numbered
                   ? Text(
                       '$i',
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: context.appTextTheme.bodySmall!.copyWith(
                         fontWeight: FontWeight.w600,
                         color: i <= current ? c.onPrimary : c.onSurfaceStrong,
                       ),
