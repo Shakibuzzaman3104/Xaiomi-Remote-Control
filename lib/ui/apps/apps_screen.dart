@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../fade_switcher.dart';
 import '../motion.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -52,49 +53,13 @@ class AppsScreen extends StatefulWidget {
   State<AppsScreen> createState() => _AppsScreenState();
 }
 
-class _AppsScreenState extends State<AppsScreen>
-    with SingleTickerProviderStateMixin {
-  static const _rowDelay = Duration(milliseconds: 40);
-  static const _tileDuration = Duration(milliseconds: 260);
-  static const _staggerRows = 5;
-  static final _entranceDuration = _rowDelay * _staggerRows + _tileDuration;
-
+class _AppsScreenState extends State<AppsScreen> {
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
-  late final AnimationController _entrance = AnimationController(vsync: this);
   bool _favourites = false;
-  bool _entrancePlayed = false;
-
-  void _playEntranceOnce() {
-    if (_entrancePlayed || widget.apps.isEmpty) return;
-    _entrancePlayed = true;
-    _entrance.animateTo(1, duration: motion(context, _entranceDuration));
-  }
-
-  Curve _tileEntranceCurve(int index) {
-    final delay = _rowDelay * (index ~/ 4).clamp(0, _staggerRows - 1);
-    return Interval(
-      delay.inMilliseconds / _entranceDuration.inMilliseconds,
-      (delay + _tileDuration).inMilliseconds / _entranceDuration.inMilliseconds,
-      curve: AppMotion.easeOut,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _playEntranceOnce();
-  }
-
-  @override
-  void didUpdateWidget(covariant AppsScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _playEntranceOnce();
-  }
 
   @override
   void dispose() {
-    _entrance.dispose();
     _search.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -162,42 +127,63 @@ class _AppsScreenState extends State<AppsScreen>
                   color: c.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppShapes.pill),
                 ),
-                child: Row(
+                child: Stack(
                   children: [
-                    for (final favourite in [false, true])
-                      Expanded(
-                        child: Semantics(
-                          selected: _favourites == favourite,
-                          button: true,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(AppShapes.pill),
-                            onTap: () =>
-                                setState(() => _favourites = favourite),
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: _favourites == favourite
-                                    ? c.primary
-                                    : c.surfaceContainer,
+                    SpringValue(
+                      value: _favourites ? 1 : -1,
+                      builder: (context, value, child) => Align(
+                        alignment: Alignment(value.clamp(-1.0, 1.0), 0),
+                        child: FractionallySizedBox(
+                          widthFactor: .5,
+                          heightFactor: 1,
+                          child: child,
+                        ),
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: c.primary,
+                          borderRadius: BorderRadius.circular(AppShapes.pill),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        for (final favourite in [false, true])
+                          Expanded(
+                            child: Semantics(
+                              selected: _favourites == favourite,
+                              button: true,
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(
                                   AppShapes.pill,
                                 ),
-                              ),
-                              child: Text(
-                                favourite ? 'Favourites' : 'All',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: _favourites == favourite
-                                      ? c.onPrimary
-                                      : c.onSurfaceStrong,
-                                  fontWeight: FontWeight.w600,
+                                onTap: () =>
+                                    setState(() => _favourites = favourite),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(
+                                      AppShapes.pill,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    favourite ? 'Favourites' : 'All',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: _favourites == favourite
+                                          ? c.onPrimary
+                                          : c.onSurfaceStrong,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -283,23 +269,26 @@ class _AppsScreenState extends State<AppsScreen>
       );
     }
     return KeyedSubtree(
-      key: const ValueKey('grid'),
+      key: ValueKey('grid-$_favourites-$query'),
       child: _grid(
         context,
         itemCount: apps.length,
         builder: (index, tileWidth) {
           final app = apps[index];
-          return _AppTile(
+          return SpringIn(
             key: ValueKey(app.package),
-            app: app,
-            tileWidth: tileWidth,
-            entrance: _entrance,
-            entranceCurve: _tileEntranceCurve(index),
-            onOpen: () => widget.onOpen(app),
-            onShowActions: () => widget.onShowActions(app),
-            onToggleFavourite: widget.onToggleFavourite == null
-                ? null
-                : () => widget.onToggleFavourite!(app),
+            delay: Duration(
+              milliseconds: ((index ~/ 4 + index % 4) * 25).clamp(0, 300),
+            ),
+            child: _AppTile(
+              app: app,
+              tileWidth: tileWidth,
+              onOpen: () => widget.onOpen(app),
+              onShowActions: () => widget.onShowActions(app),
+              onToggleFavourite: widget.onToggleFavourite == null
+                  ? null
+                  : () => widget.onToggleFavourite!(app),
+            ),
           );
         },
       ),
@@ -350,12 +339,17 @@ class _AppsScreenState extends State<AppsScreen>
       refreshable: false,
       builder: (index, tileWidth) => Column(
         children: [
-          Container(
-            width: tileWidth,
-            height: tileWidth,
-            decoration: BoxDecoration(
-              color: c.surfaceContainer,
-              borderRadius: BorderRadius.circular(12),
+          SizedBox.square(
+            dimension: tileWidth,
+            child: Center(
+              child: Container(
+                width: tileWidth * .86,
+                height: tileWidth * .86,
+                decoration: BoxDecoration(
+                  color: c.surfaceContainer,
+                  borderRadius: BorderRadius.circular(AppShapes.card),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -417,19 +411,14 @@ class _AppsScreenState extends State<AppsScreen>
 
 class _AppTile extends StatefulWidget {
   const _AppTile({
-    super.key,
     required this.app,
     required this.tileWidth,
-    required this.entrance,
-    required this.entranceCurve,
     required this.onOpen,
     required this.onShowActions,
     required this.onToggleFavourite,
   });
   final TvAppItem app;
   final double tileWidth;
-  final Animation<double> entrance;
-  final Curve entranceCurve;
   final VoidCallback onOpen, onShowActions;
   final VoidCallback? onToggleFavourite;
 
@@ -439,6 +428,7 @@ class _AppTile extends StatefulWidget {
 
 class _AppTileState extends State<_AppTile> {
   int _starPops = 0;
+  bool _lifted = false;
 
   @override
   void didUpdateWidget(covariant _AppTile oldWidget) {
@@ -452,7 +442,15 @@ class _AppTileState extends State<_AppTile> {
     final app = widget.app;
     final tile = InkWell(
       onTap: widget.onOpen,
-      onLongPress: widget.onShowActions,
+      onLongPress: () async {
+        if (!reduceMotion(context)) {
+          setState(() => _lifted = true);
+          await Future<void>.delayed(const Duration(milliseconds: 120));
+          if (!mounted) return;
+        }
+        widget.onShowActions();
+        if (mounted) setState(() => _lifted = false);
+      },
       borderRadius: BorderRadius.circular(12),
       child: Opacity(
         opacity: app.dimmed ? 0.5 : 1,
@@ -462,14 +460,27 @@ class _AppTileState extends State<_AppTile> {
               width: widget.tileWidth,
               height: widget.tileWidth,
               decoration: BoxDecoration(
-                color: c.appTile,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: c.subtleOutline),
+                borderRadius: BorderRadius.circular(AppShapes.card),
+                boxShadow: _lifted
+                    ? [
+                        BoxShadow(
+                          color: c.primary.withValues(alpha: .22),
+                          blurRadius: 18,
+                          offset: const Offset(0, 7),
+                        ),
+                      ]
+                    : null,
               ),
               child: Stack(
                 children: [
                   Center(
-                    child: SizedBox(width: 56, height: 56, child: app.icon),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppShapes.card),
+                      child: SizedBox.square(
+                        dimension: widget.tileWidth * .86,
+                        child: FittedBox(fit: BoxFit.cover, child: app.icon),
+                      ),
+                    ),
                   ),
                   if (app.isFavourite)
                     Positioned(
@@ -520,20 +531,12 @@ class _AppTileState extends State<_AppTile> {
         ),
       ),
     );
-    return AnimatedBuilder(
-      animation: widget.entrance,
-      child: tile,
-      builder: (context, child) {
-        if (widget.entrance.isCompleted) return child!;
-        final t = widget.entranceCurve.transform(widget.entrance.value);
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 12),
-            child: child,
-          ),
-        );
-      },
+    return SpringValue(
+      value: _lifted ? 1.06 : 1,
+      spring: AppSprings.bouncy,
+      builder: (context, scale, child) =>
+          Transform.scale(scale: scale, child: child),
+      child: SpringTapFeedback(scale: .94, child: tile),
     );
   }
 }
@@ -546,14 +549,7 @@ class _StarPop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!pop || reduceMotion(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.6, end: 1),
-      duration: AppMotion.swap,
-      curve: Curves.easeOutBack,
-      child: child,
-      builder: (context, scale, child) =>
-          Transform.scale(scale: scale, child: child),
-    );
+    return SpringIn(fromScale: .55, rise: 0, child: child);
   }
 }
 

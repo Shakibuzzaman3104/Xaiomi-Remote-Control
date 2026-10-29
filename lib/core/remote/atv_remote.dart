@@ -88,7 +88,8 @@ class AtvNotPairedException extends AtvConnectionLostException {
 
 /// A TLS client for the Android TV Remote Service v2 protocol.
 class AtvIdentityChangedException extends AtvConnectionLostException {
-  const AtvIdentityChangedException() : super("This TV's identity changed. Pair it again.");
+  const AtvIdentityChangedException()
+    : super("This TV's identity changed. Pair it again.");
 }
 
 @visibleForTesting

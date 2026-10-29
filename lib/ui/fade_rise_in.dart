@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'motion.dart';
+import 'physics.dart';
 
 /// Fades and lifts its child in once when first mounted.
 class FadeRiseIn extends StatelessWidget {
@@ -22,18 +23,11 @@ class FadeRiseIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!animate || reduceMotion(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: AppMotion.standard,
-      curve: AppMotion.easeOut,
+    return SpringIn(
+      rise: rise,
+      fromScale: 1,
+      spring: AppSprings.smooth,
       child: child,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, (1 - t) * rise),
-          child: child,
-        ),
-      ),
     );
   }
 }

@@ -5,10 +5,13 @@
 import 'package:flutter/material.dart';
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import '../../fade_switcher.dart';
 import '../../haptics.dart';
 import '../../motion.dart';
+import '../../rolling_number.dart';
+import '../../physics.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../remote_models.dart';
@@ -87,44 +90,59 @@ class _VolumePillState extends State<VolumePill> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ExcludeSemantics(
-                              child: Text(
-                                'Volume ${((_dragIndex ?? widget.exactIndex!) * 100 / widget.exactMax!).round()}%',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.appTextTheme.labelMedium,
+                              child: RollingNumber(
+                                value:
+                                    ((_dragIndex ?? widget.exactIndex!) *
+                                            100 /
+                                            widget.exactMax!)
+                                        .round(),
+                                prefix: 'Volume ',
+                                suffix: '%',
+                                style: context.appTextTheme.labelMedium!,
                               ),
                             ),
                             SizedBox(
                               height: 32,
-                              child: Slider(
-                                value: (_dragIndex ?? widget.exactIndex!)
+                              child: SpringValue(
+                                value: (widget.exactIndex!)
                                     .clamp(0, widget.exactMax!)
                                     .toDouble(),
-                                max: widget.exactMax!.toDouble(),
-                                divisions: widget.exactMax,
-                                semanticFormatterCallback: (value) =>
-                                    'Volume ${(value * 100 / widget.exactMax!).round()}%',
-                                activeColor: widget.muted ? c.muted : c.primary,
-                                inactiveColor: c.progressTrack,
-                                onChanged: (value) {
-                                  setState(() => _dragIndex = value.round());
-                                  _pending = value.round();
-                                  _throttle ??= Timer(
-                                    const Duration(milliseconds: 150),
-                                    () {
-                                      _throttle = null;
-                                      _sendPending();
-                                    },
-                                  );
-                                },
-                                onChangeEnd: (value) {
-                                  AppHaptics.selection();
-                                  setState(() => _dragIndex = null);
-                                  _throttle?.cancel();
-                                  _throttle = null;
-                                  _pending = value.round();
-                                  _sendPending();
-                                },
+                                spring: AppSprings.settle,
+                                builder: (context, animatedValue, _) => Slider(
+                                  value:
+                                      (_dragIndex?.toDouble() ?? animatedValue)
+                                          .clamp(
+                                            0.0,
+                                            widget.exactMax!.toDouble(),
+                                          ),
+                                  max: widget.exactMax!.toDouble(),
+                                  divisions: widget.exactMax,
+                                  semanticFormatterCallback: (value) =>
+                                      'Volume ${(value * 100 / widget.exactMax!).round()}%',
+                                  activeColor: widget.muted
+                                      ? c.muted
+                                      : c.primary,
+                                  inactiveColor: c.progressTrack,
+                                  onChanged: (value) {
+                                    setState(() => _dragIndex = value.round());
+                                    _pending = value.round();
+                                    _throttle ??= Timer(
+                                      const Duration(milliseconds: 150),
+                                      () {
+                                        _throttle = null;
+                                        _sendPending();
+                                      },
+                                    );
+                                  },
+                                  onChangeEnd: (value) {
+                                    AppHaptics.selection();
+                                    setState(() => _dragIndex = null);
+                                    _throttle?.cancel();
+                                    _throttle = null;
+                                    _pending = value.round();
+                                    _sendPending();
+                                  },
+                                ),
                               ),
                             ),
                           ],
@@ -134,23 +152,32 @@ class _VolumePillState extends State<VolumePill> {
                             scale: 1,
                             slide: const Offset(0, 0.15),
                             duration: AppMotion.quick,
-                            child: Text(
-                              widget.muted
-                                  ? 'Muted'
-                                  : widget.level == null
-                                  ? 'Volume'
-                                  : 'Volume ${widget.level}%',
-                              key: ValueKey(widget.muted ? -1 : widget.level),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.appTextTheme.labelLarge!.copyWith(
-                                color: c.onSurfaceStrong,
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
+                            child: widget.muted || widget.level == null
+                                ? Text(
+                                    widget.muted ? 'Muted' : 'Volume',
+                                    key: ValueKey(widget.muted),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: context.appTextTheme.labelLarge!
+                                        .copyWith(
+                                          color: c.onSurfaceStrong,
+                                          fontWeight: FontWeight.w600,
+                                          fontFeatures: const [
+                                            FontFeature.tabularFigures(),
+                                          ],
+                                        ),
+                                  )
+                                : RollingNumber(
+                                    key: const ValueKey('level'),
+                                    value: widget.level!,
+                                    prefix: 'Volume ',
+                                    suffix: '%',
+                                    style: context.appTextTheme.labelLarge!
+                                        .copyWith(
+                                          color: c.onSurfaceStrong,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
                           ),
                         ),
                 ),
@@ -168,13 +195,21 @@ class _VolumePillState extends State<VolumePill> {
           ),
         ),
         const SizedBox(width: 16),
-        RoundActionButton(
-          label: widget.muted ? 'Unmute' : 'Mute',
-          icon: widget.muted
-              ? Icons.volume_off_outlined
-              : Icons.volume_up_outlined,
-          selected: widget.muted,
-          onPressed: () => widget.onButton(RemoteButton.mute),
+        SpringValue(
+          value: widget.muted ? 1 : 0,
+          spring: AppSprings.settle,
+          builder: (context, value, child) => Transform.rotate(
+            angle: math.sin(value * math.pi * 3) * 0.12,
+            child: child,
+          ),
+          child: RoundActionButton(
+            label: widget.muted ? 'Unmute' : 'Mute',
+            icon: widget.muted
+                ? Icons.volume_off_outlined
+                : Icons.volume_up_outlined,
+            selected: widget.muted,
+            onPressed: () => widget.onButton(RemoteButton.mute),
+          ),
         ),
       ],
     );

@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/session/providers.dart';
 import '../../core/session/tv_session.dart';
+import '../fade_switcher.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -52,45 +54,74 @@ class TvSwitcherSheet extends ConsumerWidget {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  for (final tv in tvs)
-                    ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppShapes.card),
+                  for (var i = 0; i < tvs.length; i++)
+                    SpringIn(
+                      delay: Duration(milliseconds: (i * 45).clamp(0, 300)),
+                      child: SpringTapFeedback(
+                        child: Builder(
+                          builder: (context) {
+                            final tv = tvs[i];
+                            return ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppShapes.card,
+                                ),
+                              ),
+                              leading: Icon(
+                                Icons.tv_outlined,
+                                color: c.onSurfaceStrong,
+                              ),
+                              title: Text(
+                                tv.displayName,
+                                style: TextStyle(color: c.onSurfaceStrong),
+                              ),
+                              subtitle: Text(
+                                tv.id == active?.id
+                                    ? statusText
+                                    : (tv.model ?? tv.host),
+                                style: TextStyle(color: c.onSurfaceVariant),
+                              ),
+                              trailing: tv.id == active?.id
+                                  ? Icon(Icons.check, color: c.primary)
+                                  : null,
+                              onTap: () {
+                                ref
+                                    .read(pairedTvsProvider.notifier)
+                                    .select(tv.id);
+                                Navigator.of(context).pop();
+                              },
+                            );
+                          },
+                        ),
                       ),
-                      leading: Icon(
-                        Icons.tv_outlined,
-                        color: c.onSurfaceStrong,
-                      ),
-                      title: Text(
-                        tv.displayName,
-                        style: TextStyle(color: c.onSurfaceStrong),
-                      ),
-                      subtitle: Text(
-                        tv.id == active?.id
-                            ? statusText
-                            : (tv.model ?? tv.host),
-                        style: TextStyle(color: c.onSurfaceVariant),
-                      ),
-                      trailing: tv.id == active?.id
-                          ? Icon(Icons.check, color: c.primary)
-                          : null,
-                      onTap: () {
-                        ref.read(pairedTvsProvider.notifier).select(tv.id);
-                        Navigator.of(context).pop();
-                      },
                     ),
                 ],
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.add, color: c.onSurfaceStrong),
-              title: const Text('Add a TV'),
-              onTap: onAddTv,
+            SpringIn(
+              delay: Duration(milliseconds: (tvs.length * 45).clamp(0, 300)),
+              child: SpringTapFeedback(
+                child: ListTile(
+                  leading: Icon(Icons.add, color: c.onSurfaceStrong),
+                  title: const Text('Add a TV'),
+                  onTap: onAddTv,
+                ),
+              ),
             ),
-            ListTile(
-              leading: Icon(Icons.settings_outlined, color: c.onSurfaceStrong),
-              title: const Text('Settings'),
-              onTap: onSettings,
+            SpringIn(
+              delay: Duration(
+                milliseconds: ((tvs.length + 1) * 45).clamp(0, 300),
+              ),
+              child: SpringTapFeedback(
+                child: ListTile(
+                  leading: Icon(
+                    Icons.settings_outlined,
+                    color: c.onSurfaceStrong,
+                  ),
+                  title: const Text('Settings'),
+                  onTap: onSettings,
+                ),
+              ),
             ),
           ],
         ),

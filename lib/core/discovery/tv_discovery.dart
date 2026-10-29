@@ -82,7 +82,11 @@ class TvDiscovery {
   Future<void> _operation = Future.value();
 
   Stream<List<DiscoveredTv>> get devices => Stream.multi((controller) {
-    final subscription = _devicesController.stream.listen(controller.add, onError: controller.addError, onDone: controller.close);
+    final subscription = _devicesController.stream.listen(
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    );
     controller.add(_snapshot());
     controller.onCancel = subscription.cancel;
   });
@@ -108,27 +112,30 @@ class TvDiscovery {
     final serviceTypes = [remoteServiceType, castServiceType, adbServiceType];
 
     try {
-    for (final type in serviceTypes) {
-      final discovery = _discoveryFactory(type);
-      _discoveries.add(discovery);
-      await discovery.initialize();
-      if (generation != _generation) { await _cleanup(); return; }
+      for (final type in serviceTypes) {
+        final discovery = _discoveryFactory(type);
+        _discoveries.add(discovery);
+        await discovery.initialize();
+        if (generation != _generation) {
+          await _cleanup();
+          return;
+        }
 
-      final stream = discovery.eventStream;
-      if (stream != null) {
-        final sub = stream.listen(
-          (event) {
+        final stream = discovery.eventStream;
+        if (stream != null) {
+          final sub = stream.listen((event) {
             if (generation == _generation) {
               _handleDiscoveryEvent(type, discovery, event);
             }
-          },
-          onError: (_) {},
-        );
-        _subscriptions.add(sub);
+          }, onError: (_) {});
+          _subscriptions.add(sub);
+        }
+        await discovery.start();
+        if (generation != _generation) {
+          await _cleanup();
+          return;
+        }
       }
-      await discovery.start();
-      if (generation != _generation) { await _cleanup(); return; }
-    }
     } catch (_) {
       await _cleanup();
       rethrow;
@@ -159,7 +166,9 @@ class TvDiscovery {
     _subscriptions.clear();
 
     for (final discovery in _discoveries) {
-      try { await discovery.stop(); } catch (_) {}
+      try {
+        await discovery.stop();
+      } catch (_) {}
     }
     _discoveries.clear();
 
@@ -263,6 +272,6 @@ class TvDiscovery {
     }
   }
 
-  List<DiscoveredTv> _snapshot() => _primaryDevices.values.toList()
-    ..sort((a, b) => a.name.compareTo(b.name));
+  List<DiscoveredTv> _snapshot() =>
+      _primaryDevices.values.toList()..sort((a, b) => a.name.compareTo(b.name));
 }

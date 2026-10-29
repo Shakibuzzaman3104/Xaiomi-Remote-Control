@@ -2,13 +2,14 @@
  * @author Shakib
  * @since 29/10/26
  */
-import 'dart:math' as math;
+import 'package:flutter/physics.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../haptics.dart';
 import '../motion.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'step_dots.dart';
@@ -25,8 +26,6 @@ class _UpperCaseHexFormatter extends TextInputFormatter {
     );
   }
 }
-
-double _shakeOffset(double t) => math.sin(t * math.pi * 6) * 8 * (1 - t);
 
 class PairScreen extends StatefulWidget {
   const PairScreen({
@@ -56,9 +55,8 @@ class _PairScreenState extends State<PairScreen>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
-  late final AnimationController _shake = AnimationController(
+  late final AnimationController _shake = AnimationController.unbounded(
     vsync: this,
-    duration: const Duration(milliseconds: 360),
   );
   bool _submitting = false;
   String? _error;
@@ -121,7 +119,9 @@ class _PairScreenState extends State<PairScreen>
 
     if (err != null) {
       AppHaptics.medium();
-      if (!reduceMotion(context)) _shake.forward(from: 0);
+      if (!reduceMotion(context)) {
+        _shake.animateWith(SpringSimulation(AppSprings.bouncy, 8, 0, 0));
+      }
       _controller.clear();
       setState(() {
         _submitting = false;
@@ -230,7 +230,7 @@ class _PairScreenState extends State<PairScreen>
                         child: AnimatedBuilder(
                           animation: _shake,
                           builder: (context, child) => Transform.translate(
-                            offset: Offset(_shakeOffset(_shake.value), 0),
+                            offset: Offset(_shake.value, 0),
                             child: child,
                           ),
                           child: Stack(
@@ -248,55 +248,61 @@ class _PairScreenState extends State<PairScreen>
                                     final char = isFilled ? text[index] : '';
 
                                     return Expanded(
-                                      child: AnimatedContainer(
-                                        duration: motion(
-                                          context,
-                                          AppMotion.quick,
-                                        ),
-                                        curve: AppMotion.easeOut,
-                                        margin: EdgeInsets.only(
-                                          right: index == 5 ? 0 : 7,
-                                        ),
-                                        height: 72,
-                                        decoration: BoxDecoration(
-                                          color: c.background,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                      child: SpringIn(
+                                        key: ValueKey('$index-$isFilled'),
+                                        animate: isFilled,
+                                        rise: 0,
+                                        fromScale: .85,
+                                        child: AnimatedContainer(
+                                          duration: motion(
+                                            context,
+                                            AppMotion.quick,
                                           ),
-                                          border: Border.all(
-                                            color: widget.success
-                                                ? c.primary
-                                                : _error != null
-                                                ? c.danger
-                                                : isFocusedBox
-                                                ? c.primary
-                                                : c.inputOutline,
-                                            width: isFocusedBox ? 1.5 : 1.0,
+                                          curve: SpringCurves.smooth,
+                                          margin: EdgeInsets.only(
+                                            right: index == 5 ? 0 : 7,
                                           ),
+                                          height: 72,
+                                          decoration: BoxDecoration(
+                                            color: c.background,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: widget.success
+                                                  ? c.primary
+                                                  : _error != null
+                                                  ? c.danger
+                                                  : isFocusedBox
+                                                  ? c.primary
+                                                  : c.inputOutline,
+                                              width: isFocusedBox ? 1.5 : 1.0,
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: isFilled
+                                              ? _PopIn(
+                                                  key: ValueKey('$index$char'),
+                                                  child: Text(
+                                                    char,
+                                                    style: context
+                                                        .appTextTheme
+                                                        .headlineMedium!
+                                                        .copyWith(
+                                                          color:
+                                                              c.onSurfaceStrong,
+                                                        ),
+                                                  ),
+                                                )
+                                              : (isFocusedBox &&
+                                                        index == text.length
+                                                    ? Container(
+                                                        width: 2,
+                                                        height: 24,
+                                                        color: c.primary,
+                                                      )
+                                                    : const SizedBox.shrink()),
                                         ),
-                                        alignment: Alignment.center,
-                                        child: isFilled
-                                            ? _PopIn(
-                                                key: ValueKey('$index$char'),
-                                                child: Text(
-                                                  char,
-                                                  style: context
-                                                      .appTextTheme
-                                                      .headlineMedium!
-                                                      .copyWith(
-                                                        color:
-                                                            c.onSurfaceStrong,
-                                                      ),
-                                                ),
-                                              )
-                                            : (isFocusedBox &&
-                                                      index == text.length
-                                                  ? Container(
-                                                      width: 2,
-                                                      height: 24,
-                                                      color: c.primary,
-                                                    )
-                                                  : const SizedBox.shrink()),
                                       ),
                                     );
                                   }),
@@ -469,17 +475,7 @@ class _PopIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (reduceMotion(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: AppMotion.quick,
-      curve: AppMotion.easeOut,
-      child: child,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.scale(scale: 0.8 + 0.2 * t, child: child),
-      ),
-    );
+    return SpringIn(fromScale: .6, rise: 0, child: child);
   }
 }
 
@@ -499,11 +495,11 @@ class _CheckMarkState extends State<_CheckMark>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_controller.value == 0 && !_controller.isAnimating) {
-      _controller.animateTo(
-        1,
-        duration: motion(context, AppMotion.standard),
-        curve: AppMotion.easeOut,
-      );
+      if (reduceMotion(context)) {
+        _controller.value = 1;
+      } else {
+        _controller.animateWith(SpringSimulation(AppSprings.settle, 0, 1, 0));
+      }
     }
   }
 
@@ -516,9 +512,26 @@ class _CheckMarkState extends State<_CheckMark>
   @override
   Widget build(BuildContext context) => Semantics(
     label: 'Paired',
-    child: CustomPaint(
-      size: const Size.square(26),
-      painter: _CheckPainter(widget.color, _controller),
+    child: SpringIn(
+      fromScale: .6,
+      rise: 0,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: widget.color.withValues(alpha: .18)),
+            ),
+          ),
+          CustomPaint(
+            size: const Size.square(26),
+            painter: _CheckPainter(widget.color, _controller),
+          ),
+        ],
+      ),
     ),
   );
 }

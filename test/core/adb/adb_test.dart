@@ -66,7 +66,11 @@ void main() {
         }
       });
     });
-    final client = AdbClient(host: '127.0.0.1', port: server.port, key: AdbKey.generate());
+    final client = AdbClient(
+      host: '127.0.0.1',
+      port: server.port,
+      key: AdbKey.generate(),
+    );
     try {
       await client.connect();
       final stream = await client.openSocket('test');
@@ -177,9 +181,7 @@ void main() {
       isTrue,
     );
     expect(
-      AdbCommands.parseMusicMuted(
-        '$audio- STREAM_ALARM:\n   Muted: true\n',
-      ),
+      AdbCommands.parseMusicMuted('$audio- STREAM_ALARM:\n   Muted: true\n'),
       isFalse,
     );
   });

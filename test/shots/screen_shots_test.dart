@@ -128,7 +128,13 @@ List<TvAppItem> _demoApps() => [
     TvAppItem(
       package: 'pkg.${name.toLowerCase()}',
       label: name,
-      icon: CircleAvatar(child: Text(name[0])),
+      icon: Container(
+        width: 56,
+        height: 56,
+        alignment: Alignment.center,
+        color: const Color(0xFFE6DDFF),
+        child: Text(name[0], style: const TextStyle(fontSize: 22)),
+      ),
       isFavourite: _favourites.contains(name),
     ),
 ];

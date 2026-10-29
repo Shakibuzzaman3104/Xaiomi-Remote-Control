@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'motion.dart';
+import 'physics.dart';
 
 /// Cross-fades between keyed children; scale and slide drop away under Reduce Motion.
 class FadeSwitcher extends StatelessWidget {
@@ -33,8 +34,8 @@ class FadeSwitcher extends StatelessWidget {
     return AnimatedSwitcher(
       duration: motion(context, duration),
       reverseDuration: motion(context, reverseDuration),
-      switchInCurve: AppMotion.easeOut,
-      switchOutCurve: AppMotion.easeOut,
+      switchInCurve: Curves.linear,
+      switchOutCurve: Curves.linear,
       layoutBuilder: (current, previous) => Stack(
         alignment: alignment,
         fit: expand ? StackFit.expand : StackFit.loose,
@@ -42,9 +43,10 @@ class FadeSwitcher extends StatelessWidget {
       ),
       transitionBuilder: (incoming, animation) {
         var moving = incoming;
+        final spring = animation.drive(CurveTween(curve: SpringCurves.smooth));
         if (scaled) {
           moving = ScaleTransition(
-            scale: Tween<double>(begin: scale, end: 1).animate(animation),
+            scale: Tween<double>(begin: scale, end: 1).animate(spring),
             child: moving,
           );
         }
@@ -53,7 +55,7 @@ class FadeSwitcher extends StatelessWidget {
             position: Tween<Offset>(
               begin: slide,
               end: Offset.zero,
-            ).animate(animation),
+            ).animate(spring),
             child: moving,
           );
         }
@@ -66,4 +68,29 @@ class FadeSwitcher extends StatelessWidget {
       child: child,
     );
   }
+}
+
+class SpringTapFeedback extends StatefulWidget {
+  const SpringTapFeedback({super.key, required this.child, this.scale = 0.97});
+  final Widget child;
+  final double scale;
+
+  @override
+  State<SpringTapFeedback> createState() => _SpringTapFeedbackState();
+}
+
+class _SpringTapFeedbackState extends State<SpringTapFeedback> {
+  bool pressed = false;
+
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => setState(() => pressed = true),
+    onPointerUp: (_) => setState(() => pressed = false),
+    onPointerCancel: (_) => setState(() => pressed = false),
+    child: SpringPress(
+      pressed: pressed && !reduceMotion(context),
+      scale: widget.scale,
+      child: widget.child,
+    ),
+  );
 }

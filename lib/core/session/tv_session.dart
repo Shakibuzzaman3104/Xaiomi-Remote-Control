@@ -106,10 +106,14 @@ class TvSession {
     );
     try {
       var target = _currentTv;
-      if (_state.attempt >= 2 && target.tvCertSha256 != null && _resolveHost != null) {
+      if (_state.attempt >= 2 &&
+          target.tvCertSha256 != null &&
+          _resolveHost != null) {
         final host = await _resolveHost(target);
         if (_disposed || generation != _generation) return;
-        if (host != null && host != target.host) target = target.copyWith(host: host);
+        if (host != null && host != target.host) {
+          target = target.copyWith(host: host);
+        }
       }
       final client = _factory(target);
       _client = client;
@@ -131,7 +135,8 @@ class TvSession {
       await client.connect();
       if (_disposed || generation != _generation) return;
       final fingerprint = client.peerCertSha256;
-      if (fingerprint != null && (target.host != _currentTv.host || _currentTv.tvCertSha256 == null)) {
+      if (fingerprint != null &&
+          (target.host != _currentTv.host || _currentTv.tvCertSha256 == null)) {
         _currentTv = target.copyWith(tvCertSha256: fingerprint);
         await _onTvUpdated?.call(_currentTv);
         if (_disposed || generation != _generation) return;

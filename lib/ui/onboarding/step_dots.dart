@@ -4,6 +4,7 @@
  */
 import 'package:flutter/material.dart';
 
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -39,25 +40,28 @@ class StepDots extends StatelessWidget {
                       )
                     : null,
               ),
-            Container(
-              width: numbered ? 28 : 10,
-              height: numbered ? 28 : 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: (numbered ? i <= current : i == current)
-                    ? c.primary
-                    : (numbered ? c.surfaceContainerStrong : c.okButton),
+            SpringValue(
+              value: !numbered && i == current ? 20 : (numbered ? 28 : 10),
+              builder: (context, width, child) => Container(
+                width: width,
+                height: numbered ? 28 : 10,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: (numbered ? i <= current : i == current)
+                      ? c.primary
+                      : (numbered ? c.surfaceContainerStrong : c.okButton),
+                ),
+                alignment: Alignment.center,
+                child: numbered
+                    ? Text(
+                        '$i',
+                        style: context.appTextTheme.bodySmall!.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: i <= current ? c.onPrimary : c.onSurfaceStrong,
+                        ),
+                      )
+                    : null,
               ),
-              alignment: Alignment.center,
-              child: numbered
-                  ? Text(
-                      '$i',
-                      style: context.appTextTheme.bodySmall!.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: i <= current ? c.onPrimary : c.onSurfaceStrong,
-                      ),
-                    )
-                  : null,
             ),
           ],
         ],

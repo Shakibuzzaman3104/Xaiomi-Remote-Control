@@ -4,6 +4,9 @@
  */
 import 'package:flutter/material.dart';
 
+import '../physics.dart';
+import '../fade_switcher.dart';
+
 import '../haptics.dart';
 
 import '../theme/app_colors.dart';
@@ -122,43 +125,46 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       for (var i = 0; i < _steps.length; i++) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: c.okButton,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '${i + 1}',
-                                  style: context.appTextTheme.bodySmall!
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: c.onSurfaceStrong,
-                                      ),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 4),
+                        SpringIn(
+                          delay: Duration(milliseconds: i * 60),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: c.okButton,
+                                  ),
+                                  alignment: Alignment.center,
                                   child: Text(
-                                    _steps[i],
-                                    style: context.appTextTheme.bodyMedium!
+                                    '${i + 1}',
+                                    style: context.appTextTheme.bodySmall!
                                         .copyWith(
+                                          fontWeight: FontWeight.bold,
                                           color: c.onSurfaceStrong,
-                                          height: 1.3,
                                         ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      _steps[i],
+                                      style: context.appTextTheme.bodyMedium!
+                                          .copyWith(
+                                            color: c.onSurfaceStrong,
+                                            height: 1.3,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         if (i < _steps.length - 1)
@@ -187,10 +193,19 @@ class UnlockScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        connected ? Icons.check_circle : Icons.circle_outlined,
-                        size: 18,
-                        color: connected ? c.connected : c.muted,
+                      FadeSwitcher(
+                        child: SpringIn(
+                          key: ValueKey(connected),
+                          rise: 0,
+                          fromScale: .6,
+                          child: Icon(
+                            connected
+                                ? Icons.check_circle
+                                : Icons.circle_outlined,
+                            size: 18,
+                            color: connected ? c.connected : c.muted,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(

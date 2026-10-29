@@ -72,21 +72,28 @@ void main() {
       pairedAt: DateTime(2026),
     );
     var attempts = 0;
-    final container = ProviderContainer(overrides: [
-      activeTvProvider.overrideWithValue(tv),
-      keyValueStoreProvider.overrideWithValue(store),
-      fullControlProvider.overrideWith(() => FullControl(
-        clientFactory: (_, AdbKey key) {
-          attempts++;
-          return FailingClient(key);
-        },
-      )),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        activeTvProvider.overrideWithValue(tv),
+        keyValueStoreProvider.overrideWithValue(store),
+        fullControlProvider.overrideWith(
+          () => FullControl(
+            clientFactory: (_, AdbKey key) {
+              attempts++;
+              return FailingClient(key);
+            },
+          ),
+        ),
+      ],
+    );
     addTearDown(container.dispose);
     container.read(fullControlProvider);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(attempts, 1);
-    expect(container.read(fullControlProvider).status, FullControlStatus.failed);
+    expect(
+      container.read(fullControlProvider).status,
+      FullControlStatus.failed,
+    );
     await container.read(fullControlProvider.notifier).disconnect();
     await Future<void>.delayed(const Duration(milliseconds: 2500));
     await container.read(fullControlProvider.notifier).reconnectIfEnabled();

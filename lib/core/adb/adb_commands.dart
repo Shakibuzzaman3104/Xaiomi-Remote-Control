@@ -216,7 +216,9 @@ class AdbCommands {
       if (playing && uptimeMs != null && updated != null && position >= 0) {
         position += ((uptimeMs - updated).clamp(0, 1 << 31) * speed).round();
       }
-      final durationMs = duration == null ? null : int.parse(duration.group(1)!);
+      final durationMs = duration == null
+          ? null
+          : int.parse(duration.group(1)!);
       if (durationMs != null && durationMs > 0 && position > durationMs) {
         position = durationMs;
       }
@@ -257,6 +259,7 @@ class AdbCommands {
   Future<void> openSettings() async {
     await client.shell('am start -a android.settings.SETTINGS');
   }
+
   Future<Uint8List> screencapPng() => client.exec('screencap -p');
   Future<AdbDeviceInfo> deviceInfo() async {
     final results = await Future.wait([

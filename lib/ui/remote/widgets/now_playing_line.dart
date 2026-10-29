@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../haptics.dart';
+import '../../physics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
@@ -58,11 +59,13 @@ class NowPlayingLine extends StatelessWidget {
                 height: 24,
                 child:
                     playing.appIcon ??
-                    Icon(
-                      playing.playing
-                          ? Icons.play_circle_outline
-                          : Icons.pause_circle_outline,
-                      color: c.primary,
+                    SpringValue(
+                      value: playing.playing ? 1 : 0,
+                      builder: (context, value, _) => AnimatedIcon(
+                        icon: AnimatedIcons.play_pause,
+                        progress: AlwaysStoppedAnimation(value.clamp(0.0, 1.0)),
+                        color: c.primary,
+                      ),
                     ),
               ),
               const SizedBox(width: 10),
@@ -117,11 +120,16 @@ class NowPlayingLine extends StatelessWidget {
                       const SizedBox(height: 5),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(999),
-                        child: LinearProgressIndicator(
+                        child: SpringValue(
                           value: progress,
-                          minHeight: 3,
-                          backgroundColor: c.progressTrack,
-                          color: c.primary,
+                          spring: AppSprings.settle,
+                          builder: (context, value, _) =>
+                              LinearProgressIndicator(
+                                value: value.clamp(0.0, 1.0),
+                                minHeight: 3,
+                                backgroundColor: c.progressTrack,
+                                color: c.primary,
+                              ),
                         ),
                       ),
                     ],

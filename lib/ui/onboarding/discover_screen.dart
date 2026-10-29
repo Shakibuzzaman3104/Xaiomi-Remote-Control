@@ -2,9 +2,11 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-import '../fade_rise_in.dart';
+import '../physics.dart';
 import '../haptics.dart';
 import '../motion.dart';
 import '../theme/app_colors.dart';
@@ -114,8 +116,10 @@ class DiscoverScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               for (var i = 0; i < devices.length; i++) ...[
-                FadeRiseIn(
+                SpringIn(
                   key: ValueKey(devices[i].id),
+                  delay: Duration(milliseconds: (i * 70).clamp(0, 300)),
+                  rise: -18,
                   child: _DeviceTile(
                     item: devices[i],
                     onTap: () {
@@ -349,7 +353,17 @@ class _SearchRadarState extends State<_SearchRadar>
               ),
             ),
           ),
-          widget.child,
+          AnimatedBuilder(
+            animation: _controller,
+            child: widget.child,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(
+                0,
+                _running ? 3 * math.sin(_controller.value * math.pi * 2) : 0,
+              ),
+              child: child,
+            ),
+          ),
         ],
       ),
     );

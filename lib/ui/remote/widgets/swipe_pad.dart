@@ -5,10 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import '../../haptics.dart';
 import '../../motion.dart';
+import '../../physics.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../remote_models.dart';
 
 class SwipePad extends StatefulWidget {
@@ -18,10 +21,16 @@ class SwipePad extends StatefulWidget {
     this.sensitivity = 0.5,
     this.onButtonDown,
     this.onButtonUp,
+    this.onExpand,
+    this.expanded = false,
+    this.radius,
   });
 
   final ValueChanged<RemoteButton> onButton;
   final double sensitivity;
+  final ValueChanged<Rect>? onExpand;
+  final bool expanded;
+  final double? radius;
   final ValueChanged<RemoteButton>? onButtonDown, onButtonUp;
 
   @override
@@ -35,10 +44,11 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
   int maxPointers = 0;
   bool moved = false;
   Timer? timer;
+  Timer? flashTimer;
   bool longPressed = false;
   RemoteButton? flashDirection;
   final touch = ValueNotifier<Offset?>(null);
-  late final contact = AnimationController(vsync: this);
+  bool touching = false;
   late final flash = AnimationController(vsync: this);
 
   void emit(RemoteButton button) {
@@ -52,11 +62,7 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
     maxPointers = points.length > maxPointers ? points.length : maxPointers;
     origin ??= event.localPosition;
     touch.value = event.localPosition;
-    contact.animateTo(
-      1,
-      duration: motion(context, AppMotion.pressIn),
-      curve: AppMotion.easeOut,
-    );
+    setState(() => touching = true);
     if (points.length == 1 &&
         widget.onButtonDown != null &&
         widget.onButtonUp != null) {
@@ -104,7 +110,20 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
       delta = event.localPosition - origin!;
       emit(direction);
       flashDirection = direction;
-      flash.forward(from: 0);
+      flashTimer?.cancel();
+      flash.value = 0;
+      if (reduceMotion(context)) {
+        flash.value = 1;
+      } else {
+        flash.animateWith(SpringSimulation(AppSprings.bouncy, 0, 1, 0));
+      }
+      flashTimer = Timer(const Duration(milliseconds: 140), () {
+        if (mounted) {
+          flash.animateWith(
+            SpringSimulation(AppSprings.smooth, flash.value, 0, flash.velocity),
+          );
+        }
+      });
     }
   }
 
@@ -116,11 +135,7 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
       touch.value = points.values.last;
       return;
     }
-    contact.animateBack(
-      0,
-      duration: motion(context, AppMotion.quick),
-      curve: AppMotion.easeOut,
-    );
+    setState(() => touching = false);
     timer?.cancel();
     if (longPressed) {
       widget.onButtonUp?.call(RemoteButton.ok);
@@ -136,9 +151,9 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
   @override
   void dispose() {
     timer?.cancel();
+    flashTimer?.cancel();
     if (longPressed) widget.onButtonUp?.call(RemoteButton.ok);
     touch.dispose();
-    contact.dispose();
     flash.dispose();
     super.dispose();
   }
@@ -148,84 +163,123 @@ class _SwipePadState extends State<SwipePad> with TickerProviderStateMixin {
     final colors = context.colors;
     return Semantics(
       label: 'Swipe pad',
-      child: Listener(
-        onPointerDown: down,
-        onPointerMove: move,
-        onPointerUp: up,
-        onPointerCancel: (event) => up(event, cancel: true),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.surfaceContainer,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: colors.dpadOutline),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    'Swipe to move · Tap to select · Two fingers to go back',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: colors.muted),
-                  ),
+      child: Stack(
+        children: [
+          Listener(
+            onPointerDown: down,
+            onPointerMove: move,
+            onPointerUp: up,
+            onPointerCancel: (event) => up(event, cancel: true),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(
+                  widget.radius ?? (widget.expanded ? 28 : AppShapes.card),
                 ),
+                border: Border.all(color: colors.dpadOutline),
               ),
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: _TouchPainter(
-                              colors.primary,
-                              touch,
-                              contact,
-                            ),
-                          ),
-                        ),
-                        _DirectionFlash(
-                          animation: flash,
-                          direction: () => flashDirection,
-                          color: colors.primary,
-                          drift: reduceMotion(context) ? 0 : 10,
-                        ),
-                      ],
+              child: Stack(
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        'Swipe to move · Tap to select · Two fingers to go back',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colors.muted),
+                      ),
                     ),
                   ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          widget.radius ??
+                              (widget.expanded ? 28 : AppShapes.card),
+                        ),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: SpringValue(
+                                value: touching ? 1 : 0,
+                                builder: (context, value, _) => CustomPaint(
+                                  painter: _TouchPainter(
+                                    colors.primary,
+                                    touch,
+                                    value,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            _DirectionFlash(
+                              animation: flash,
+                              direction: () => flashDirection,
+                              color: colors.primary,
+                              drift: reduceMotion(context) ? 0 : 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.onExpand != null)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Expand pad',
+                  icon: const Icon(Icons.open_in_full_rounded, size: 20),
+                  onPressed: () {
+                    final box = context.findRenderObject()! as RenderBox;
+                    widget.onExpand!(box.localToGlobal(Offset.zero) & box.size);
+                  },
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
 }
 
 class _TouchPainter extends CustomPainter {
-  _TouchPainter(this.color, this.touch, this.contact)
-    : super(repaint: Listenable.merge([touch, contact]));
+  _TouchPainter(this.color, this.touch, this.contact) : super(repaint: touch);
   final Color color;
   final ValueNotifier<Offset?> touch;
-  final Animation<double> contact;
+  final double contact;
 
   @override
   void paint(Canvas canvas, Size size) {
     final position = touch.value;
-    final strength = contact.value;
+    final strength = contact;
     if (position == null || strength <= 0) return;
+    final amount = strength.clamp(0.0, 1.0);
+    final radius = 65 * amount;
+    if (radius <= 0) return;
     canvas.drawCircle(
       position,
-      26 * (0.6 + 0.4 * strength),
-      Paint()..color = color.withValues(alpha: 0.14 * strength),
+      radius,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            color.withValues(alpha: 0.22 * amount),
+            color.withValues(alpha: 0),
+          ],
+        ).createShader(Rect.fromCircle(center: position, radius: radius)),
     );
   }
 
   @override
-  bool shouldRepaint(_TouchPainter old) => old.color != color;
+  bool shouldRepaint(_TouchPainter old) =>
+      old.color != color || old.contact != contact;
 }
 
 class _DirectionFlash extends StatelessWidget {
@@ -240,18 +294,13 @@ class _DirectionFlash extends StatelessWidget {
   final Color color;
   final double drift;
 
-  static final _opacity = TweenSequence<double>([
-    TweenSequenceItem(tween: Tween(begin: 0, end: 1), weight: 30),
-    TweenSequenceItem(tween: Tween(begin: 1, end: 0), weight: 70),
-  ]);
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, _) {
         final button = direction();
-        if (button == null || !animation.isAnimating) {
+        if (button == null || animation.value <= 0) {
           return const SizedBox.shrink();
         }
         final (icon, axis) = switch (button) {
@@ -260,11 +309,11 @@ class _DirectionFlash extends StatelessWidget {
           RemoteButton.left => (Icons.keyboard_arrow_left, const Offset(-1, 0)),
           _ => (Icons.keyboard_arrow_right, const Offset(1, 0)),
         };
-        final t = AppMotion.easeOut.transform(animation.value);
+        final t = animation.value.clamp(0.0, 1.0);
         return Align(
           alignment: Alignment(axis.dx * 0.72, axis.dy * 0.72),
           child: Opacity(
-            opacity: _opacity.transform(animation.value) * 0.8,
+            opacity: t * 0.8,
             child: Transform.translate(
               offset: axis * drift * t,
               child: Icon(icon, size: 44, color: color),

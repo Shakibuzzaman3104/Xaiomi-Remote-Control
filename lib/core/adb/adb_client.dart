@@ -49,11 +49,17 @@ class AdbSocket {
 }
 
 class AdbClient {
-  AdbClient({required this.host, this.port = 5555, required this.key, this.socketConnector});
+  AdbClient({
+    required this.host,
+    this.port = 5555,
+    required this.key,
+    this.socketConnector,
+  });
   final String host;
   final int port;
   final AdbKey key;
-  final Future<Socket> Function(String host, int port, Duration timeout)? socketConnector;
+  final Future<Socket> Function(String host, int port, Duration timeout)?
+  socketConnector;
   final _states = StreamController<AdbConnectionState>.broadcast();
   Stream<AdbConnectionState> get states => _states.stream;
   String? deviceModel;
@@ -93,8 +99,9 @@ class AdbClient {
     handshake.future.ignore();
     Socket? socket;
     try {
-      socket = await (socketConnector?.call(host, port, authTimeout) ??
-          Socket.connect(host, port, timeout: authTimeout));
+      socket =
+          await (socketConnector?.call(host, port, authTimeout) ??
+              Socket.connect(host, port, timeout: authTimeout));
       if (generation != _generation) throw AdbException('Disconnected');
       _socket = socket;
       final decoder = AdbMessageDecoder();
@@ -110,7 +117,9 @@ class AdbClient {
           }
         },
         onError: (Object e) {
-          if (generation == _generation) _fail(AdbException('Socket error: $e'));
+          if (generation == _generation) {
+            _fail(AdbException('Socket error: $e'));
+          }
         },
         onDone: () {
           if (generation == _generation) _fail(AdbException('Socket closed'));
@@ -120,7 +129,9 @@ class AdbClient {
       await handshake.future.timeout(authTimeout);
       if (generation != _generation) throw AdbException('Disconnected');
     } on TimeoutException {
-      if (generation == _generation) _fail(AdbException('Connection timed out'));
+      if (generation == _generation) {
+        _fail(AdbException('Connection timed out'));
+      }
       throw AdbException('Connection timed out');
     } catch (e) {
       final error = e is AdbException

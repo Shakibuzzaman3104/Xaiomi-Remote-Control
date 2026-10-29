@@ -32,9 +32,8 @@ class _AppsPageState extends ConsumerState<AppsPage> {
 
   void _openFullControlSetup() {
     if (!mounted) return;
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const UnlockPage()));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const UnlockPage()));
   }
 
   Future<void> _showError(
@@ -195,10 +194,18 @@ class _AppsPageState extends ConsumerState<AppsPage> {
 
   Widget _icon(BuildContext context, String label, TvApp? app) {
     final bytes = app?.iconPng;
-    final fallback = CircleAvatar(
-      child: Text(label.isEmpty ? '?' : label.characters.first.toUpperCase()),
+    final scheme = Theme.of(context).colorScheme;
+    final fallback = Container(
+      width: 56,
+      height: 56,
+      alignment: Alignment.center,
+      color: scheme.primaryContainer,
+      child: Text(
+        label.isEmpty ? '?' : label.characters.first.toUpperCase(),
+        style: TextStyle(fontSize: 22, color: scheme.onPrimaryContainer),
+      ),
     );
-    final cacheSize = (56 * MediaQuery.devicePixelRatioOf(context)).round();
+    final cacheSize = (96 * MediaQuery.devicePixelRatioOf(context)).round();
     return bytes == null
         ? fallback
         : Image.memory(

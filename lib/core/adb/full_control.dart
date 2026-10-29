@@ -389,10 +389,7 @@ class FullControl extends Notifier<FullControlState> {
         if (output.trim().isNotEmpty && apps.isEmpty) {
           throw AdbException('Invalid app helper output');
         }
-        state = state.copyWith(
-          apps: apps,
-          appsLoading: false,
-        );
+        state = state.copyWith(apps: apps, appsLoading: false);
       }
     } catch (_) {
       if (generation == _generation) {

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../fade_switcher.dart';
 import '../../haptics.dart';
 import '../../motion.dart';
+import '../../physics.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -39,8 +40,22 @@ class RoundActionButton extends StatefulWidget {
 
 class _RoundActionButtonState extends State<RoundActionButton> {
   Timer? timer;
+  Timer? breathing;
+  bool expanded = false;
   bool pressed = false;
   bool longPressed = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    breathing?.cancel();
+    if (reduceMotion(context)) expanded = false;
+    if (widget.label == 'Voice' && !reduceMotion(context)) {
+      breathing = Timer.periodic(const Duration(seconds: 4), (_) {
+        if (mounted && !pressed) setState(() => expanded = !expanded);
+      });
+    }
+  }
+
   void start() {
     AppHaptics.selection();
     if (widget.onLongDown == null) widget.onPressed();
@@ -79,6 +94,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
   @override
   void dispose() {
     timer?.cancel();
+    breathing?.cancel();
     if (longPressed) widget.onLongUp?.call();
     super.dispose();
   }
@@ -102,34 +118,36 @@ class _RoundActionButtonState extends State<RoundActionButton> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedScale(
-                scale: pressed ? 0.95 : 1,
-                duration: motion(
-                  context,
-                  pressed ? AppMotion.pressIn : AppMotion.pressOut,
-                ),
-                curve: AppMotion.easeOut,
-                child: AnimatedContainer(
-                  duration: motion(context, AppMotion.tint),
-                  curve: AppMotion.easeOut,
-                  width: widget.size,
-                  height: widget.size,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.selected
-                        ? c.primary
-                        : (pressed || widget.strong)
-                        ? c.surfaceContainerStrong
-                        : c.surfaceContainer,
-                  ),
-                  child: FadeSwitcher(
-                    scale: 0.85,
-                    duration: AppMotion.quick,
-                    child: Icon(
-                      widget.icon,
-                      key: ValueKey(widget.icon),
-                      color: widget.selected ? c.onPrimary : c.onSurface,
-                      size: 25,
+              SpringValue(
+                value: !pressed && expanded ? 1.012 : 1,
+                spring: AppSprings.settle,
+                builder: (context, value, child) =>
+                    Transform.scale(scale: value, child: child),
+                child: SpringPress(
+                  pressed: pressed,
+                  scale: 0.95,
+                  child: AnimatedContainer(
+                    duration: motion(context, AppMotion.tint),
+                    curve: AppMotion.easeOut,
+                    width: widget.size,
+                    height: widget.size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.selected
+                          ? c.primary
+                          : (pressed || widget.strong)
+                          ? c.surfaceContainerStrong
+                          : c.surfaceContainer,
+                    ),
+                    child: FadeSwitcher(
+                      scale: 0.85,
+                      duration: AppMotion.quick,
+                      child: Icon(
+                        widget.icon,
+                        key: ValueKey(widget.icon),
+                        color: widget.selected ? c.onPrimary : c.onSurface,
+                        size: 25,
+                      ),
                     ),
                   ),
                 ),

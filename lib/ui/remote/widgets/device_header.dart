@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../fade_switcher.dart';
 import '../../haptics.dart';
 import '../../motion.dart';
+import '../../physics.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import 'pulse_dot.dart';
@@ -72,36 +73,45 @@ class DeviceHeader extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    FadeSwitcher(
-                      scale: 1,
-                      alignment: Alignment.centerLeft,
-                      duration: AppMotion.quick,
-                      child: Row(
-                        key: ValueKey((connected, offlineLabel)),
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox.square(
-                            dimension: 15,
-                            child: Center(
-                              child: connected
-                                  ? Icon(Icons.wifi, size: 15, color: c.muted)
-                                  : retrying
-                                  ? const PulseDot()
-                                  : Icon(
-                                      Icons.link_off,
-                                      size: 15,
-                                      color: c.muted,
-                                    ),
+                    SpringValue(
+                      value: connected ? 1 : 0,
+                      spring: AppSprings.settle,
+                      builder: (context, value, child) => Opacity(
+                        opacity:
+                            0.75 + 0.25 * (2 * value.clamp(0.0, 1.0) - 1).abs(),
+                        child: child,
+                      ),
+                      child: FadeSwitcher(
+                        scale: 1,
+                        alignment: Alignment.centerLeft,
+                        duration: AppMotion.quick,
+                        child: Row(
+                          key: ValueKey((connected, offlineLabel)),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox.square(
+                              dimension: 15,
+                              child: Center(
+                                child: connected
+                                    ? Icon(Icons.wifi, size: 15, color: c.muted)
+                                    : retrying
+                                    ? const PulseDot()
+                                    : Icon(
+                                        Icons.link_off,
+                                        size: 15,
+                                        color: c.muted,
+                                      ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            connected ? 'Connected' : offlineLabel,
-                            style: context.appTextTheme.labelMedium!.copyWith(
-                              color: c.muted,
+                            const SizedBox(width: 5),
+                            Text(
+                              connected ? 'Connected' : offlineLabel,
+                              style: context.appTextTheme.labelMedium!.copyWith(
+                                color: c.muted,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

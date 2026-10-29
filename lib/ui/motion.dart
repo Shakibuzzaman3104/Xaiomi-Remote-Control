@@ -4,6 +4,8 @@
  */
 import 'package:flutter/widgets.dart';
 
+import 'physics.dart';
+
 abstract final class AppMotion {
   static const Curve easeOut = Cubic(0.23, 1, 0.32, 1);
 
@@ -25,8 +27,8 @@ Duration motion(BuildContext context, Duration duration) =>
     reduceMotion(context) ? Duration.zero : duration;
 
 AnimationStyle sheetAnimation(BuildContext context) => AnimationStyle(
-  duration: motion(context, AppMotion.standard),
-  reverseDuration: motion(context, AppMotion.exit),
-  curve: AppMotion.easeOut,
+  duration: motion(context, const Duration(milliseconds: 520)),
+  reverseDuration: motion(context, AppMotion.standard),
+  curve: SpringCurves.smooth,
   reverseCurve: AppMotion.easeOut,
 );

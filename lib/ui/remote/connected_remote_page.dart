@@ -17,6 +17,7 @@ import '../../core/session/tv_session.dart';
 import '../apps/apps_page.dart';
 import '../onboarding/unlock_page.dart';
 import '../motion.dart';
+import '../physics.dart';
 import '../theme/app_theme.dart';
 import 'remote_models.dart';
 import 'remote_screen.dart';
@@ -365,7 +366,12 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(playing.title, style: context.appTextTheme.titleLarge),
+              SpringIn(
+                child: Text(
+                  playing.title,
+                  style: context.appTextTheme.titleLarge,
+                ),
+              ),
               if (playing.subtitle?.isNotEmpty ?? false)
                 Text(playing.subtitle!, style: context.appTextTheme.bodyMedium),
               if (app != null)
@@ -377,34 +383,44 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    tooltip: 'Rewind',
-                    onPressed: () =>
-                        ref.read(tvSessionProvider)?.press(RemoteButton.rewind),
-                    icon: const Icon(Icons.fast_rewind_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Play-Pause',
-                    onPressed: () => ref
-                        .read(tvSessionProvider)
-                        ?.press(RemoteButton.playPause),
-                    icon: Icon(
-                      playing.playing
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
+              SpringIn(
+                delay: const Duration(milliseconds: 80),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _SheetPress(
+                      child: IconButton(
+                        tooltip: 'Rewind',
+                        onPressed: () => ref
+                            .read(tvSessionProvider)
+                            ?.press(RemoteButton.rewind),
+                        icon: const Icon(Icons.fast_rewind_rounded),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Fast-forward',
-                    onPressed: () => ref
-                        .read(tvSessionProvider)
-                        ?.press(RemoteButton.fastForward),
-                    icon: const Icon(Icons.fast_forward_rounded),
-                  ),
-                ],
+                    _SheetPress(
+                      child: IconButton(
+                        tooltip: 'Play-Pause',
+                        onPressed: () => ref
+                            .read(tvSessionProvider)
+                            ?.press(RemoteButton.playPause),
+                        icon: Icon(
+                          playing.playing
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                        ),
+                      ),
+                    ),
+                    _SheetPress(
+                      child: IconButton(
+                        tooltip: 'Fast-forward',
+                        onPressed: () => ref
+                            .read(tvSessionProvider)
+                            ?.press(RemoteButton.fastForward),
+                        icon: const Icon(Icons.fast_forward_rounded),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (package != null && package.isNotEmpty)
                 FilledButton.tonal(
@@ -547,4 +563,22 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       mouseSetup: _mouseSetupPrompt(cursorState),
     );
   }
+}
+
+class _SheetPress extends StatefulWidget {
+  const _SheetPress({required this.child});
+  final Widget child;
+  @override
+  State<_SheetPress> createState() => _SheetPressState();
+}
+
+class _SheetPressState extends State<_SheetPress> {
+  bool pressed = false;
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => setState(() => pressed = true),
+    onPointerUp: (_) => setState(() => pressed = false),
+    onPointerCancel: (_) => setState(() => pressed = false),
+    child: SpringPress(pressed: pressed, child: widget.child),
+  );
 }

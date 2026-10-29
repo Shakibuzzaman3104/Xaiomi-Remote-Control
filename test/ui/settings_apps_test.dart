@@ -130,18 +130,19 @@ void main() {
       ),
     );
     await tester.enterText(find.byType(TextField), 'NET');
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Netflix'), findsOneWidget);
     expect(find.text('YouTube'), findsNothing);
     await tester.enterText(find.byType(TextField), '');
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Favourites'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Netflix'), findsNothing);
     await tester.longPress(find.text('YouTube'));
+    await tester.pumpAndSettle();
     expect(selected, same(apps.first));
     await tester.enterText(find.byType(TextField), 'missing');
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('No apps match "missing"'), findsOneWidget);
   });
   testWidgets('empty favourites shows its own message', (tester) async {

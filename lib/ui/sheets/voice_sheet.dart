@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../fade_switcher.dart';
 import '../haptics.dart';
 import '../motion.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -24,6 +25,7 @@ class VoiceSheet extends StatelessWidget {
     this.typeIntoFieldAvailable = true,
     this.errorText,
     this.tvSearchAvailable = false,
+    this.soundLevel = 0,
   });
 
   final bool listening;
@@ -35,6 +37,7 @@ class VoiceSheet extends StatelessWidget {
   final bool typeIntoFieldAvailable;
   final bool tvSearchAvailable;
   final String? errorText;
+  final double soundLevel;
 
   @override
   Widget build(BuildContext context) {
@@ -76,167 +79,171 @@ class VoiceSheet extends StatelessWidget {
             horizontal: AppShapes.screenPadding,
             vertical: 12,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: c.surfaceContainerStrong,
-                    borderRadius: BorderRadius.circular(AppShapes.pill),
-                  ),
-                ),
-              ),
-              if (tvSearchAvailable) ...[
-                const SizedBox(height: 12),
-                _TargetChip(
-                  label: 'Search TV',
-                  icon: Icons.search_rounded,
-                  selected: target == VoiceTarget.searchTv,
-                  enabled: true,
-                  onTap: () => onTargetChanged(VoiceTarget.searchTv),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Center(
-                child: Semantics(
-                  button: true,
-                  label: isListening ? 'Stop listening' : 'Start listening',
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      AppHaptics.selection();
-                      onMicTap();
-                    },
-                    child: _MicRing(
-                      listening: isListening,
-                      child: Container(
-                        width: 114,
-                        height: 114,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: c.primary.withValues(alpha: 0.06),
-                        ),
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: c.primary,
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.mic_rounded,
-                            size: 36,
-                            color: c.onPrimary,
-                          ),
-                        ),
-                      ),
+          child: SpringIn(
+            spring: AppSprings.smooth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: c.surfaceContainerStrong,
+                      borderRadius: BorderRadius.circular(AppShapes.pill),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 36),
-                child: Semantics(
-                  liveRegion: errorText != null,
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: FadeSwitcher(
-                            scale: 1,
-                            duration: AppMotion.quick,
-                            child: Text(
-                              displayText,
-                              key: ValueKey(displayKind),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.appTextTheme.bodyLarge!.copyWith(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w400,
-                                color: textColor,
-                              ),
+                if (tvSearchAvailable) ...[
+                  const SizedBox(height: 12),
+                  _TargetChip(
+                    label: 'Search TV',
+                    icon: Icons.search_rounded,
+                    selected: target == VoiceTarget.searchTv,
+                    enabled: true,
+                    onTap: () => onTargetChanged(VoiceTarget.searchTv),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Center(
+                  child: Semantics(
+                    button: true,
+                    label: isListening ? 'Stop listening' : 'Start listening',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        AppHaptics.selection();
+                        onMicTap();
+                      },
+                      child: _MicRing(
+                        listening: isListening,
+                        level: soundLevel,
+                        child: Container(
+                          width: 114,
+                          height: 114,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: c.primary.withValues(alpha: 0.06),
+                          ),
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 88,
+                            height: 88,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: c.primary,
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.mic_rounded,
+                              size: 36,
+                              color: c.onPrimary,
                             ),
                           ),
                         ),
-                        if (errorText == null && transcript.isNotEmpty) ...[
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 1.5,
-                            height: 23,
-                            color: c.primaryText,
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _TargetChip(
-                      label: 'Search YouTube',
-                      icon: Icons.smart_display_rounded,
-                      selected: target == VoiceTarget.search,
-                      enabled: true,
-                      onTap: () => onTargetChanged(VoiceTarget.search),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _TargetChip(
-                      label: 'Type into field',
-                      icon: Icons.keyboard_alt_outlined,
-                      selected: target == VoiceTarget.typeIntoField,
-                      enabled: typeIntoFieldAvailable,
-                      onTap: () => onTargetChanged(VoiceTarget.typeIntoField),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: 48,
-                    minWidth: 48,
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      AppHaptics.selection();
-                      onCancel();
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: c.primaryText,
-                      minimumSize: const Size(48, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppShapes.card),
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 36),
+                  child: Semantics(
+                    liveRegion: errorText != null,
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: FadeSwitcher(
+                              scale: 1,
+                              duration: AppMotion.quick,
+                              child: Text(
+                                displayText,
+                                key: ValueKey(displayKind),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.appTextTheme.bodyLarge!.copyWith(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w400,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (errorText == null && transcript.isNotEmpty) ...[
+                            const SizedBox(width: 4),
+                            Container(
+                              width: 1.5,
+                              height: 23,
+                              color: c.primaryText,
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    child: Semantics(
-                      button: true,
-                      label: 'Cancel',
-                      child: Text(
-                        'Cancel',
-                        style: context.appTextTheme.displaySmall!.copyWith(
-                          color: c.primaryText,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _TargetChip(
+                        label: 'Search YouTube',
+                        icon: Icons.smart_display_rounded,
+                        selected: target == VoiceTarget.search,
+                        enabled: true,
+                        onTap: () => onTargetChanged(VoiceTarget.search),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _TargetChip(
+                        label: 'Type into field',
+                        icon: Icons.keyboard_alt_outlined,
+                        selected: target == VoiceTarget.typeIntoField,
+                        enabled: typeIntoFieldAvailable,
+                        onTap: () => onTargetChanged(VoiceTarget.typeIntoField),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 48,
+                      minWidth: 48,
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        AppHaptics.selection();
+                        onCancel();
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: c.primaryText,
+                        minimumSize: const Size(48, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppShapes.card),
+                        ),
+                      ),
+                      child: Semantics(
+                        button: true,
+                        label: 'Cancel',
+                        child: Text(
+                          'Cancel',
+                          style: context.appTextTheme.displaySmall!.copyWith(
+                            color: c.primaryText,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -244,56 +251,16 @@ class VoiceSheet extends StatelessWidget {
   }
 }
 
-class _MicRing extends StatefulWidget {
-  const _MicRing({required this.listening, required this.child});
+class _MicRing extends StatelessWidget {
+  const _MicRing({
+    required this.listening,
+    required this.level,
+    required this.child,
+  });
 
   final bool listening;
+  final double level;
   final Widget child;
-
-  @override
-  State<_MicRing> createState() => _MicRingState();
-}
-
-class _MicRingState extends State<_MicRing>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 600),
-  );
-
-  void syncAnimation() {
-    if (widget.listening && !MediaQuery.disableAnimationsOf(context)) {
-      if (!controller.isAnimating) controller.repeat(reverse: true);
-    } else if (controller.value > 0 &&
-        !MediaQuery.disableAnimationsOf(context)) {
-      controller.animateBack(
-        0,
-        duration: AppMotion.quick,
-        curve: AppMotion.easeOut,
-      );
-    } else {
-      controller.stop();
-      controller.value = 0;
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    syncAnimation();
-  }
-
-  @override
-  void didUpdateWidget(covariant _MicRing oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    syncAnimation();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -305,22 +272,20 @@ class _MicRingState extends State<_MicRing>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedBuilder(
-            animation: controller,
-            builder: (context, child) => Transform.scale(
-              scale: 1 + 0.08 * AppMotion.easeOut.transform(controller.value),
-              child: child,
-            ),
+          SpringValue(
+            value: reduced || !listening ? 0 : level.clamp(0.0, 1.0),
+            builder: (context, level, child) =>
+                Transform.scale(scale: 1 + 0.08 * level, child: child),
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: c.primary.withValues(
-                  alpha: widget.listening && reduced ? 0.16 : 0.06,
+                  alpha: listening && reduced ? 0.16 : 0.06,
                 ),
               ),
             ),
           ),
-          widget.child,
+          child,
         ],
       ),
     );

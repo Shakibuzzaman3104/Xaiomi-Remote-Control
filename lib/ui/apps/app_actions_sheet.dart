@@ -4,6 +4,8 @@
  */
 import 'package:flutter/material.dart';
 
+import '../fade_switcher.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import 'apps_screen.dart';
 import '../theme/app_theme.dart';
@@ -35,6 +37,7 @@ class AppActionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    var actionIndex = 0;
     Widget action(
       String title,
       IconData icon,
@@ -48,59 +51,64 @@ class AppActionsSheet extends StatelessWidget {
           : danger
           ? c.danger
           : c.onSurfaceStrong;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Material(
-          color: danger ? c.danger.withValues(alpha: .06) : c.surfaceContainer,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: enabled ? callback : onNeedFullControl,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 52),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: danger
-                            ? c.danger.withValues(alpha: .08)
-                            : c.surfaceContainerStrong,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: color, size: 22),
+      return SpringIn(
+        delay: Duration(milliseconds: actionIndex++ * 35),
+        child: SpringTapFeedback(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Material(
+              color: danger
+                  ? c.danger.withValues(alpha: .06)
+                  : c.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: enabled ? callback : onNeedFullControl,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 52),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            title,
-                            style: context.appTextTheme.labelLarge!.copyWith(
-                              color: color,
-                            ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: danger
+                                ? c.danger.withValues(alpha: .08)
+                                : c.surfaceContainerStrong,
+                            shape: BoxShape.circle,
                           ),
-                          if (!enabled)
-                            Text(
-                              'Needs Full control',
-                              style: context.appTextTheme.labelSmall!.copyWith(
-                                color: c.muted,
+                          child: Icon(icon, color: color, size: 22),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                title,
+                                style: context.appTextTheme.labelLarge!
+                                    .copyWith(color: color),
                               ),
-                            ),
-                        ],
-                      ),
+                              if (!enabled)
+                                Text(
+                                  'Needs Full control',
+                                  style: context.appTextTheme.labelSmall!
+                                      .copyWith(color: c.muted),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (!enabled)
+                          Icon(Icons.lock_outline, size: 18, color: c.muted),
+                      ],
                     ),
-                    if (!enabled)
-                      Icon(Icons.lock_outline, size: 18, color: c.muted),
-                  ],
+                  ),
                 ),
               ),
             ),

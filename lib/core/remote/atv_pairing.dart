@@ -18,7 +18,10 @@ import 'proto/polo.pb.dart';
 enum PairingFailureKind { unreachable, wrongCode, expired }
 
 class AtvPairingException implements Exception {
-  const AtvPairingException(this.message, [this.kind = PairingFailureKind.expired]);
+  const AtvPairingException(
+    this.message, [
+    this.kind = PairingFailureKind.expired,
+  ]);
   final PairingFailureKind kind;
   final String message;
   @override
@@ -140,7 +143,10 @@ class AtvPairingClient {
       _socket = socket;
       final peer = socket.peerCertificate;
       if (peer == null) {
-        throw const AtvPairingException('Server certificate is missing', PairingFailureKind.unreachable);
+        throw const AtvPairingException(
+          'Server certificate is missing',
+          PairingFailureKind.unreachable,
+        );
       }
       tvCertSha256 = sha256.convert(peer.der).toString();
       _socket!.listen(
@@ -166,7 +172,10 @@ class AtvPairingClient {
       _socket?.destroy();
       _socket = null;
       if (e is AtvPairingException) rethrow;
-      throw AtvPairingException('Unable to start pairing: $e', PairingFailureKind.unreachable);
+      throw AtvPairingException(
+        'Unable to start pairing: $e',
+        PairingFailureKind.unreachable,
+      );
     }
   }
 
@@ -185,7 +194,10 @@ class AtvPairingClient {
       code: code,
     );
     if (secret[0] != int.parse(code.substring(0, 2), radix: 16)) {
-      throw const AtvPairingException('Incorrect pairing code', PairingFailureKind.wrongCode);
+      throw const AtvPairingException(
+        'Incorrect pairing code',
+        PairingFailureKind.wrongCode,
+      );
     }
     _codeTimer?.cancel();
     _step = 5;
@@ -213,9 +225,12 @@ class AtvPairingClient {
           if (_step == 5) {
             final pending = _pending;
             if (pending != null && !pending.isCompleted) {
-              pending.completeError(AtvPairingException(
-                'Pairing status: ${message.status}', PairingFailureKind.wrongCode,
-              ));
+              pending.completeError(
+                AtvPairingException(
+                  'Pairing status: ${message.status}',
+                  PairingFailureKind.wrongCode,
+                ),
+              );
             }
             close();
             return;
@@ -263,10 +278,15 @@ class AtvPairingClient {
 
   void _fail(String message, [PairingFailureKind? kind]) {
     if (_pending != null && !_pending!.isCompleted) {
-      _pending!.completeError(AtvPairingException(
-        message,
-        kind ?? (_step < 4 && !_closed ? PairingFailureKind.unreachable : PairingFailureKind.expired),
-      ));
+      _pending!.completeError(
+        AtvPairingException(
+          message,
+          kind ??
+              (_step < 4 && !_closed
+                  ? PairingFailureKind.unreachable
+                  : PairingFailureKind.expired),
+        ),
+      );
     }
   }
 

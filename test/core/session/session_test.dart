@@ -96,7 +96,9 @@ class DelayedPairing extends FakePairing {
   @override
   Future<void> startPairing() => gate.future;
   @override
-  void close() { closes++; }
+  void close() {
+    closes++;
+  }
 }
 
 class IdentityRemote extends FakeRemote {
@@ -127,31 +129,39 @@ void main() {
     expect(client.closes, 2);
   });
 
-  test('replacing pairing closes the previous client and its late completion', () async {
-    final first = DelayedPairing();
-    final second = FakePairing();
-    var created = 0;
-    final flow = PairingFlow(
-      store: PairedTvStore(MemoryStore()),
-      certificateFactory: () => cert,
-      pairingClientFactory: (_, _) => created++ == 0 ? first : second,
-    );
-    final pending = flow.begin(const DiscoveredTv(name: 'First', host: 'one'));
-    await flow.begin(const DiscoveredTv(name: 'Second', host: 'two'));
-    expect(first.closes, 1);
-    first.gate.complete();
-    await pending;
-    expect(first.closes, 2);
-    expect(second.started, isTrue);
-    final paired = await flow.complete('123456');
-    expect(paired.host, 'two');
-  });
+  test(
+    'replacing pairing closes the previous client and its late completion',
+    () async {
+      final first = DelayedPairing();
+      final second = FakePairing();
+      var created = 0;
+      final flow = PairingFlow(
+        store: PairedTvStore(MemoryStore()),
+        certificateFactory: () => cert,
+        pairingClientFactory: (_, _) => created++ == 0 ? first : second,
+      );
+      final pending = flow.begin(
+        const DiscoveredTv(name: 'First', host: 'one'),
+      );
+      await flow.begin(const DiscoveredTv(name: 'Second', host: 'two'));
+      expect(first.closes, 1);
+      first.gate.complete();
+      await pending;
+      expect(first.closes, 2);
+      expect(second.started, isTrue);
+      final paired = await flow.complete('123456');
+      expect(paired.host, 'two');
+    },
+  );
 
   test('identity change immediately requires pairing again', () async {
     final session = TvSession(tv: tv, clientFactory: (_) => IdentityRemote());
     await session.start();
     expect(session.state.status, SessionStatus.notPaired);
-    expect(session.state.lastError, "This TV's identity changed. Pair it again.");
+    expect(
+      session.state.lastError,
+      "This TV's identity changed. Pair it again.",
+    );
     await session.dispose();
   });
 
@@ -160,34 +170,41 @@ void main() {
     final session = TvSession(
       tv: tv,
       clientFactory: (_) => FakeRemote()..peerCertSha256 = 'fingerprint',
-      onTvUpdated: (value) async { saved = value; },
+      onTvUpdated: (value) async {
+        saved = value;
+      },
     );
     await session.start();
     expect(saved?.tvCertSha256, 'fingerprint');
     await session.dispose();
   });
 
-  test('resolves and saves a changed host after a successful connection', () async {
-    final original = tv.copyWith(tvCertSha256: 'fingerprint');
-    final hosts = <String>[];
-    PairedTv? saved;
-    final session = TvSession(
-      tv: original,
-      backoff: (_) => const Duration(milliseconds: 1),
-      resolveHost: (_) async => 'new-host',
-      onTvUpdated: (value) async { saved = value; },
-      clientFactory: (target) {
-        hosts.add(target.host);
-        return FakeRemote(fail: target.host == 'host')
-          ..peerCertSha256 = 'fingerprint';
-      },
-    );
-    await session.start();
-    await waitFor(() => session.isConnected);
-    expect(hosts, ['host', 'host', 'new-host']);
-    expect(saved?.host, 'new-host');
-    await session.dispose();
-  });
+  test(
+    'resolves and saves a changed host after a successful connection',
+    () async {
+      final original = tv.copyWith(tvCertSha256: 'fingerprint');
+      final hosts = <String>[];
+      PairedTv? saved;
+      final session = TvSession(
+        tv: original,
+        backoff: (_) => const Duration(milliseconds: 1),
+        resolveHost: (_) async => 'new-host',
+        onTvUpdated: (value) async {
+          saved = value;
+        },
+        clientFactory: (target) {
+          hosts.add(target.host);
+          return FakeRemote(fail: target.host == 'host')
+            ..peerCertSha256 = 'fingerprint';
+        },
+      );
+      await session.start();
+      await waitFor(() => session.isConnected);
+      expect(hosts, ['host', 'host', 'new-host']);
+      expect(saved?.host, 'new-host');
+      await session.dispose();
+    },
+  );
   test('does not save a resolved host when its identity changed', () async {
     final original = tv.copyWith(tvCertSha256: 'fingerprint');
     final hosts = <String>[];
@@ -196,17 +213,24 @@ void main() {
       tv: original,
       backoff: (_) => const Duration(milliseconds: 1),
       resolveHost: (_) async => 'new-host',
-      onTvUpdated: (value) async { saved = value; },
+      onTvUpdated: (value) async {
+        saved = value;
+      },
       clientFactory: (target) {
         hosts.add(target.host);
-        return target.host == 'host' ? FakeRemote(fail: true) : IdentityRemote();
+        return target.host == 'host'
+            ? FakeRemote(fail: true)
+            : IdentityRemote();
       },
     );
     await session.start();
     await waitFor(() => session.state.status == SessionStatus.notPaired);
     expect(hosts, ['host', 'host', 'new-host']);
     expect(saved, isNull);
-    expect(session.state.lastError, "This TV's identity changed. Pair it again.");
+    expect(
+      session.state.lastError,
+      "This TV's identity changed. Pair it again.",
+    );
     await session.dispose();
   });
   test('all buttons map to the expected keys', () {

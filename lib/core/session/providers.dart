@@ -63,10 +63,15 @@ class PairedTvs extends AsyncNotifier<PairedTvsState> {
     await ref.read(pairedTvStoreProvider).save(tv);
     final current = state.asData?.value;
     if (current == null) return;
-    state = AsyncData(PairedTvsState(
-      tvs: [for (final saved in current.tvs) if (saved.id == tv.id) tv else saved],
-      lastUsedId: current.lastUsedId,
-     ));
+    state = AsyncData(
+      PairedTvsState(
+        tvs: [
+          for (final saved in current.tvs)
+            if (saved.id == tv.id) tv else saved,
+        ],
+        lastUsedId: current.lastUsedId,
+      ),
+    );
   }
 
   Future<void> remove(String id) async {
@@ -117,11 +122,20 @@ final tvSessionProvider = Provider<TvSession?>((ref) {
       try {
         await discovery.start();
         final name = tv.serviceName ?? tv.name;
-        final devices = await discovery.devices.firstWhere(
-          (devices) => devices.any((device) => device.host != tv.host && (device.name == name || device.friendlyName == name)),
-        ).timeout(const Duration(seconds: 4), onTimeout: () => []);
+        final devices = await discovery.devices
+            .firstWhere(
+              (devices) => devices.any(
+                (device) =>
+                    device.host != tv.host &&
+                    (device.name == name || device.friendlyName == name),
+              ),
+            )
+            .timeout(const Duration(seconds: 4), onTimeout: () => []);
         for (final device in devices) {
-          if (device.host != tv.host && (device.name == name || device.friendlyName == name)) return device.host;
+          if (device.host != tv.host &&
+              (device.name == name || device.friendlyName == name)) {
+            return device.host;
+          }
         }
       } catch (_) {
         return null;

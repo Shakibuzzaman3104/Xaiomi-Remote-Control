@@ -88,9 +88,8 @@ class TvCursorLink {
   /// Opens the socket, retrying while the service starts.
   Future<void> connect({Duration timeout = const Duration(seconds: 8)}) {
     if (_closed) return Future.error(AdbException('TV cursor closed'));
-    return _connecting ??= _connect(
-      timeout,
-    ).whenComplete(() => _connecting = null);
+    return _connecting ??= _connect(timeout)
+        .whenComplete(() => _connecting = null);
   }
 
   void _checkOpen() {
@@ -153,7 +152,9 @@ class TvCursorLink {
       final line = await reply.future.timeout(const Duration(seconds: 2));
       _checkOpen();
       final match = RegExp(r'^xr_cursor (\d+)$').firstMatch(line);
-      if (match == null) throw AdbException('Unexpected TV cursor reply: $line');
+      if (match == null) {
+        throw AdbException('Unexpected TV cursor reply: $line');
+      }
       if (int.tryParse(match.group(1)!) != version) {
         throw CursorVersionException();
       }
@@ -290,12 +291,14 @@ class TvCursor extends Notifier<TvCursorState> {
         if (pending == null) {
           unawaited(_reconnectIfSetUp(_generation));
         } else {
-          unawaited(pending.whenComplete(() {
-            if (_link == link && state.status == TvCursorStatus.connecting) {
-              _reconnecting = null;
-              unawaited(_reconnectIfSetUp(_generation));
-            }
-          }));
+          unawaited(
+            pending.whenComplete(() {
+              if (_link == link && state.status == TvCursorStatus.connecting) {
+                _reconnecting = null;
+                unawaited(_reconnectIfSetUp(_generation));
+              }
+            }),
+          );
         }
       }
     };

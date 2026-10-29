@@ -39,7 +39,11 @@ void main() {
         }
       });
     });
-    final client = AdbClient(host: '127.0.0.1', port: server.port, key: AdbKey.generate());
+    final client = AdbClient(
+      host: '127.0.0.1',
+      port: server.port,
+      key: AdbKey.generate(),
+    );
     try {
       await client.connect();
       final link = TvCursorLink(client);
@@ -81,7 +85,11 @@ void main() {
         }
       });
     });
-    final client = AdbClient(host: '127.0.0.1', port: server.port, key: AdbKey.generate());
+    final client = AdbClient(
+      host: '127.0.0.1',
+      port: server.port,
+      key: AdbKey.generate(),
+    );
     try {
       await client.connect();
       final link = TvCursorLink(client);
@@ -101,9 +109,7 @@ void main() {
 
   test('reads the installed version code', () {
     expect(
-      TvCursorLink.parseVersionCode(
-        '    versionCode=3 minSdk=24 targetSdk=28',
-      ),
+      TvCursorLink.parseVersionCode('    versionCode=3 minSdk=24 targetSdk=28'),
       3,
     );
     expect(TvCursorLink.parseVersionCode(''), isNull);

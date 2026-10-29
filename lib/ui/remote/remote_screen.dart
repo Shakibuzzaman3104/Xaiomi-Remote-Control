@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../fade_switcher.dart';
 import '../motion.dart';
+import 'expanded_pad_page.dart';
 import 'remote_models.dart';
 import 'widgets/device_header.dart';
 import 'widgets/mouse_unavailable.dart';
@@ -340,6 +341,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
         onButtonDown: widget.onButtonDown,
         onButtonUp: widget.onButtonUp,
         sensitivity: widget.swipeSensitivity,
+        onExpand: (rect) => _expandPad(RemoteMode.swipe, rect),
       ),
       RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
         prompt:
@@ -356,9 +358,27 @@ class _RemoteScreenState extends State<RemoteScreen> {
         onClick: widget.onClick,
         onAirMouseChanged: widget.onAirMouseChanged,
         onLongPress: widget.onPointerLongPress,
+        onExpand: (rect) => _expandPad(RemoteMode.mouse, rect),
       ),
       RemoteMode.numpad => Numpad(onButton: widget.onButton),
     };
+  }
+
+  void _expandPad(RemoteMode mode, Rect origin) {
+    Navigator.of(context).push(
+      ExpandedPadPage.route(
+        mode: mode,
+        origin: origin,
+        onButton: widget.onButton,
+        onButtonDown: widget.onButtonDown,
+        onButtonUp: widget.onButtonUp,
+        onPointerMove: widget.onPointerMove,
+        onScroll: widget.onScroll,
+        onClick: widget.onClick,
+        onPointerLongPress: widget.onPointerLongPress,
+        sensitivity: widget.swipeSensitivity,
+      ),
+    );
   }
 
   void _changeMode(RemoteMode value) {

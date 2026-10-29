@@ -4,6 +4,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xiaomi_remote/ui/rolling_number.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 import 'package:xiaomi_remote/ui/remote/widgets/volume_pill.dart';
 
@@ -26,7 +27,10 @@ void main() {
       ),
     );
     expect(find.byType(Slider), findsOneWidget);
-    expect(find.text('Volume 50%'), findsOneWidget);
+    expect(
+      tester.widget<RollingNumber>(find.byType(RollingNumber)).value,
+      50,
+    );
     await tester.drag(find.byType(Slider), const Offset(80, 0));
     await tester.pumpAndSettle();
     expect(selected, isNotNull);
@@ -71,7 +75,7 @@ void main() {
       ),
     );
     expect(find.byType(Slider), findsNothing);
-    expect(find.text('Volume 50%'), findsOneWidget);
+    expect(find.bySemanticsLabel('Volume 50%'), findsOneWidget);
     expect(find.byIcon(Icons.remove), findsOneWidget);
     expect(find.byIcon(Icons.add), findsOneWidget);
   });

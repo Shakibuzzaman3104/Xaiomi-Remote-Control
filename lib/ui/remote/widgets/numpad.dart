@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../haptics.dart';
+import '../../physics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
@@ -59,27 +60,29 @@ class Numpad extends StatelessWidget {
           child: Semantics(
             label: labels[i],
             button: true,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Ink(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: c.surfaceContainer,
-                  border: Border.all(color: c.dpadOutline),
-                ),
-                child: InkResponse(
-                  customBorder: const CircleBorder(),
-                  containedInkWell: true,
-                  onTap: () {
-                    AppHaptics.selection();
-                    onButton(buttons[i]);
-                  },
-                  child: Center(
-                    child: Text(
-                      labels[i],
-                      style: context.appTextTheme.bodyMedium!.copyWith(
-                        color: c.onSurfaceStrong,
-                        fontSize: i == 9 || i == 11 ? 14 : 22,
+            child: _KeyPress(
+              child: Material(
+                type: MaterialType.transparency,
+                child: Ink(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.surfaceContainer,
+                    border: Border.all(color: c.dpadOutline),
+                  ),
+                  child: InkResponse(
+                    customBorder: const CircleBorder(),
+                    containedInkWell: true,
+                    onTap: () {
+                      AppHaptics.selection();
+                      onButton(buttons[i]);
+                    },
+                    child: Center(
+                      child: Text(
+                        labels[i],
+                        style: context.appTextTheme.bodyMedium!.copyWith(
+                          color: c.onSurfaceStrong,
+                          fontSize: i == 9 || i == 11 ? 14 : 22,
+                        ),
                       ),
                     ),
                   ),
@@ -91,4 +94,22 @@ class Numpad extends StatelessWidget {
       ),
     );
   }
+}
+
+class _KeyPress extends StatefulWidget {
+  const _KeyPress({required this.child});
+  final Widget child;
+  @override
+  State<_KeyPress> createState() => _KeyPressState();
+}
+
+class _KeyPressState extends State<_KeyPress> {
+  bool pressed = false;
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => setState(() => pressed = true),
+    onPointerUp: (_) => setState(() => pressed = false),
+    onPointerCancel: (_) => setState(() => pressed = false),
+    child: SpringPress(pressed: pressed, child: widget.child),
+  );
 }

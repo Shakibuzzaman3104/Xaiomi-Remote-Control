@@ -186,6 +186,7 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
   String _transcript = '';
   bool _listening = false;
   String? _error;
+  double _soundLevel = 0;
 
   @override
   void initState() {
@@ -231,6 +232,11 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
       onResult: (result) {
         if (mounted) setState(() => _transcript = result.recognizedWords);
       },
+      onSoundLevelChange: (level) {
+        if (mounted) {
+          setState(() => _soundLevel = ((level + 2) / 12).clamp(0, 1));
+        }
+      },
       listenOptions: SpeechListenOptions(
         partialResults: true,
         localeId: widget.speechLocale,
@@ -254,6 +260,7 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
     typeIntoFieldAvailable: widget.typeIntoFieldAvailable,
     tvSearchAvailable: widget.tvSearchAvailable,
     errorText: _error,
+    soundLevel: _soundLevel,
     onTargetChanged: (target) => setState(() => _target = target),
     onMicTap: _toggleListening,
     onCancel: () => Navigator.of(context).pop(),

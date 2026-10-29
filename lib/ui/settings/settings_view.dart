@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../fade_switcher.dart';
+import '../physics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -279,42 +281,55 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 3, bottom: 5),
-            child: Text(
-              label,
-              style: context.appTextTheme.labelMedium!.copyWith(
-                color: c.onSurfaceVariant,
+    const labels = [
+      'Devices',
+      'Control',
+      'Voice',
+      'Connection',
+      'Appearance',
+      'About',
+    ];
+    final index = labels.indexOf(label);
+    return SpringIn(
+      delay: Duration(milliseconds: (index < 0 ? 0 : index) * 45),
+      spring: AppSprings.smooth,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 3, bottom: 5),
+              child: Text(
+                label,
+                style: context.appTextTheme.labelMedium!.copyWith(
+                  color: c.onSurfaceVariant,
 
-                fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: c.appTile,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: c.subtleOutline),
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < children.length; i++) ...[
-                  if (i > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Divider(height: 1, color: c.subtleOutline),
-                    ),
-                  children[i],
+            Container(
+              decoration: BoxDecoration(
+                color: c.appTile,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: c.subtleOutline),
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    if (i > 0)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Divider(height: 1, color: c.subtleOutline),
+                      ),
+                    children[i],
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -370,10 +385,15 @@ class _Row extends StatelessWidget {
                     ),
                   ),
                   if (subtitle != null)
-                    Text(
-                      subtitle!,
-                      style: context.appTextTheme.labelSmall!.copyWith(
-                        color: c.muted,
+                    FadeSwitcher(
+                      scale: 1,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        subtitle!,
+                        key: ValueKey(subtitle),
+                        style: context.appTextTheme.labelSmall!.copyWith(
+                          color: c.muted,
+                        ),
                       ),
                     ),
                   ?bottom,
@@ -388,6 +408,7 @@ class _Row extends StatelessWidget {
         ),
       ),
     );
-    return mergeSemantics ? MergeSemantics(child: content) : content;
+    final feedback = SpringTapFeedback(child: content);
+    return mergeSemantics ? MergeSemantics(child: feedback) : feedback;
   }
 }
