@@ -20,9 +20,11 @@ class DeviceHeader extends StatelessWidget {
     required this.onTvSettings,
     required this.onAppSettings,
     this.onPower,
+    this.offlineLabel = 'Reconnecting…',
+    this.retrying = true,
   });
-  final String name;
-  final bool connected;
+  final String name, offlineLabel;
+  final bool connected, retrying;
   final VoidCallback onSwitchDevice, onTvSettings, onAppSettings;
   final VoidCallback? onPower;
   @override
@@ -73,7 +75,7 @@ class DeviceHeader extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       duration: AppMotion.quick,
                       child: Row(
-                        key: ValueKey(connected),
+                        key: ValueKey((connected, offlineLabel)),
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox.square(
@@ -81,12 +83,18 @@ class DeviceHeader extends StatelessWidget {
                             child: Center(
                               child: connected
                                   ? Icon(Icons.wifi, size: 15, color: c.muted)
-                                  : const PulseDot(),
+                                  : retrying
+                                  ? const PulseDot()
+                                  : Icon(
+                                      Icons.link_off,
+                                      size: 15,
+                                      color: c.muted,
+                                    ),
                             ),
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            connected ? 'Connected' : 'Reconnecting…',
+                            connected ? 'Connected' : offlineLabel,
                             style: context.appTextTheme.labelMedium!.copyWith(
                               color: c.muted,
                             ),

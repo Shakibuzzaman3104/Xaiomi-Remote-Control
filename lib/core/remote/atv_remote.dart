@@ -130,12 +130,18 @@ class AtvRemoteClient {
       throw StateError('Client is closed or already connected');
     }
     try {
-      final socket = await SecureSocket.connect(
-        host,
-        port,
-        context: atvSecurityContext(certificate),
-        onBadCertificate: (_) => true,
-      );
+      final SecureSocket socket;
+      try {
+        socket = await SecureSocket.connect(
+          host,
+          port,
+          context: atvSecurityContext(certificate),
+          onBadCertificate: (_) => true,
+        );
+      } on SocketException catch (e) {
+        if (_isReset(e)) throw const AtvNotPairedException();
+        rethrow;
+      }
       if (_closed) {
         socket.destroy();
         throw StateError('Client is closed');
@@ -161,7 +167,11 @@ class AtvRemoteClient {
             _lost(e);
           }
         },
-        onError: (Object error) => _lost(error),
+        onError: (Object error) => _lost(
+          !_heardFromTv && error is SocketException && _isReset(error)
+              ? const AtvNotPairedException()
+              : error,
+        ),
         onDone: () => _lost(
           _heardFromTv ? 'Connection closed' : const AtvNotPairedException(),
         ),
@@ -182,6 +192,10 @@ class AtvRemoteClient {
       rethrow;
     }
   }
+
+  static bool _isReset(SocketException e) =>
+      const {54, 104}.contains(e.osError?.errorCode) ||
+      e.message.toLowerCase().contains('reset');
 
   Future<void> disconnect() async {
     if (_closed) return;

@@ -110,6 +110,12 @@ class _RemoteScreenState extends State<RemoteScreen> {
           DeviceHeader(
             name: s.deviceName,
             connected: s.connected,
+            retrying: s.reconnecting,
+            offlineLabel: s.needsPairing
+                ? 'Not paired'
+                : s.reconnecting
+                ? 'Reconnecting…'
+                : 'Offline',
             onSwitchDevice: widget.onSwitchDevice,
             onTvSettings: () => widget.onButton(RemoteButton.settings),
             onAppSettings: widget.onAppSettings,
