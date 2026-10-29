@@ -14,8 +14,6 @@ import 'widgets/trackpad.dart';
 import 'widgets/numpad.dart';
 import 'widgets/round_action_button.dart';
 import 'widgets/volume_pill.dart';
-import 'widgets/media_row.dart';
-import 'widgets/favourite_apps_row.dart';
 import 'widgets/bottom_action_bar.dart';
 import 'widgets/disconnected_banner.dart';
 
@@ -27,12 +25,11 @@ class RemoteScreen extends StatefulWidget {
     required this.onButton,
     required this.onSwitchDevice,
     required this.onOpenNowPlaying,
-    required this.onOpenApp,
-    required this.onEditFavourites,
+    required this.onApps,
     required this.onKeyboard,
     required this.onVoice,
     required this.onRetry,
-    required this.onMenu,
+    required this.onAppSettings,
     required this.onPointerMove,
     required this.onScroll,
     required this.onClick,
@@ -43,12 +40,11 @@ class RemoteScreen extends StatefulWidget {
   final ValueChanged<RemoteButton> onButton;
   final VoidCallback onSwitchDevice,
       onOpenNowPlaying,
-      onEditFavourites,
+      onApps,
       onKeyboard,
       onVoice,
       onRetry,
-      onMenu;
-  final ValueChanged<FavouriteApp> onOpenApp;
+      onAppSettings;
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
@@ -64,7 +60,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
     mode = widget.initialMode;
   }
 
-  static const double _controlsAroundPad = 408;
+  static const double _controlsAroundPad = 180;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +75,11 @@ class _RemoteScreenState extends State<RemoteScreen> {
                 name: s.deviceName,
                 connected: s.connected,
                 onSwitchDevice: widget.onSwitchDevice,
-                onMenu: widget.onMenu,
+                onTvSettings: () => widget.onButton(RemoteButton.settings),
+                onAppSettings: widget.onAppSettings,
+                onPower: s.connected
+                    ? () => widget.onButton(RemoteButton.power)
+                    : null,
               ),
               if (!s.connected) ...[
                 const SizedBox(height: 8),
@@ -93,13 +93,24 @@ class _RemoteScreenState extends State<RemoteScreen> {
                 ),
               ],
               const SizedBox(height: 12),
+              _whenConnected(
+                ModeSwitcher(
+                  mode: mode,
+                  onChanged: (v) => setState(() => mode = v),
+                ),
+              ),
               Expanded(
                 child: _whenConnected(
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final padSize = _padSizeFor(constraints);
                       return SingleChildScrollView(
-                        child: _buildControls(padSize),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Center(child: _buildControls(padSize)),
+                        ),
                       );
                     },
                   ),
@@ -110,7 +121,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
                 BottomActionBar(
                   onKeyboard: widget.onKeyboard,
                   onVoice: widget.onVoice,
-                  onPower: () => widget.onButton(RemoteButton.power),
+                  onApps: widget.onApps,
                 ),
               ),
               const SizedBox(height: 8),
@@ -122,7 +133,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
   }
 
   double _padSizeFor(BoxConstraints constraints) {
-    final byWidth = (constraints.maxWidth * .82).clamp(0.0, 264.0);
+    final byWidth = (constraints.maxWidth * .9).clamp(0.0, 320.0);
     final byHeight = constraints.maxHeight - _controlsAroundPad;
     return byWidth < byHeight ? byWidth : byHeight.clamp(168.0, byWidth);
   }
@@ -140,10 +151,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
 
   Widget _buildControls(double padSize) {
     final s = widget.state;
+    final playing = s.nowPlaying?.playing ?? false;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        ModeSwitcher(mode: mode, onChanged: (v) => setState(() => mode = v)),
-        const SizedBox(height: 12),
         SizedBox(
           width: padSize,
           height: padSize,
@@ -174,9 +185,9 @@ class _RemoteScreenState extends State<RemoteScreen> {
               onPressed: () => widget.onButton(RemoteButton.home),
             ),
             RoundActionButton(
-              label: 'Settings',
-              icon: Icons.settings_outlined,
-              onPressed: () => widget.onButton(RemoteButton.settings),
+              label: playing ? 'Pause' : 'Play',
+              icon: playing ? Icons.pause : Icons.play_arrow,
+              onPressed: () => widget.onButton(RemoteButton.playPause),
             ),
           ],
         ),
@@ -185,16 +196,6 @@ class _RemoteScreenState extends State<RemoteScreen> {
           level: s.volumeLevel,
           muted: s.muted,
           onButton: widget.onButton,
-        ),
-        const SizedBox(height: 6),
-        MediaRow(
-          playing: s.nowPlaying?.playing ?? false,
-          onButton: widget.onButton,
-        ),
-        FavouriteAppsRow(
-          apps: s.favourites,
-          onOpen: widget.onOpenApp,
-          onEdit: widget.onEditFavourites,
         ),
       ],
     );

@@ -24,12 +24,16 @@ void main() {
     await client.connect();
     await Future<void>.delayed(const Duration(seconds: 2));
     final state = client.state;
-    stdout.writeln('state: connected=${state.connected} on=${state.isOn} app=${state.currentApp} '
-        'model=${state.deviceModel} features=${state.supportedFeatures}');
+    stdout.writeln(
+      'state: connected=${state.connected} on=${state.isOn} app=${state.currentApp} '
+      'model=${state.deviceModel} features=${state.supportedFeatures}',
+    );
     expect(state.connected, isTrue);
     expect(state.supportedFeatures & 2, 2);
     client.sendKey(RemoteKeyCode.KEYCODE_HOME);
-    await Future<void>.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 2));
+    client.launchApp('https://www.netflix.com/browse');
+    await Future<void>.delayed(const Duration(seconds: 2));
     await client.disconnect();
   }, skip: host == null ? 'set ATV_HOST and ATV_CERT_DIR' : false);
 }

@@ -125,6 +125,8 @@ void main() {
       RemoteKeyCode.KEYCODE_7,
       RemoteKeyCode.KEYCODE_8,
       RemoteKeyCode.KEYCODE_9,
+      RemoteKeyCode.KEYCODE_ENTER,
+      RemoteKeyCode.KEYCODE_DEL,
     ];
     expect(RemoteButton.values.map(keyCodeFor), expected);
   });

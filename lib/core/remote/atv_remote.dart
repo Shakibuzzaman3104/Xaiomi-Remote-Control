@@ -92,7 +92,8 @@ class AtvRemoteClient {
   final AtvCertificate certificate;
   final int port;
   final void Function(RemoteMessage)? sendSink;
-  static const int features = 1 | 2 | 4 | 8 | 32 | 64 | 512;
+  // VOICE (8) stalls the handshake on the Mi Box S: no set_active, keys ignored.
+  static const int features = 1 | 2 | 4 | 32 | 64 | 512;
   final _states = StreamController<AtvState>.broadcast();
   AtvState _state = const AtvState();
   AtvState get state => _state;
@@ -102,6 +103,7 @@ class AtvRemoteClient {
   int _imeCounter = 0, _fieldCounter = 0;
   int? _voiceSession;
   Completer<int>? _voiceBegin;
+  final _ready = Completer<void>();
   bool _closed = false;
 
   void _update(AtvState value) {
@@ -145,6 +147,12 @@ class AtvRemoteClient {
         },
         onError: (Object error) => _lost(error),
         onDone: () => _lost('Connection closed'),
+      );
+      await _ready.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw const AtvConnectionLostException(
+          'TV did not activate the remote session',
+        ),
       );
     } catch (e) {
       if (!_closed) _lost(e);
@@ -221,6 +229,7 @@ class AtvRemoteClient {
         ),
       );
     } else if (message.hasRemoteSetActive()) {
+      if (!_ready.isCompleted) _ready.complete();
       _send(
         RemoteMessage(
           remoteSetActive: RemoteSetActive(active: _state.supportedFeatures),

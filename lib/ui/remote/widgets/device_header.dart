@@ -13,11 +13,14 @@ class DeviceHeader extends StatelessWidget {
     required this.name,
     required this.connected,
     required this.onSwitchDevice,
-    required this.onMenu,
+    required this.onTvSettings,
+    required this.onAppSettings,
+    this.onPower,
   });
   final String name;
   final bool connected;
-  final VoidCallback onSwitchDevice, onMenu;
+  final VoidCallback onSwitchDevice, onTvSettings, onAppSettings;
+  final VoidCallback? onPower;
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -90,12 +93,31 @@ class DeviceHeader extends StatelessWidget {
           ),
         ),
         IconButton(
+          tooltip: 'Power',
+          onPressed: onPower == null
+              ? null
+              : () {
+                  HapticFeedback.mediumImpact();
+                  onPower!();
+                },
+          icon: Icon(Icons.power_settings_new, color: c.onSurface),
+        ),
+        PopupMenuButton<VoidCallback>(
           tooltip: 'Menu',
-          onPressed: () {
-            HapticFeedback.selectionClick();
-            onMenu();
-          },
           icon: Icon(Icons.more_vert, color: c.onSurface),
+          color: c.surfaceContainer,
+          onSelected: (action) => action(),
+          itemBuilder: (_) => [
+            if (connected)
+              PopupMenuItem(
+                value: onTvSettings,
+                child: const Text('TV settings'),
+              ),
+            PopupMenuItem(
+              value: onAppSettings,
+              child: const Text('App settings'),
+            ),
+          ],
         ),
       ],
     );

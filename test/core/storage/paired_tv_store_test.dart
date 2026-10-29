@@ -4,6 +4,7 @@
  */
 
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xiaomi_remote/core/storage/paired_tv_store.dart';
 
@@ -35,35 +36,40 @@ void main() {
       store = PairedTvStore(memoryStore);
     });
 
-    test('save and loadAll round-trip with all fields including dates', () async {
-      final pairedAt = DateTime.parse('2026-10-29T20:00:00.000Z');
-      final lastConnectedAt = DateTime.parse('2026-10-29T20:30:00.000Z');
+    test(
+      'save and loadAll round-trip with all fields including dates',
+      () async {
+        final pairedAt = DateTime.parse('2026-10-29T20:00:00.000Z');
+        final lastConnectedAt = DateTime.parse('2026-10-29T20:30:00.000Z');
 
-      final tv = PairedTv(
-        id: '192.168.1.100',
-        name: 'Living Room TV',
-        host: '192.168.1.100',
-        model: 'MIBOX4',
-        certPem: '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
-        privateKeyPem: '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----',
-        pairedAt: pairedAt,
-        lastConnectedAt: lastConnectedAt,
-      );
+        final tv = PairedTv(
+          id: '192.168.1.100',
+          name: 'Living Room TV',
+          host: '192.168.1.100',
+          model: 'MIBOX4',
+          certPem:
+              '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
+          privateKeyPem:
+              '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----',
+          pairedAt: pairedAt,
+          lastConnectedAt: lastConnectedAt,
+        );
 
-      await store.save(tv);
-      final list = await store.loadAll();
+        await store.save(tv);
+        final list = await store.loadAll();
 
-      expect(list.length, 1);
-      expect(list.first.id, tv.id);
-      expect(list.first.name, tv.name);
-      expect(list.first.host, tv.host);
-      expect(list.first.model, tv.model);
-      expect(list.first.certPem, tv.certPem);
-      expect(list.first.privateKeyPem, tv.privateKeyPem);
-      expect(list.first.pairedAt, tv.pairedAt);
-      expect(list.first.lastConnectedAt, tv.lastConnectedAt);
-      expect(list.first, equals(tv));
-    });
+        expect(list.length, 1);
+        expect(list.first.id, tv.id);
+        expect(list.first.name, tv.name);
+        expect(list.first.host, tv.host);
+        expect(list.first.model, tv.model);
+        expect(list.first.certPem, tv.certPem);
+        expect(list.first.privateKeyPem, tv.privateKeyPem);
+        expect(list.first.pairedAt, tv.pairedAt);
+        expect(list.first.lastConnectedAt, tv.lastConnectedAt);
+        expect(list.first, equals(tv));
+      },
+    );
 
     test('save replaces existing device by id', () async {
       final tv1 = PairedTv(

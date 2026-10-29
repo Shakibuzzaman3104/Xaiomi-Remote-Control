@@ -11,9 +11,9 @@ class BottomActionBar extends StatelessWidget {
     super.key,
     required this.onKeyboard,
     required this.onVoice,
-    required this.onPower,
+    required this.onApps,
   });
-  final VoidCallback onKeyboard, onVoice, onPower;
+  final VoidCallback onKeyboard, onVoice, onApps;
   @override
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -31,11 +31,7 @@ class BottomActionBar extends StatelessWidget {
         size: 72,
         onPressed: onVoice,
       ),
-      RoundActionButton(
-        label: 'Power',
-        icon: Icons.power_settings_new,
-        onPressed: onPower,
-      ),
+      RoundActionButton(label: 'Apps', icon: Icons.apps, onPressed: onApps),
     ],
   );
 }

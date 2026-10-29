@@ -1,0 +1,268 @@
+/**
+ * @author Shakib
+ * @since 29/10/26
+ */
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+
+class KeyboardSheet extends StatefulWidget {
+  const KeyboardSheet({
+    super.key,
+    required this.fieldLabel,
+    required this.initialText,
+    required this.onChanged,
+    required this.onSend,
+    required this.onClear,
+    required this.onClose,
+  });
+
+  final String fieldLabel;
+  final String initialText;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onSend;
+  final VoidCallback onClear;
+  final VoidCallback onClose;
+
+  @override
+  State<KeyboardSheet> createState() => _KeyboardSheetState();
+}
+
+class _KeyboardSheetState extends State<KeyboardSheet> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void didUpdateWidget(covariant KeyboardSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialText != widget.initialText &&
+        _controller.text != widget.initialText) {
+      _controller.text = widget.initialText;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleClear() {
+    HapticFeedback.selectionClick();
+    _controller.clear();
+    widget.onChanged('');
+    widget.onClear();
+  }
+
+  void _handleSend() {
+    HapticFeedback.selectionClick();
+    widget.onSend();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: c.background,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppShapes.card),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppShapes.screenPadding,
+            right: AppShapes.screenPadding,
+            top: 12,
+            bottom: bottomInset + 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: c.surfaceContainerStrong,
+                    borderRadius: BorderRadius.circular(AppShapes.pill),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.fieldLabel.isEmpty
+                          ? 'Typing on TV'
+                          : 'Typing on TV · ${widget.fieldLabel}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: c.onSurfaceStrong,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Semantics(
+                    button: true,
+                    label: 'Close',
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          widget.onClose();
+                        },
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: c.muted,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                textInputAction: TextInputAction.send,
+                style: TextStyle(fontSize: 16, color: c.onSurfaceStrong),
+                cursorColor: c.primary,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: c.appTile,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderSide: BorderSide(color: c.primary, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderSide: BorderSide(color: c.primary, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderSide: BorderSide(color: c.primary, width: 1.5),
+                  ),
+                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) {
+                      if (value.text.isEmpty) return const SizedBox.shrink();
+                      return Semantics(
+                        button: true,
+                        label: 'Clear text',
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.cancel_rounded,
+                            color: c.muted,
+                            size: 20,
+                          ),
+                          onPressed: _handleClear,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                onChanged: widget.onChanged,
+                onSubmitted: (_) => _handleSend(),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: 'Clear',
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: TextButton.icon(
+                          onPressed: _handleClear,
+                          icon: const Icon(Icons.backspace_outlined, size: 20),
+                          label: const Text(
+                            'Clear',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            backgroundColor: c.surfaceContainer,
+                            foregroundColor: c.onSurfaceStrong,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppShapes.card,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: 'Send',
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: ElevatedButton.icon(
+                          onPressed: _handleSend,
+                          icon: const Icon(Icons.send_rounded, size: 20),
+                          label: const Text(
+                            'Send',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: c.primary,
+                            foregroundColor: c.onPrimary,
+                            elevation: 0,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppShapes.card,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -3,88 +3,67 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/session/providers.dart';
+import 'ui/onboarding/onboarding_flow.dart';
+import 'ui/remote/remote_home.dart';
+import 'ui/settings/settings_screen.dart';
 import 'ui/theme/app_theme.dart';
-import 'ui/theme/app_colors.dart';
-import 'ui/remote/remote_models.dart';
-import 'ui/remote/remote_screen.dart';
+import 'ui/theme/theme_mode_provider.dart';
 
-void main() => runApp(const XiaomiRemoteApp());
+void main() => runApp(const ProviderScope(child: XiaomiRemoteApp()));
 
-class XiaomiRemoteApp extends StatelessWidget {
+class XiaomiRemoteApp extends ConsumerWidget {
   const XiaomiRemoteApp({super.key});
+
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
     title: 'Xiaomi Remote',
+    debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     darkTheme: AppTheme.dark,
-    themeMode: ThemeMode.system,
-    home: Builder(
-      builder: (context) {
-        final c = context.colors;
-        final names = [
-          'YouTube',
-          'Netflix',
-          'Hoichoi',
-          'Toffee',
-          'VLC',
-          'Plex',
-        ];
-        final colors = [
-          c.danger,
-          c.primary,
-          c.connected,
-          c.primaryText,
-          c.muted,
-          c.onSurface,
-        ];
-        return RemoteScreen(
-          state: RemoteViewState(
-            deviceName: 'Living Room · Mi Box S',
-            connected: true,
-            reconnecting: false,
-            nowPlaying: const NowPlaying(
-              title: 'Me at the zoo',
-              position: Duration(seconds: 12),
-              duration: Duration(seconds: 19),
-              playing: true,
-            ),
-            volumeLevel: 12,
-            muted: false,
-            favourites: List.generate(
-              names.length,
-              (i) => FavouriteApp(
-                id: names[i],
-                label: names[i],
-                icon: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: colors[i],
-                  child: Text(
-                    names[i][0],
-                    style: TextStyle(
-                      color: c.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          onButton: (v) => debugPrint('Button: $v'),
-          onSwitchDevice: () => debugPrint('Switch device'),
-          onOpenNowPlaying: () => debugPrint('Now playing'),
-          onOpenApp: (v) => debugPrint('App: ${v.id}'),
-          onEditFavourites: () => debugPrint('Edit favourites'),
-          onKeyboard: () => debugPrint('Keyboard'),
-          onVoice: () => debugPrint('Voice'),
-          onRetry: () => debugPrint('Retry'),
-          onMenu: () => debugPrint('Menu'),
-          onPointerMove: (v) => debugPrint('Move: $v'),
-          onScroll: (v) => debugPrint('Scroll: $v'),
-          onClick: (v) => debugPrint('Right click: $v'),
-          onAirMouseChanged: (v) => debugPrint('Air mouse: $v'),
-        );
-      },
+    themeMode: ref.watch(themeModeProvider),
+    home: const AppRoot(),
+  );
+}
+
+/// Shows onboarding until a TV is paired, then the Remote.
+class AppRoot extends ConsumerWidget {
+  const AppRoot({super.key});
+
+  void _openAddTv(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (routeContext) => Consumer(
+        builder: (_, ref, child) {
+          ref.listen(activeTvProvider, (previous, next) {
+            if (next != null && next.id != previous?.id) {
+              Navigator.of(routeContext).popUntil((route) => route.isFirst);
+            }
+          });
+          return child!;
+        },
+        child: const OnboardingFlow(),
+      ),
     ),
   );
+
+  void _openSettings(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SettingsScreen(onAddTv: () => _openAddTv(context)),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final paired = ref.watch(pairedTvsProvider);
+    if (paired.isLoading && !paired.hasValue) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (ref.watch(activeTvProvider) == null) return const OnboardingFlow();
+    return RemoteHome(
+      onAddTv: () => _openSettings(context),
+      onAppSettings: () => _openSettings(context),
+    );
+  }
 }

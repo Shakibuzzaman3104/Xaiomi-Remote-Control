@@ -4,31 +4,65 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xiaomi_remote/main.dart';
 import 'package:xiaomi_remote/ui/remote/remote_models.dart';
 import 'package:xiaomi_remote/ui/remote/remote_screen.dart';
 import 'package:xiaomi_remote/ui/remote/widgets/dpad.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
 
 void main() {
-  testWidgets('demo renders at phone size and larger text', (tester) async {
+  testWidgets('renders at phone size, larger text and both themes', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(360, 780));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    for (final scale in [1.0, 1.3]) {
-      await tester.pumpWidget(
-        MediaQuery(
-          data: MediaQueryData(
-            size: const Size(360, 780),
-            textScaler: TextScaler.linear(scale),
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      for (final scale in [1.0, 1.3]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: MediaQuery(
+              data: MediaQueryData(
+                size: const Size(360, 780),
+                textScaler: TextScaler.linear(scale),
+              ),
+              child: RemoteScreen(
+                state: RemoteViewState(
+                  deviceName: 'Living Room · Mi Box S',
+                  connected: true,
+                  reconnecting: false,
+                  nowPlaying: const NowPlaying(
+                    title: 'Me at the zoo',
+                    position: Duration(seconds: 12),
+                    duration: Duration(seconds: 19),
+                    playing: true,
+                  ),
+                  volumeLevel: 12,
+                  muted: false,
+                ),
+                onButton: (_) {},
+                onSwitchDevice: () {},
+                onOpenNowPlaying: () {},
+                onApps: () {},
+                onKeyboard: () {},
+                onVoice: () {},
+                onRetry: () {},
+                onAppSettings: () {},
+                onPointerMove: (_) {},
+                onScroll: (_) {},
+                onClick: (_) {},
+                onAirMouseChanged: (_) {},
+              ),
+            ),
           ),
-          child: const XiaomiRemoteApp(),
-        ),
-      );
-      await tester.pump();
-      expect(find.text('Living Room · Mi Box S'), findsOneWidget);
-      expect(find.text('Me at the zoo'), findsOneWidget);
-      expect(find.text('Favourite apps'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+        );
+        await tester.pump();
+        expect(find.text('Living Room · Mi Box S'), findsOneWidget);
+        expect(find.text('Me at the zoo'), findsOneWidget);
+        expect(find.text('Play'), findsNothing);
+        expect(find.text('Pause'), findsOneWidget);
+        expect(find.text('Favourite apps'), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
     }
   });
   testWidgets('buttons, repeats, numpad and disconnected state', (
@@ -47,19 +81,17 @@ void main() {
           connected: connected,
           reconnecting: !connected,
           muted: false,
-          favourites: const [],
         ),
         onButton: buttons.add,
         onSwitchDevice: () {},
         onOpenNowPlaying: () {},
-        onOpenApp: (_) {},
-        onEditFavourites: () {},
+        onApps: () {},
         onKeyboard: () {},
         onVoice: () {
           voices++;
         },
         onRetry: () {},
-        onMenu: () {},
+        onAppSettings: () {},
         onPointerMove: (_) {},
         onScroll: (_) {},
         onClick: (_) {},
@@ -96,6 +128,12 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
     expect(buttons.last, RemoteButton.volumeUp);
+    await tester.tap(find.text('Play'));
+    await tester.pump();
+    expect(buttons.last, RemoteButton.playPause);
+    await tester.tap(find.byTooltip('Power'));
+    await tester.pump();
+    expect(buttons.last, RemoteButton.power);
     await tester.ensureVisible(find.byIcon(Icons.mic_none));
     await tester.tap(find.byIcon(Icons.mic_none));
     await tester.pump();

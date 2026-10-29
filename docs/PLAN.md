@@ -40,6 +40,8 @@ _Tested live on 29/10/26 against the real box._
 | Reconnect after wake | R / ADB | No re-pairing, no new ADB prompt. Box needed ~1 min after the remote press |
 | Write secure + global settings | ADB | Write and read-back verified, so the companion a11y service can be enabled remotely |
 | Force-stop apps | ADB | Verified on VLC |
+| Pair, keys, app links from the Flutter app | R | Pixel 6: discovered via mDNS, paired, Home and YouTube link worked |
+| YouTube search by link | R | `https://www.youtube.com/results?search_query=…` opens results; voice search works without ADB |
 
 ### 🟡 Expected, not yet tested
 | Capability | Ch | Why we expect it |
@@ -55,6 +57,8 @@ _Tested live on 29/10/26 against the real box._
 | Bangla in YouTube's search | YouTube uses its own Latin-only keyboard; system fields are fine |
 | Control the TV set (power/input/volume) | HDMI-CEC is off. User can enable it in box settings → then box power controls TV |
 | Root-level actions | `user` build |
+| Read the pairing code by screenshot | The code dialog is secure; screencap returns black. User must read it |
+| Negotiate the `VOICE` feature | Box never sends `set_active` and ignores every key. Client negotiates without VOICE (615) |
 
 ### ⚠️ Unverified (spikes needed)
 | Capability | Spike |

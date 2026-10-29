@@ -33,4 +33,6 @@ RemoteKeyCode keyCodeFor(RemoteButton button) => switch (button) {
   RemoteButton.digit7 => RemoteKeyCode.KEYCODE_7,
   RemoteButton.digit8 => RemoteKeyCode.KEYCODE_8,
   RemoteButton.digit9 => RemoteKeyCode.KEYCODE_9,
+  RemoteButton.enter => RemoteKeyCode.KEYCODE_ENTER,
+  RemoteButton.delete => RemoteKeyCode.KEYCODE_DEL,
 };

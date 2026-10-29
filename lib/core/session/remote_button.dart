@@ -30,4 +30,6 @@ enum RemoteButton {
   digit7,
   digit8,
   digit9,
+  enter,
+  delete,
 }

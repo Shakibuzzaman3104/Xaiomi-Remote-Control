@@ -42,13 +42,11 @@ class RemoteViewState {
     this.nowPlaying,
     this.volumeLevel,
     required this.muted,
-    required this.favourites,
   });
   final String deviceName;
   final bool connected, reconnecting, muted;
   final NowPlaying? nowPlaying;
   final int? volumeLevel;
-  final List<FavouriteApp> favourites;
   RemoteViewState copyWith({
     String? deviceName,
     bool? connected,
@@ -56,7 +54,6 @@ class RemoteViewState {
     Object? nowPlaying = _unset,
     Object? volumeLevel = _unset,
     bool? muted,
-    List<FavouriteApp>? favourites,
   }) => RemoteViewState(
     deviceName: deviceName ?? this.deviceName,
     connected: connected ?? this.connected,
@@ -68,6 +65,5 @@ class RemoteViewState {
         ? this.volumeLevel
         : volumeLevel as int?,
     muted: muted ?? this.muted,
-    favourites: favourites ?? this.favourites,
   );
 }
