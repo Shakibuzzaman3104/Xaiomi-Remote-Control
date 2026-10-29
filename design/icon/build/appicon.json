@@ -1,0 +1,70 @@
+{
+  "concept": "design/icon/concept_v1.png",
+  "background": {
+    "kind": "model",
+    "fit_resid": 7.0,
+    "vd_gradient_rms": 17.89,
+    "spread": 216.0,
+    "resource": "@mipmap/ic_launcher_background"
+  },
+  "separation": {
+    "local": {
+      "recomposite_diff": 1.38,
+      "kept_backdrop": 0.0,
+      "semi_transparent": 0.944
+    },
+    "used": "api",
+    "api": {
+      "recomposite_diff": 3.66,
+      "kept_backdrop": 0.0,
+      "semi_transparent": 0.033
+    }
+  },
+  "warnings": [
+    "local matte left 94% of the subject semi-transparent (subject close in colour to its background): iOS dark/tinted, the silhouette and light backgrounds would look ghosted"
+  ],
+  "safe_zone": {
+    "shrink": 1.0,
+    "subject_radius_dp": 27.0,
+    "faint_radius_dp": 27.36,
+    "limit_dp": 33,
+    "ok": true
+  },
+  "glyph": {
+    "iou_vs_silhouette": 0.679,
+    "radius_dp": 27.16,
+    "scale": 0.885,
+    "colors": [
+      "#000000"
+    ],
+    "lint": [],
+    "ok": true
+  },
+  "monochrome": "@drawable/ic_launcher_monochrome",
+  "composite_diff_vs_concept": 3.34,
+  "play_store": {
+    "size": [
+      512,
+      512
+    ],
+    "opaque": true,
+    "kb": 184.9
+  },
+  "ios": {
+    "size": [
+      1024,
+      1024
+    ],
+    "opaque": true,
+    "had_alpha_discarded": false,
+    "tinted_mode": "LA",
+    "tinted_has_alpha": true,
+    "dark_has_alpha": true,
+    "actool": "ok (Assets.car compiled)"
+  },
+  "web_maskable": {
+    "subject_r": 0.654,
+    "ok": true
+  },
+  "aapt2": "aapt2 compile+link ok (android-37.0)"
+}

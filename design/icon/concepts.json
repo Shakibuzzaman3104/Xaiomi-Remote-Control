@@ -1,0 +1,44 @@
+{
+  "concept_v1.png": {
+    "path": "design/icon/concept_v1.png",
+    "direction": "a minimal circular D-pad ring with a glowing OK centre, flat emblem on a deep violet gradient",
+    "prompt": "The attached image is an APPROVED app design, given only as a style reference. Design a NEW launcher icon for this app in the SAME visual language: its palette (#6041B4,#F7F5FC,#9D7BF4,#110F14), rendering style, lighting and mood. Do NOT reproduce the screenshot or any illustration or scene in it (no landscape, horizon, water or card); invent a simple icon composition. Brief: Xiaomi Remote: a calm, premium phone remote for an Android TV box (Mi Box S). Design language 'Violet Quiet': soft violet, rounded, quiet confidence. Direction: a minimal circular D-pad ring with a glowing OK centre, flat emblem on a deep violet gradient. Square 1:1 canvas. FULL-BLEED: the background fills the entire square edge to edge; no rounded corners, no border or frame, no drop shadow, no device, no mockup, no UI elements. One bold, simple central subject with a strong silhouette that still reads at 48 px, centred and about 60% of the canvas wide so circular masks never cut it, on a solid or smooth-gradient background with little or no texture. No text, letters or numbers anywhere.",
+    "metrics": {
+      "subject_r": 0.747,
+      "bg_resid": 7.0,
+      "edge_touch": 0.008,
+      "flags": [],
+      "palette_de": 54.5
+    },
+    "reference": "test/shots/goldens/remote.png",
+    "quality": "low"
+  },
+  "concept_v3.png": {
+    "path": "design/icon/concept_v3.png",
+    "direction": "an abstract stylised remote: a soft pill shape with a single bold ring button, deep violet with a subtle lavender highlight",
+    "prompt": "The attached image is an APPROVED app design, given only as a style reference. Design a NEW launcher icon for this app in the SAME visual language: its palette (#6041B4,#F7F5FC,#9D7BF4,#110F14), rendering style, lighting and mood. Do NOT reproduce the screenshot or any illustration or scene in it (no landscape, horizon, water or card); invent a simple icon composition. Brief: Xiaomi Remote: a calm, premium phone remote for an Android TV box (Mi Box S). Design language 'Violet Quiet': soft violet, rounded, quiet confidence. Direction: an abstract stylised remote: a soft pill shape with a single bold ring button, deep violet with a subtle lavender highlight. Square 1:1 canvas. FULL-BLEED: the background fills the entire square edge to edge; no rounded corners, no border or frame, no drop shadow, no device, no mockup, no UI elements. One bold, simple central subject with a strong silhouette that still reads at 48 px, centred and about 60% of the canvas wide so circular masks never cut it, on a solid or smooth-gradient background with little or no texture. No text, letters or numbers anywhere.",
+    "metrics": {
+      "subject_r": 0.744,
+      "bg_resid": 3.6,
+      "edge_touch": 0.0,
+      "flags": [],
+      "palette_de": 14.7
+    },
+    "reference": "test/shots/goldens/remote.png",
+    "quality": "low"
+  },
+  "concept_v2.png": {
+    "path": "design/icon/concept_v2.png",
+    "direction": "a rounded TV screen outline with a small remote signal arc above it, light lavender background, violet glyph",
+    "prompt": "The attached image is an APPROVED app design, given only as a style reference. Design a NEW launcher icon for this app in the SAME visual language: its palette (#6041B4,#F7F5FC,#9D7BF4,#110F14), rendering style, lighting and mood. Do NOT reproduce the screenshot or any illustration or scene in it (no landscape, horizon, water or card); invent a simple icon composition. Brief: Xiaomi Remote: a calm, premium phone remote for an Android TV box (Mi Box S). Design language 'Violet Quiet': soft violet, rounded, quiet confidence. Direction: a rounded TV screen outline with a small remote signal arc above it, light lavender background, violet glyph. Square 1:1 canvas. FULL-BLEED: the background fills the entire square edge to edge; no rounded corners, no border or frame, no drop shadow, no device, no mockup, no UI elements. One bold, simple central subject with a strong silhouette that still reads at 48 px, centred and about 60% of the canvas wide so circular masks never cut it, on a solid or smooth-gradient background with little or no texture. No text, letters or numbers anywhere.",
+    "metrics": {
+      "subject_r": 0.721,
+      "bg_resid": 6.1,
+      "edge_touch": 0.0,
+      "flags": [],
+      "palette_de": 8.8
+    },
+    "reference": "test/shots/goldens/remote.png",
+    "quality": "low"
+  }
+}
