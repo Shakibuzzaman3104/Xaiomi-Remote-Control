@@ -24,8 +24,10 @@ class RemoteHome extends ConsumerStatefulWidget {
     super.key,
     required this.onAddTv,
     required this.onAppSettings,
+    this.onPairAgain,
   });
   final VoidCallback onAddTv, onAppSettings;
+  final VoidCallback? onPairAgain;
 
   @override
   ConsumerState<RemoteHome> createState() => _RemoteHomeState();
@@ -134,6 +136,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
       onAppSettings: widget.onAppSettings,
       onKeyboard: showKeyboard,
       onVoice: showVoice,
+      onPairAgain: widget.onPairAgain,
     );
   }
 }

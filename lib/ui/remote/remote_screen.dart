@@ -36,6 +36,7 @@ class RemoteScreen extends StatefulWidget {
     required this.onKeyboard,
     required this.onVoice,
     required this.onRetry,
+    this.onPairAgain,
     required this.onAppSettings,
     required this.onPointerMove,
     required this.onScroll,
@@ -55,6 +56,7 @@ class RemoteScreen extends StatefulWidget {
       onVoice,
       onRetry,
       onAppSettings;
+  final VoidCallback? onPairAgain;
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
@@ -76,8 +78,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
   static const double _landscapeGap = 32;
   static const double _minLandscapePad = 120;
   static const double _minActionsWidth = 280;
-  static const double _controlsAroundPad =
-      160 + _minPadGap * 2 + _minActionsGap * 2;
+  static const double _controlsAroundPad = 160 + 32 * 2 + 20 * 2;
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +128,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 8),
-                      DisconnectedBanner(onRetry: widget.onRetry),
+                      DisconnectedBanner(
+                        onRetry: widget.onRetry,
+                        onPairAgain: s.needsPairing ? widget.onPairAgain : null,
+                      ),
                     ],
                   ),
           ),

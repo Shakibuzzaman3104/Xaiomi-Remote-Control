@@ -16,4 +16,15 @@ void main() {
       modulus,
     );
   });
+
+  test('each certificate gets its own common name', () {
+    String commonName(AtvCertificate c) =>
+        X509Utils.x509CertificateFromPem(c.certPem)
+            .tbsCertificate!
+            .subject['2.5.4.3']!;
+    final first = commonName(AtvCertificate.generate());
+    final second = commonName(AtvCertificate.generate());
+    expect(first, startsWith('xiaomi_remote_'));
+    expect(first, isNot(second));
+  });
 }

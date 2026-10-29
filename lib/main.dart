@@ -80,6 +80,7 @@ class AppRoot extends ConsumerWidget {
         key: const ValueKey('remote'),
         onAddTv: () => _openSettings(context),
         onAppSettings: () => _openSettings(context),
+        onPairAgain: () => _openAddTv(context),
       );
     }
     return FadeSwitcher(scale: 1, expand: true, child: screen);

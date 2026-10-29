@@ -49,9 +49,10 @@ class RemoteViewState {
     this.volumeLevel,
     this.exactVolume,
     required this.muted,
+    this.needsPairing = false,
   });
   final String deviceName;
-  final bool connected, reconnecting, muted;
+  final bool connected, reconnecting, muted, needsPairing;
   final NowPlaying? nowPlaying;
   final int? volumeLevel;
   final VolumeControl? exactVolume;
@@ -63,6 +64,7 @@ class RemoteViewState {
     Object? volumeLevel = _unset,
     Object? exactVolume = _unset,
     bool? muted,
+    bool? needsPairing,
   }) => RemoteViewState(
     deviceName: deviceName ?? this.deviceName,
     connected: connected ?? this.connected,
@@ -77,5 +79,6 @@ class RemoteViewState {
         ? this.exactVolume
         : exactVolume as VolumeControl?,
     muted: muted ?? this.muted,
+    needsPairing: needsPairing ?? this.needsPairing,
   );
 }

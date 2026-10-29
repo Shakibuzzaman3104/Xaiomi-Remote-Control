@@ -26,8 +26,9 @@ final tv = PairedTv(
 );
 
 class FakeRemote extends AtvRemoteClient {
-  FakeRemote({this.fail = false}) : super(host: 'host', certificate: cert);
-  final bool fail;
+  FakeRemote({this.fail = false, this.rejected = false})
+    : super(host: 'host', certificate: cert);
+  final bool fail, rejected;
   final controller = StreamController<AtvState>.broadcast();
   AtvState current = const AtvState();
   RemoteKeyCode? key;
@@ -38,6 +39,7 @@ class FakeRemote extends AtvRemoteClient {
   AtvState get state => current;
   @override
   Future<void> connect() async {
+    if (rejected) throw const AtvNotPairedException();
     if (fail) throw const AtvConnectionLostException('failed');
     current = const AtvState(connected: true);
     controller.add(current);
@@ -175,6 +177,23 @@ void main() {
     session.retryNow();
     await waitFor(() => session.isConnected);
     expect(count, 7);
+    await session.dispose();
+  });
+
+  test('stops retrying once the TV rejects the phone twice', () async {
+    var count = 0;
+    final session = TvSession(
+      tv: tv,
+      backoff: (_) => const Duration(milliseconds: 1),
+      clientFactory: (_) {
+        count++;
+        return FakeRemote(rejected: true);
+      },
+    );
+    await session.start();
+    await waitFor(() => session.state.status == SessionStatus.notPaired);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(count, 2);
     await session.dispose();
   });
 

@@ -12,7 +12,7 @@ import '../storage/paired_tv_store.dart';
 import 'key_mapping.dart';
 import 'remote_button.dart';
 
-enum SessionStatus { connecting, connected, reconnecting, offline }
+enum SessionStatus { connecting, connected, reconnecting, offline, notPaired }
 
 @immutable
 class TvSessionState {
@@ -49,6 +49,7 @@ class TvSession {
   bool _disposed = false;
   bool _started = false;
   int _generation = 0;
+  int _rejections = 0;
 
   static AtvRemoteClient _defaultClient(PairedTv tv) => AtvRemoteClient(
     host: tv.host,
@@ -116,6 +117,7 @@ class TvSession {
       );
       await client.connect();
       if (_disposed || generation != _generation) return;
+      _rejections = 0;
       _emit(SessionStatus.connected, atv: client.state, attempt: 0);
     } catch (error) {
       _failure(generation, error);
@@ -131,14 +133,20 @@ class TvSession {
     _subscription = null;
     if (subscription != null) unawaited(subscription.cancel());
     if (client != null) unawaited(client.disconnect());
+    _rejections = error is AtvNotPairedException ? _rejections + 1 : 0;
     final attempt = _state.attempt + 1;
+    final notPaired = _rejections >= 2;
     _emit(
-      attempt >= 6 ? SessionStatus.offline : SessionStatus.reconnecting,
+      notPaired
+          ? SessionStatus.notPaired
+          : attempt >= 6
+          ? SessionStatus.offline
+          : SessionStatus.reconnecting,
       atv: _state.atv.copyWith(connected: false),
       attempt: attempt,
       error: '$error',
     );
-    if (attempt < 6) {
+    if (attempt < 6 && !notPaired) {
       _timer = Timer(_backoff(attempt), () {
         unawaited(_connect());
       });
@@ -155,6 +163,7 @@ class TvSession {
     _subscription = null;
     if (subscription != null) unawaited(subscription.cancel());
     if (client != null) unawaited(client.disconnect());
+    _rejections = 0;
     _emit(SessionStatus.reconnecting, attempt: 0);
     unawaited(_connect());
   }

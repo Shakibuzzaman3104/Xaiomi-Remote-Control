@@ -23,8 +23,10 @@ class ConnectedRemotePage extends ConsumerStatefulWidget {
     required this.onAppSettings,
     required this.onKeyboard,
     required this.onVoice,
+    this.onPairAgain,
   });
   final VoidCallback onSwitchDevice, onAppSettings, onKeyboard, onVoice;
+  final VoidCallback? onPairAgain;
 
   @override
   ConsumerState<ConnectedRemotePage> createState() =>
@@ -138,6 +140,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
             ? (atv.volumeLevel * 100 / atv.volumeMax).round()
             : null,
         muted: atv.muted,
+        needsPairing: status == SessionStatus.notPaired,
         exactVolume: _exactVolume,
       ),
       onButton: (button) {
@@ -157,6 +160,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onKeyboard: widget.onKeyboard,
       onVoice: widget.onVoice,
       onRetry: () => session?.retryNow(),
+      onPairAgain: widget.onPairAgain,
       onAppSettings: widget.onAppSettings,
       onPointerMove: (_) {},
       onScroll: (_) {},

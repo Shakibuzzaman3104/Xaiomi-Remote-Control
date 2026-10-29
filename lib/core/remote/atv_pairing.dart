@@ -89,7 +89,7 @@ class AtvPairingClient {
     required this.host,
     required this.certificate,
     this.port = 6467,
-    this.clientName = 'xiaomi_remote',
+    this.clientName = 'Xiaomi Remote',
   });
   final String host;
   final int port;

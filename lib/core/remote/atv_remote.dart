@@ -80,6 +80,11 @@ class AtvConnectionLostException implements Exception {
   String toString() => 'AtvConnectionLostException: $message';
 }
 
+/// The TV closed the connection without a word: it no longer knows this phone.
+class AtvNotPairedException extends AtvConnectionLostException {
+  const AtvNotPairedException() : super('The TV does not recognise this phone');
+}
+
 /// A TLS client for the Android TV Remote Service v2 protocol.
 class AtvRemoteClient {
   AtvRemoteClient({
@@ -113,6 +118,7 @@ class AtvRemoteClient {
   String? _awaitedValue;
   DateTime _lastReceived = DateTime.now();
   bool _closed = false;
+  bool _heardFromTv = false;
 
   void _update(AtvState value) {
     _state = value;
@@ -139,6 +145,7 @@ class AtvRemoteClient {
       _update(_state.copyWith(connected: true));
       socket.listen(
         (data) {
+          _heardFromTv = true;
           _lastReceived = DateTime.now();
           try {
             for (final bytes in _decoder.add(data)) {
@@ -155,7 +162,9 @@ class AtvRemoteClient {
           }
         },
         onError: (Object error) => _lost(error),
-        onDone: () => _lost('Connection closed'),
+        onDone: () => _lost(
+          _heardFromTv ? 'Connection closed' : const AtvNotPairedException(),
+        ),
       );
       _watchdog = Timer.periodic(const Duration(seconds: 4), (_) {
         if (DateTime.now().difference(_lastReceived) > silenceTimeout) {
@@ -197,7 +206,9 @@ class AtvRemoteClient {
     _watchdog?.cancel();
     _socket?.destroy();
     _socket = null;
-    final exception = AtvConnectionLostException('$error');
+    final exception = error is AtvConnectionLostException
+        ? error
+        : AtvConnectionLostException('$error');
     final pending = _voiceBegin;
     if (pending != null && !pending.isCompleted) {
       pending.completeError(exception);
