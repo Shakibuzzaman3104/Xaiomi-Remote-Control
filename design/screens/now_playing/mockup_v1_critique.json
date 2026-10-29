@@ -1,0 +1,27 @@
+{
+  "mockup": "design/screens/now_playing/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/now_playing/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The total-duration label \u201c0:19\u201d has approximately 2.5:1 contrast against the background, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the total-duration label to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 753,
+            "y": 1118,
+            "w": 61,
+            "h": 36
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.6
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/screens/now_playing/mockup_v1.png"
+}

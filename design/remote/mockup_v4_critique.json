@@ -1,0 +1,41 @@
+{
+  "mockup": "design/remote/mockup_v4.png",
+  "rounds": [
+    {
+      "image": "design/remote/mockup_v4.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The pale gray plus glyph in the \u201cAdd\u201d control falls below the 3:1 contrast required for an actionable icon.",
+          "edit": "Darken the plus glyph to achieve at least 3:1 contrast against its button surface.",
+          "bbox": {
+            "x": 733,
+            "y": 1505,
+            "w": 45,
+            "h": 45
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.2
+        },
+        {
+          "category": "state",
+          "problem": "The device\u2019s connection status is conveyed only by a green dot, with no text or distinct icon identifying its meaning.",
+          "edit": "Replace the plain status dot with a recognizable connected-status icon or add a visible \u201cConnected\u201d label.",
+          "bbox": {
+            "x": 119,
+            "y": 108,
+            "w": 26,
+            "h": 26
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 2
+        }
+      ],
+      "weight": 4
+    }
+  ],
+  "best": "design/remote/mockup_v4.png"
+}

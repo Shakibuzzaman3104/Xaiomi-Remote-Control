@@ -1,0 +1,72 @@
+{
+  "platform": "android",
+  "device": "phone",
+  "orientation": null,
+  "posture": null,
+  "page": null,
+  "screen_dp": 412,
+  "logical_h": 915,
+  "canvas": "1152x2496",
+  "hinge": null,
+  "directions": {
+    "families_offered": [
+      "Tonal monochrome",
+      "Bold graphic",
+      "Soft daylight",
+      "Midnight glow",
+      "Photo-led",
+      "Printed page",
+      "Metric mosaic"
+    ],
+    "variants": {
+      "mockup_v1.png": {
+        "avoid": "Avoid multicolour app-logo tiles, simulated plastic remote buttons, and bright green connection lights.",
+        "mood": "Tonal monochrome: quiet violet instrument panel for relaxed, one-handed TV control. Keep every surface strictly flat, with generous empty space and consistent thin line icons.",
+        "name": "01 \u00b7 Violet Quiet",
+        "palette": "Use background #F8F6FC, surface #EEEBF5, primary text #241D32, secondary text #655D71, and accent #6840B5. Reserve accent for Mic, selected D-pad mode, and the elapsed value 0:12; keep its total area below 10%. Render app marks and Connected in neutral ink. Secondary text must meet 4.5:1 on both fills.",
+        "shape": "Use only 12dp and fully circular corners: 12dp for the mode selector and volume strip; circular for the 208dp D-pad, OK target, and Mic. Separate D-pad sectors with 1px hairlines. Use flat fills, without shadows, gradients, bevels, blur, or simulated depth.",
+        "signature": "Make the D-pad a violet compass disc: four short, neutral radial ticks align with the directional arrows around the standard circular control. Keep OK distinct through a lighter flat centre fill.",
+        "spacing": "Use 24dp screen margins, 8dp within groups, 24dp between groups, and 16dp panel padding. Centre the D-pad in the lower-middle reach zone. Give every control at least a 48dp target; keep the bottom action row above Android system insets.",
+        "theme": "light",
+        "type": "Use rounded humanist sans type such as Nunito Sans, with a 12/14/16/20/28sp scale. Make the 208dp D-pad the hero, with OK at 28sp semibold. Use tabular timing, 14sp device text, and 12sp labels; distinguish hierarchy through size and weight rather than extra colour.",
+        "hue": "violet"
+      },
+      "mockup_v2.png": {
+        "avoid": "Avoid gamer-style neon, oversized power symbols, and colourful streaming-service button grids.",
+        "mood": "Bold graphic: a crisp teal control poster with condensed headings and decisive alignment. Keep the complete screen sequence: Living Room \u00b7 Mi Box S, Connected, switcher chevron and overflow; now playing; modes; D-pad; navigation; volume; media; favourites; bottom actions.",
+        "name": "02 \u00b7 Teal Signal",
+        "palette": "Use background #F4F8F6, surface #E3ECE8, primary text #142B27, secondary text #4A6059, and accent #007568. Use accent only for the prominent Mic, selected D-pad mode, and elapsed time 0:12, covering at most 10%. Keep YouTube, Netflix, Hoichoi, Toffee and VLC marks monochrome. Ensure secondary text meets 4.5:1 on both fills.",
+        "shape": "Use only square and fully circular corners: square for rectangular controls and mode segments; circular for the 208dp D-pad, OK, and Mic. Build flat rectangular bands with sparse 1px rules. Use no shadows, gradients, bevels, blur, or 3D.",
+        "signature": "Place a short, thick neutral registration bar at the left edge of each control group, creating a poster-like alignment spine beside standard Android buttons.",
+        "spacing": "Use 20dp side margins, 8dp within groups, 20dp between groups, and 12dp panel padding. Keep the D-pad centred and reachable, with 48dp minimum touch targets. Dock Keyboard, Mic and Power above the system inset; allow the content above to scroll on short screens.",
+        "theme": "light",
+        "type": "Use Roboto Condensed for device name, modes and OK, paired with Roboto for supporting text. Use a 12/14/16/22/28sp scale. Make the 208dp D-pad the hero with 28sp bold OK; retain exact title casing and use medium-weight labels for legibility.",
+        "hue": "teal"
+      },
+      "mockup_v3.png": {
+        "avoid": "Avoid faux leather or wood textures, nostalgic physical-remote illustrations, and decorative badges around favourite apps.",
+        "mood": "Printed page: a warm, restrained household controller with a literary heading and precise utility controls. Preserve every specified control and label; give the screen the composure of a carefully typeset programme page.",
+        "name": "03 \u00b7 Crimson Programme",
+        "palette": "Use background #FCF7F3, surface #F0E8E2, primary text #302423, secondary text #6A5A57, and accent #AA263C. Apply accent only to Mic, selected D-pad mode, and elapsed time 0:12, within 10% of the screen. Keep all icons and app marks neutral. Secondary text must meet 4.5:1 on both fills.",
+        "shape": "Use only 4dp and fully circular corners: 4dp for mode segments and the volume strip; circular for the 208dp D-pad, OK, and Mic. Define groups with empty space and occasional 1px rules. Use solid fills without paper texture, shadows, gradients, bevels, blur, or 3D.",
+        "signature": "Frame the slim now-playing line between two neutral 1px rules, like a programme listing; let its progress track form the lower rule. Keep the rest of the screen on standard Android controls.",
+        "spacing": "Use 24dp side margins, 8dp within groups, 24dp between groups, and 16dp panel padding. Keep Back, Home and Settings directly below the D-pad. Give every action a 48dp minimum target and anchor Keyboard, Mic and Power above the system inset.",
+        "theme": "light",
+        "type": "Set Living Room \u00b7 Mi Box S in a restrained serif such as Source Serif 4 at 22sp; use Source Sans 3 elsewhere. Use a 12/14/16/22/28sp scale. Keep the circular D-pad as the hero with a 28sp sans-serif OK; use tabular figures for playback time.",
+        "hue": "crimson"
+      },
+      "mockup_v4.png": {
+        "avoid": "Avoid dashboard charts unrelated to remote control, equal-weight button mosaics, and status indicators that resemble diagnostic alarms.",
+        "mood": "Metric mosaic: a precise sky-blue controller organised into calm functional modules. Keep the D-pad visually dominant; use playback timing and aligned control cells to supply the measured character without adding data or charts.",
+        "name": "04 \u00b7 Sky Index",
+        "palette": "Use background #F4F9FC, surface #E6EFF5, primary text #192D3B, secondary text #50616C, and accent #086EA8. Reserve accent for Mic, selected D-pad mode, and elapsed time 0:12, occupying at most 10%. Render app identities and connection status neutrally. Secondary text must meet 4.5:1 on both fills.",
+        "shape": "Use only 8dp and fully circular corners: 8dp for the mode selector and functional strips; circular for the 208dp D-pad, OK, and Mic. Align modules with 1px separators and flat fills. Use no shadows, gradients, bevels, blur, or 3D.",
+        "signature": "Give the playback line a fixed-width timing column, with 0:12 aligned above the right endpoint of the thin progress track and / 0:19 beside it. Repeat that column alignment in the control rows for a recognisable instrument-like rhythm.",
+        "spacing": "Use 20dp side margins, 8dp within groups, 20dp between groups, and 12dp panel padding. Keep navigation, volume and media in separate aligned rows beneath the D-pad. Use 48dp minimum targets; centre the prominent Mic between Keyboard and Power above the system inset.",
+        "theme": "light",
+        "type": "Use Roboto with tabular numerals and a 12/14/16/24/28sp scale. Make the 208dp D-pad the hero with 28sp medium OK; use 24sp playback timing as the secondary emphasis. Keep labels at 12sp and device text at 16sp.",
+        "hue": "sky blue"
+      }
+    }
+  }
+}

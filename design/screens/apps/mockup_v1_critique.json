@@ -1,0 +1,41 @@
+{
+  "mockup": "design/screens/apps/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/apps/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The muted \u201cConnected\u201d label has approximately 3:1 contrast against the pale background, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the \u201cConnected\u201d label to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 189,
+            "y": 131,
+            "w": 141,
+            "h": 31
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.1
+        },
+        {
+          "category": "spacing",
+          "problem": "The favourite stars sit approximately 4\u20135 logical units from their tiles\u2019 top and right edges, below the required 8-unit internal spacing.",
+          "edit": "Inset all favourite toggles at least 8 logical units from their app tiles\u2019 top and right edges.",
+          "bbox": {
+            "x": 169,
+            "y": 592,
+            "w": 43,
+            "h": 42
+          },
+          "scope": "local",
+          "severity": "low",
+          "id": 2
+        }
+      ],
+      "weight": 3
+    }
+  ],
+  "best": "design/screens/apps/mockup_v1.png"
+}

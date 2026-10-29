@@ -1,0 +1,54 @@
+{
+  "mockup": "design/remote/mockup_v2.png",
+  "rounds": [
+    {
+      "image": "design/remote/mockup_v2.png",
+      "issues": [
+        {
+          "category": "alignment",
+          "problem": "The Home button and label sit approximately 22 px lower than the adjacent Back and Settings controls, misaligning the row.",
+          "edit": "Align the Back, Home, and Settings button centers horizontally and place their labels on a shared baseline.",
+          "bbox": {
+            "x": 58,
+            "y": 1023,
+            "w": 554,
+            "h": 184
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        },
+        {
+          "category": "state",
+          "problem": "The device connection status is conveyed only by an unlabeled green dot, with no text or distinct status icon.",
+          "edit": "Add a visible \u201cConnected\u201d status label beside the device name.",
+          "bbox": {
+            "x": 66,
+            "y": 117,
+            "w": 28,
+            "h": 28
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 2
+        },
+        {
+          "category": "spacing",
+          "problem": "The selected \u201cD-pad\u201d control sits only 9\u201310 px (approximately 4\u20135 logical units) from its container\u2019s left, top, and bottom edges.",
+          "edit": "Increase the segmented container\u2019s padding around the selected control to at least 8 logical units.",
+          "bbox": {
+            "x": 37,
+            "y": 334,
+            "w": 204,
+            "h": 103
+          },
+          "scope": "local",
+          "severity": "low",
+          "id": 3
+        }
+      ],
+      "weight": 5
+    }
+  ],
+  "best": "design/remote/mockup_v2.png"
+}

@@ -1,0 +1,26 @@
+{
+  "mockup": "design/remote_flat/mockup_v4.png",
+  "rounds": [
+    {
+      "image": "design/remote_flat/mockup_v4.png",
+      "issues": [
+        {
+          "category": "icons",
+          "problem": "The \u201cMute\u201d control uses a speaker emitting sound waves, which conventionally indicates sound enabled or volume rather than muting.",
+          "edit": "Replace the speaker-with-waves glyph with a speaker-with-slash icon for the Mute action.",
+          "bbox": {
+            "x": 650,
+            "y": 1158,
+            "w": 87,
+            "h": 94
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/remote_flat/mockup_v4.png"
+}

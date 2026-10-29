@@ -1,0 +1,72 @@
+{
+  "platform": "android",
+  "device": "phone",
+  "orientation": null,
+  "posture": null,
+  "page": null,
+  "screen_dp": 412,
+  "logical_h": 915,
+  "canvas": "1152x2496",
+  "hinge": null,
+  "directions": {
+    "families_offered": [
+      "Quiet greyscale",
+      "Clean canvas",
+      "Saturated wash",
+      "Soft daylight",
+      "Bold graphic",
+      "Metric mosaic",
+      "Illustrated warmth"
+    ],
+    "variants": {
+      "mockup_v1.png": {
+        "avoid": "Avoid glossy imitation hardware, neon connection dashboards, and tiny unlabeled controls.",
+        "mood": "Quiet greyscale family; composed and tactile. Render a portrait Android Remote screen for Wi-Fi control, with no ads or bottom navigation tabs. Top: 'Living Room \u00b7 Mi Box S' chip, green connected dot, switcher chevron, and small overflow icon. Follow with a slim YouTube strip: 'Me at the zoo', '0:12 / 0:19', play/pause. Show D-pad \u00b7 Swipe \u00b7 Mouse \u00b7 Numpad with D-pad selected. Centre the circular directional ring and big OK button; place Back, Home, Settings/menu nearby, with a vertical + / \u2212 volume rocker and mute. Below: rewind, play/pause, fast-forward; favourite dock containing YouTube, Netflix, Hoichoi, Toffee, VLC, + add. Persist Keyboard, prominent centre Mic, and Power at the bottom.",
+        "name": "01 \u2014 Quiet greyscale / Indigo Dial",
+        "palette": "Background #F4F4F2; surface #FFFFFF; primary text #191A1E; secondary text #5C5D65; accent indigo #4943B8. Keep the large D-pad neutral. Restrict indigo to Mic, the active D-pad segment indicator, and elapsed value '0:12'; keep accent coverage below 10%. Preserve the required green connected dot in #287747 and authentic app logos as small content assets.",
+        "shape": "Use radii 0, 16dp, and full-round: square-edged now-playing strip and dock region; 16dp segmented-control container and app targets; full-round device chip, D-pad ring, OK, rocker, and action buttons. Separate surfaces with fine neutral borders; use only a faint contact shadow beneath OK.",
+        "signature": "Give the D-pad ring four short, inset radial notches aligned with its directional icons; repeat no other decorative motif. Keep standard Android controls around this single tactile dial.",
+        "spacing": "Use 24dp screen margins, 8dp gaps inside groups, 24dp between groups, and 16dp panel padding. Make the ring 240dp across, OK 88dp, and all interactive targets at least 48dp. Keep the dial in the lower middle and the bottom action bar above the Android gesture inset; let the app dock scroll horizontally.",
+        "theme": "light",
+        "type": "Use Roboto Flex with restrained width and strong weight contrast. Make the 32sp medium-weight OK label the typographic hero inside the physical D-pad focal point. Use a 12/14/16/20/32sp scale; set device name at 16sp, media title at 14sp, and timestamps at 12sp with tabular figures.",
+        "hue": "indigo"
+      },
+      "mockup_v2.png": {
+        "avoid": "Avoid arcade neon, toy-like multicoloured buttons, and dense reproductions of physical remote keypads.",
+        "mood": "Bold graphic family; confident, legible, and energetic in a dim living room. Render a portrait Android Wi-Fi Remote screen without ads or bottom navigation tabs. Start with 'Living Room \u00b7 Mi Box S', green status dot, switcher chevron, and small overflow icon. Add a slim YouTube strip with 'Me at the zoo', '0:12 / 0:19', and play/pause. Display D-pad \u00b7 Swipe \u00b7 Mouse \u00b7 Numpad, selecting D-pad. Make the circular arrow ring and large OK the focal point; arrange Back, Home, Settings/menu around it, plus vertical volume + / \u2212 and mute. Follow with rewind, play/pause, fast-forward and a horizontal YouTube, Netflix, Hoichoi, Toffee, VLC, + add dock. Anchor Keyboard, prominent centre Mic, and Power at the bottom.",
+        "name": "02 \u2014 Bold graphic / Sunflower Signal",
+        "palette": "Background #151515; surface #272727; primary text #FAF8EF; secondary text #BDBBB2; accent sunflower yellow #F4CB32. Reserve yellow for Mic, the selected D-pad segment marker, and elapsed value '0:12', covering at most 10%. Use #65C48B only for the required connected dot; retain authentic app logos within their dock targets.",
+        "shape": "Use radii 0, 8dp, and full-round: hard-edged horizontal section bands; 8dp device chip, segmented control, app targets, and volume rocker; full-round D-pad, OK, and bottom action buttons. Build depth through flat contrasting fills and 2dp neutral outlines; omit gradients and shadows.",
+        "signature": "Cut four broad stencil-like gaps into the neutral D-pad ring at its diagonal axes, creating a recognisable four-part disc. Keep directional touch regions continuous and generous despite the visual gaps.",
+        "spacing": "Use 16dp screen margins, 8dp within groups, 20dp between groups, and 16dp panel padding. Size the ring at 248dp and OK at 88dp; use at least 48dp touch targets. Keep the ring and volume rocker reachable in the lower middle, with the persistent bottom bar clear of the gesture inset and a horizontally scrolling app dock.",
+        "theme": "dark",
+        "type": "Use Roboto Condensed Bold for OK and device name, with Roboto for supporting controls. Make OK the 36sp hero. Use a 12/14/16/22/36sp scale; keep mode labels at 14sp medium and timestamps at 12sp tabular. Preserve supplied title and app-name casing.",
+        "hue": "sunflower yellow"
+      },
+      "mockup_v3.png": {
+        "avoid": "Avoid brushed-metal remote skins, equal-weight grids of every possible command, and oversized branded app tiles.",
+        "mood": "Clean canvas family; warm, clear, and practical for everyday household use. Build a portrait Android Remote screen for Wi-Fi control, with real content, no ads, and no bottom navigation tabs. Show 'Living Room \u00b7 Mi Box S' in a chip with green connected dot and switcher chevron, beside a small overflow icon. Below, place a slim YouTube strip with 'Me at the zoo', '0:12 / 0:19', and play/pause. Show D-pad \u00b7 Swipe \u00b7 Mouse \u00b7 Numpad with D-pad selected. Centre a circular arrow ring and big OK, surrounded by Back, Home, Settings/menu, vertical volume + / \u2212, and mute. Add rewind, play/pause, fast-forward, then the YouTube, Netflix, Hoichoi, Toffee, VLC, + add dock. Persist Keyboard, prominent centre Mic, and Power.",
+        "name": "03 \u2014 Clean canvas / Amber Press",
+        "palette": "Background #F5F1E9; surface #FFFFFF; primary text #28231D; secondary text #655B50; accent amber #A85A00. Use amber only on Mic, the active D-pad segment indicator, and elapsed value '0:12'; keep its coverage below 10%. Render the required connected dot in #287747 and preserve authentic app-logo colours as content.",
+        "shape": "Use radii 8dp, 20dp, and full-round: 8dp app targets; 20dp segmented control, now-playing surface, and volume rocker; full-round chip, D-pad, OK, and action buttons. Leave secondary controls directly on the canvas. Use a soft 2dp elevation only beneath the white D-pad surface and bottom action bar.",
+        "signature": "Place one fine, warm-grey circular groove just inside the D-pad's outer edge, interrupted only by the four direction symbols. This recessed groove is the screen's sole decorative device.",
+        "spacing": "Use 20dp screen margins, 8dp within groups, 24dp between groups, and 16dp surface padding. Make the ring 240dp and OK 88dp; give every control at least a 48dp target. Position navigation controls beside and immediately below the ring, keep the bottom bar above the system inset, and scroll the app dock horizontally.",
+        "theme": "light",
+        "type": "Use humanist Noto Sans with open counters and medium-weight control labels. Make OK the 32sp semibold hero. Use a 12/14/16/20/32sp scale; set the device name at 16sp, now-playing title at 14sp, and timestamps at 12sp tabular. Keep supporting text regular to establish a clear hierarchy.",
+        "hue": "amber"
+      },
+      "mockup_v4.png": {
+        "avoid": "Avoid glowing science-fiction control panels, excessive glass cards, and playful floating app bubbles.",
+        "mood": "Soft daylight family; calm, airy, and precise. Render a portrait Android Wi-Fi Remote screen with no ads or bottom navigation tabs. At the top, show the 'Living Room \u00b7 Mi Box S' chip, green connected dot, switcher chevron, and small overflow icon. Follow with a slim YouTube strip showing 'Me at the zoo', '0:12 / 0:19', and play/pause. Include D-pad \u00b7 Swipe \u00b7 Mouse \u00b7 Numpad with D-pad selected. Centre the large circular arrow ring and big OK; arrange Back, Home, Settings/menu nearby, with vertical + / \u2212 volume and mute. Below, place rewind, play/pause, fast-forward and a horizontal dock of YouTube, Netflix, Hoichoi, Toffee, VLC, + add. Persist Keyboard, prominent centre Mic, and Power at the bottom.",
+        "name": "04 \u2014 Soft daylight / Teal Halo",
+        "palette": "Background #EAF1EF; surface #FFFFFFE6 composited over the background, approximately #FDFEFE; primary text #17302C; secondary text #4E6460; accent teal #007C72. Confine teal to Mic, the selected D-pad indicator, and elapsed value '0:12', below 10% coverage. Use #287747 for the required green connected dot; retain authentic app logos. Keep all text on uniform surfaces for reliable contrast.",
+        "shape": "Use radii 12dp, 24dp, and full-round: 12dp app targets; 24dp now-playing panel, segmented control, and bottom action bar; full-round chip, D-pad, OK, rocker, and action buttons. Frost only the D-pad and bottom bar with gentle background blur, a fine white rim, and shallow neutral shadows.",
+        "signature": "Surround the D-pad with one translucent neutral halo that softly compresses on a directional press. Keep this halo static when idle and respect reduced-motion settings; layer it beneath standard Android control icons.",
+        "spacing": "Use 20dp screen margins, 8dp within groups, 24dp between groups, and 16dp panel padding. Size the ring at 240dp and OK at 88dp, with every touch target at least 48dp. Keep the dial in the lower middle, maintain a thumb-reachable persistent bottom bar above the gesture inset, and allow horizontal dock scrolling.",
+        "theme": "light",
+        "type": "Use rounded humanist Nunito Sans with restrained rounding and clear numerals. Make OK the 32sp bold hero. Use a 12/14/16/20/32sp scale; set device name at 16sp semibold, media title at 14sp, and timestamps at 12sp tabular. Use regular secondary labels to keep the controls visually dominant.",
+        "hue": "teal"
+      }
+    }
+  }
+}

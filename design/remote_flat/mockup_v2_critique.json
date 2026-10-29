@@ -1,0 +1,27 @@
+{
+  "mockup": "design/remote_flat/mockup_v2.png",
+  "rounds": [
+    {
+      "image": "design/remote_flat/mockup_v2.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The muted text \u201cConnected\u201d and \u201c0:19\u201d has insufficient contrast against its pale backgrounds to meet WCAG AA for body text.",
+          "edit": "Darken the secondary text color used for \u201cConnected\u201d and \u201c0:19\u201d to achieve at least 4.5:1 contrast against their backgrounds.",
+          "bbox": {
+            "x": 91,
+            "y": 142,
+            "w": 125,
+            "h": 29
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.6
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/remote_flat/mockup_v2.png"
+}

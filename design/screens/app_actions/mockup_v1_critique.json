@@ -1,0 +1,42 @@
+{
+  "mockup": "design/screens/app_actions/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/app_actions/mockup_v1.png",
+      "issues": [
+        {
+          "category": "coherence",
+          "problem": "\u201cAdd to favourites\u201d contradicts the approved screen, which already lists Netflix under \u201cFavourite apps\u201d.",
+          "edit": "Show \u201cRemove from favourites\u201d for Netflix and use the corresponding favourite-state icon.",
+          "bbox": {
+            "x": 43,
+            "y": 1091,
+            "w": 767,
+            "h": 111
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        },
+        {
+          "category": "contrast",
+          "problem": "The red \u201cUninstall\u201d text has approximately 4:1 contrast against its pale pink background, below WCAG AA for normal-sized text.",
+          "edit": "Darken the \u201cUninstall\u201d text to achieve at least 4.5:1 contrast against its pale pink background.",
+          "bbox": {
+            "x": 184,
+            "y": 1641,
+            "w": 133,
+            "h": 44
+          },
+          "scope": "local",
+          "severity": "low",
+          "id": 2,
+          "measured_contrast": 4.7,
+          "measured_passes": 4.5
+        }
+      ],
+      "weight": 3
+    }
+  ],
+  "best": "design/screens/app_actions/mockup_v1.png"
+}

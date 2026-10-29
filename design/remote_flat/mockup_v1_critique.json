@@ -1,0 +1,313 @@
+{
+  "mockup": "design/remote_flat/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/remote_flat/mockup_v1.png",
+      "issues": [],
+      "weight": 0
+    }
+  ],
+  "fit": {
+    "lines": [
+      {
+        "kind": "segment",
+        "texts": [
+          "D-pad"
+        ],
+        "container": {
+          "h": 86,
+          "w": 197,
+          "x": 40,
+          "y": 294
+        },
+        "share": 4,
+        "status": "fails",
+        "free_dp": 19.3,
+        "short_dp": {
+          "max": 10.9
+        }
+      },
+      {
+        "kind": "segment",
+        "texts": [
+          "Swipe"
+        ],
+        "container": {
+          "h": 86,
+          "w": 193,
+          "x": 237,
+          "y": 294
+        },
+        "share": 4,
+        "status": "fits",
+        "free_dp": 25.1,
+        "short_dp": {}
+      },
+      {
+        "kind": "segment",
+        "texts": [
+          "Mouse"
+        ],
+        "container": {
+          "h": 86,
+          "w": 192,
+          "x": 430,
+          "y": 294
+        },
+        "share": 4,
+        "status": "fits",
+        "free_dp": 31.0,
+        "short_dp": {}
+      },
+      {
+        "kind": "segment",
+        "texts": [
+          "Numpad"
+        ],
+        "container": {
+          "h": 86,
+          "w": 192,
+          "x": 622,
+          "y": 294
+        },
+        "share": 4,
+        "status": "fails",
+        "free_dp": 25.6,
+        "short_dp": {
+          "max": 13.5
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "OK"
+        ],
+        "container": {
+          "h": 169,
+          "w": 169,
+          "x": 342,
+          "y": 573
+        },
+        "share": 1,
+        "status": "hugs"
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Back"
+        ],
+        "container": {
+          "h": 146,
+          "w": 110,
+          "x": 127,
+          "y": 923
+        },
+        "share": 3,
+        "status": "hugs"
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Home"
+        ],
+        "container": {
+          "h": 146,
+          "w": 110,
+          "x": 372,
+          "y": 923
+        },
+        "share": 3,
+        "status": "hugs"
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Settings"
+        ],
+        "container": {
+          "h": 146,
+          "w": 110,
+          "x": 616,
+          "y": 923
+        },
+        "share": 3,
+        "status": "hugs"
+      },
+      {
+        "kind": "row",
+        "texts": [
+          "Volume"
+        ],
+        "container": {
+          "h": 119,
+          "w": 774,
+          "x": 40,
+          "y": 1102
+        },
+        "share": 1,
+        "status": "fits",
+        "free_dp": 217.4,
+        "short_dp": {}
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "YouTube"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 40,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 0.5,
+        "short_dp": {
+          "small": 8.2,
+          "large": 10.5,
+          "max": 36.2
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Netflix"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 173,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 0.5,
+        "short_dp": {
+          "small": 8.2,
+          "large": 7.6,
+          "max": 26.6
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Hoichoi"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 305,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 0.0,
+        "short_dp": {
+          "small": 8.7,
+          "large": 9.4,
+          "max": 31.4
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Toffee"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 437,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 0.0,
+        "short_dp": {
+          "small": 8.7,
+          "large": 7.7,
+          "max": 25.6
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "VLC"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 570,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 5.7,
+        "short_dp": {
+          "max": 10.3
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Add"
+        ],
+        "container": {
+          "h": 145,
+          "w": 111,
+          "x": 703,
+          "y": 1426
+        },
+        "share": 6,
+        "status": "fails",
+        "free_dp": 5.2,
+        "short_dp": {
+          "max": 11.2
+        }
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Keyboard"
+        ],
+        "container": {
+          "h": 146,
+          "w": 111,
+          "x": 173,
+          "y": 1630
+        },
+        "share": 3,
+        "status": "hugs"
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Mic"
+        ],
+        "container": {
+          "h": 170,
+          "w": 135,
+          "x": 359,
+          "y": 1616
+        },
+        "share": 3,
+        "status": "hugs"
+      },
+      {
+        "kind": "button",
+        "texts": [
+          "Power"
+        ],
+        "container": {
+          "h": 146,
+          "w": 111,
+          "x": 571,
+          "y": 1630
+        },
+        "share": 3,
+        "status": "hugs"
+      }
+    ]
+  },
+  "best": "design/remote_flat/mockup_v1.png"
+}

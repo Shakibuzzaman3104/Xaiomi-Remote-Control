@@ -1,0 +1,26 @@
+{
+  "mockup": "design/remote/mockup_v3.png",
+  "rounds": [
+    {
+      "image": "design/remote/mockup_v3.png",
+      "issues": [
+        {
+          "category": "state",
+          "problem": "The device connection indicator communicates its status only through a green dot, with no text or distinctive icon identifying the connected state.",
+          "edit": "Replace the green dot with a check-circle icon and give it the accessibility label \u201cConnected\u201d.",
+          "bbox": {
+            "x": 61,
+            "y": 117,
+            "w": 26,
+            "h": 26
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/remote/mockup_v3.png"
+}

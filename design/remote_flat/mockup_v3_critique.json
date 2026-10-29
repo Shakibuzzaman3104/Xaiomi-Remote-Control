@@ -1,0 +1,26 @@
+{
+  "mockup": "design/remote_flat/mockup_v3.png",
+  "rounds": [
+    {
+      "image": "design/remote_flat/mockup_v3.png",
+      "issues": [
+        {
+          "category": "icons",
+          "problem": "The \u201cMute\u201d button uses a speaker-with-sound-waves glyph, which conventionally indicates audible sound or volume rather than muting.",
+          "edit": "Replace the Mute button\u2019s speaker-with-waves glyph with a speaker-with-slash icon.",
+          "bbox": {
+            "x": 665,
+            "y": 1160,
+            "w": 103,
+            "h": 128
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/remote_flat/mockup_v3.png"
+}

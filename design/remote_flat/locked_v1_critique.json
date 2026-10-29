@@ -1,0 +1,27 @@
+{
+  "mockup": "design/remote_flat/locked_v1.png",
+  "rounds": [
+    {
+      "image": "design/remote_flat/locked_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The secondary text \u201cConnected\u201d and \u201c/ 0:19\u201d has insufficient contrast against the pale background for normal-sized text (below 4.5:1).",
+          "edit": "Darken the secondary text color used for connection status and playback duration to achieve at least 4.5:1 contrast against its background.",
+          "bbox": {
+            "x": 188,
+            "y": 128,
+            "w": 124,
+            "h": 32
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.4
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/remote_flat/locked_v1.png"
+}

@@ -1,0 +1,41 @@
+{
+  "mockup": "design/remote/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/remote/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "The light-gray \u201c/ 0:19\u201d has approximately 3:1 contrast against the media card, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the slash and total duration to achieve at least 4.5:1 contrast against the card.",
+          "bbox": {
+            "x": 238,
+            "y": 270,
+            "w": 68,
+            "h": 29
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 3.2
+        },
+        {
+          "category": "state",
+          "problem": "The green dot beside \u201cLiving Room \u00b7 Mi Box S\u201d communicates connection status only through hue, without a status label or distinguishing icon.",
+          "edit": "Add a visible \u201cConnected\u201d label beside the device name so connection status does not depend on the dot\u2019s hue.",
+          "bbox": {
+            "x": 141,
+            "y": 122,
+            "w": 24,
+            "h": 24
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 2
+        }
+      ],
+      "weight": 4
+    }
+  ],
+  "best": "design/remote/mockup_v1.png"
+}

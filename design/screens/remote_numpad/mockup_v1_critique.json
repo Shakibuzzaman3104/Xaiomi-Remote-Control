@@ -1,0 +1,41 @@
+{
+  "mockup": "design/screens/remote_numpad/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/screens/remote_numpad/mockup_v1.png",
+      "issues": [
+        {
+          "category": "contrast",
+          "problem": "\u201cConnected\u201d and \u201c0:19\u201d use pale gray-purple text with approximately 2.5:1 contrast, below the 4.5:1 requirement for body text.",
+          "edit": "Darken the secondary text color used for \u201cConnected\u201d and \u201c0:19\u201d to achieve at least 4.5:1 contrast against their backgrounds.",
+          "bbox": {
+            "x": 188,
+            "y": 131,
+            "w": 154,
+            "h": 29
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1,
+          "measured_contrast": 2.7
+        },
+        {
+          "category": "spacing",
+          "problem": "\u201cFavourite apps\u201d begins approximately 8 px below the playback controls, closer to the preceding section than to its own cards, making the grouping ambiguous.",
+          "edit": "Increase separation before \u201cFavourite apps\u201d beyond the heading-to-card gap, and reserve Android bottom insets when redistributing the screen vertically.",
+          "bbox": {
+            "x": 40,
+            "y": 1386,
+            "w": 773,
+            "h": 160
+          },
+          "scope": "screen",
+          "severity": "medium",
+          "id": 2
+        }
+      ],
+      "weight": 4
+    }
+  ],
+  "best": "design/screens/remote_numpad/mockup_v1.png"
+}
