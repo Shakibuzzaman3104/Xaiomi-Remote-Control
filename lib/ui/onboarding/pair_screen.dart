@@ -133,8 +133,10 @@ class _PairScreenState extends State<PairScreen> {
                         button: true,
                         label: 'Back',
                         child: Material(
-                          color: c.surfaceContainer,
-                          shape: const CircleBorder(),
+                          color: c.background,
+                          shape: CircleBorder(
+                            side: BorderSide(color: c.subtleOutline),
+                          ),
                           child: InkWell(
                             customBorder: const CircleBorder(),
                             onTap: () {
@@ -154,11 +156,11 @@ class _PairScreenState extends State<PairScreen> {
                         ),
                       ),
                     ),
-                    const StepDots(current: 2),
+                    const StepDots(current: 2, numbered: false),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -168,7 +170,7 @@ class _PairScreenState extends State<PairScreen> {
                         'Pair with ${widget.deviceName}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: c.onSurfaceStrong,
                         ),
@@ -177,11 +179,14 @@ class _PairScreenState extends State<PairScreen> {
                       Text(
                         'Enter the code shown on your TV.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: c.muted),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: c.onSurfaceVariant,
+                        ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 42),
                       SizedBox(
-                        height: 60,
+                        height: 72,
                         child: Stack(
                           children: [
                             Row(
@@ -194,38 +199,40 @@ class _PairScreenState extends State<PairScreen> {
                                         (text.length == 6 && index == 5));
                                 final char = isFilled ? text[index] : '';
 
-                                return Container(
-                                  width: 46,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: c.appTile,
-                                    borderRadius: BorderRadius.circular(
-                                      AppShapes.card,
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      right: index == 5 ? 0 : 7,
                                     ),
-                                    border: Border.all(
-                                      color: isFocusedBox
-                                          ? c.primary
-                                          : c.subtleOutline,
-                                      width: isFocusedBox ? 1.5 : 1.0,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: c.background,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isFocusedBox
+                                            ? c.primary
+                                            : c.subtleOutline,
+                                        width: isFocusedBox ? 1.5 : 1.0,
+                                      ),
                                     ),
+                                    alignment: Alignment.center,
+                                    child: isFilled
+                                        ? Text(
+                                            char,
+                                            style: TextStyle(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              color: c.onSurfaceStrong,
+                                            ),
+                                          )
+                                        : (isFocusedBox && index == text.length
+                                              ? Container(
+                                                  width: 2,
+                                                  height: 24,
+                                                  color: c.primary,
+                                                )
+                                              : const SizedBox.shrink()),
                                   ),
-                                  alignment: Alignment.center,
-                                  child: isFilled
-                                      ? Text(
-                                          char,
-                                          style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: c.onSurfaceStrong,
-                                          ),
-                                        )
-                                      : (isFocusedBox && index == text.length
-                                            ? Container(
-                                                width: 2,
-                                                height: 24,
-                                                color: c.primary,
-                                              )
-                                            : const SizedBox.shrink()),
                                 );
                               }),
                             ),
@@ -251,6 +258,7 @@ class _PairScreenState extends State<PairScreen> {
                                       setState(() => _error = null);
                                     }
                                   },
+                                  onSubmitted: (_) => _handlePair(),
                                 ),
                               ),
                             ),
@@ -269,19 +277,18 @@ class _PairScreenState extends State<PairScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 40),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: c.surfaceContainer,
-                          borderRadius: BorderRadius.circular(AppShapes.card),
-                          border: Border.all(color: c.subtleOutline),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: Row(
                           children: [
                             Container(
-                              width: 44,
-                              height: 44,
+                              width: 60,
+                              height: 60,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: c.okButton,
@@ -298,7 +305,7 @@ class _PairScreenState extends State<PairScreen> {
                               child: Text(
                                 "Can't see a code? Turn on the TV and keep it on the home screen.",
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 14,
                                   color: c.onSurface,
                                   height: 1.35,
                                 ),
@@ -328,8 +335,8 @@ class _PairScreenState extends State<PairScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: c.primary,
                         foregroundColor: c.onPrimary,
-                        disabledBackgroundColor: c.surfaceContainerStrong,
-                        disabledForegroundColor: c.muted,
+                        disabledBackgroundColor: c.primary,
+                        disabledForegroundColor: c.onPrimary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppShapes.pill),

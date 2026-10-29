@@ -59,7 +59,7 @@ class VoiceSheet extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppShapes.screenPadding,
-            vertical: 16,
+            vertical: 12,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -75,7 +75,7 @@ class VoiceSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Center(
                 child: Semantics(
                   button: true,
@@ -89,43 +89,65 @@ class VoiceSheet extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      width: listening ? 132 : 108,
-                      height: listening ? 132 : 108,
+                      width: 138,
+                      height: 138,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: c.primary.withValues(alpha: 0.12),
+                        color: c.primary.withValues(alpha: 0.06),
                       ),
                       alignment: Alignment.center,
                       child: Container(
-                        width: 88,
-                        height: 88,
+                        width: 114,
+                        height: 114,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: c.primary,
+                          color: c.primary.withValues(alpha: 0.06),
                         ),
                         alignment: Alignment.center,
-                        child: Icon(
-                          Icons.mic_rounded,
-                          size: 40,
-                          color: c.onPrimary,
+                        child: Container(
+                          width: 88,
+                          height: 88,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: c.primary,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.mic_rounded,
+                            size: 36,
+                            color: c.onPrimary,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 36),
                 child: Center(
-                  child: Text(
-                    displayText,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayText,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w400,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                      if (transcript.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Container(width: 1.5, height: 23, color: c.primaryText),
+                      ],
+                    ],
                   ),
                 ),
               ),
@@ -134,8 +156,8 @@ class VoiceSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _TargetChip(
-                      label: 'Search on TV',
-                      icon: Icons.search_rounded,
+                      label: 'Ask Assistant',
+                      icon: Icons.auto_awesome_rounded,
                       selected: target == VoiceTarget.search,
                       enabled: true,
                       onTap: () => onTargetChanged(VoiceTarget.search),
@@ -222,7 +244,7 @@ class _TargetChip extends StatelessWidget {
       backgroundColor = c.okButton;
       contentColor = c.primaryText;
     } else {
-      backgroundColor = c.appTile;
+      backgroundColor = c.background;
       contentColor = c.onSurface;
       border = Border.all(color: c.subtleOutline);
     }

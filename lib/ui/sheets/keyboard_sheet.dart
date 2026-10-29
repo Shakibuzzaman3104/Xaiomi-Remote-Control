@@ -17,6 +17,8 @@ class KeyboardSheet extends StatefulWidget {
     required this.onSend,
     required this.onClear,
     required this.onClose,
+    this.languageLabel = 'EN / বাংলা',
+    this.onLanguageTap,
   });
 
   final String fieldLabel;
@@ -25,6 +27,8 @@ class KeyboardSheet extends StatefulWidget {
   final VoidCallback onSend;
   final VoidCallback onClear;
   final VoidCallback onClose;
+  final String languageLabel;
+  final VoidCallback? onLanguageTap;
 
   @override
   State<KeyboardSheet> createState() => _KeyboardSheetState();
@@ -102,49 +106,19 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.fieldLabel.isEmpty
-                          ? 'Typing on TV'
-                          : 'Typing on TV · ${widget.fieldLabel}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: c.onSurfaceStrong,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Semantics(
-                    button: true,
-                    label: 'Close',
-                    child: Material(
-                      color: Colors.transparent,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          widget.onClose();
-                        },
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: c.muted,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                widget.fieldLabel.isEmpty
+                    ? 'Typing on TV'
+                    : 'Typing on TV · ${widget.fieldLabel}',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: c.onSurfaceStrong,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               TextField(
                 controller: _controller,
                 autofocus: true,
@@ -153,37 +127,50 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 cursorColor: c.primary,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: c.appTile,
+                  fillColor: c.surfaceContainer.withValues(alpha: 0.5),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppShapes.card),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: c.primary, width: 1.5),
+                  ),
+                  suffixIconConstraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 32,
                   ),
                   suffixIcon: ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
                     builder: (context, value, _) {
-                      if (value.text.isEmpty) return const SizedBox.shrink();
-                      return Semantics(
-                        button: true,
-                        label: 'Clear text',
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.cancel_rounded,
-                            color: c.muted,
-                            size: 20,
+                      if (value.text.isEmpty) return const SizedBox(width: 48);
+                      return Center(
+                        widthFactor: 1,
+                        heightFactor: 1,
+                        child: Semantics(
+                          button: true,
+                          label: 'Clear text',
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _handleClear,
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Icon(
+                                Icons.cancel_rounded,
+                                color: c.muted,
+                                size: 20,
+                              ),
+                            ),
                           ),
-                          onPressed: _handleClear,
                         ),
                       );
                     },
@@ -192,7 +179,50 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                 onChanged: widget.onChanged,
                 onSubmitted: (_) => _handleSend(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Material(
+                  color: c.surfaceContainer,
+                  shape: StadiumBorder(
+                    side: BorderSide(color: c.subtleOutline),
+                  ),
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: widget.onLanguageTap,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.language, size: 20, color: c.onSurface),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              widget.languageLabel,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: c.onSurface,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 18,
+                            color: c.onSurface,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
@@ -213,6 +243,7 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                           ),
                           style: TextButton.styleFrom(
                             backgroundColor: c.surfaceContainer,
+                            side: BorderSide(color: c.subtleOutline),
                             foregroundColor: c.onSurfaceStrong,
                             minimumSize: const Size(double.infinity, 48),
                             shape: RoundedRectangleBorder(
@@ -234,7 +265,7 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                         constraints: const BoxConstraints(minHeight: 48),
                         child: ElevatedButton.icon(
                           onPressed: _handleSend,
-                          icon: const Icon(Icons.send_rounded, size: 20),
+                          icon: const Icon(Icons.send_outlined, size: 20),
                           label: const Text(
                             'Send',
                             style: TextStyle(

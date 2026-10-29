@@ -1,0 +1,285 @@
+/**
+ * @author Shakib
+ * @since 29/10/26
+ */
+import 'package:flutter/material.dart';
+
+import '../remote/widgets/device_header.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+
+class TvAppItem {
+  const TvAppItem({
+    required this.package,
+    required this.label,
+    required this.icon,
+    required this.isFavourite,
+  });
+  final String package, label;
+  final Widget icon;
+  final bool isFavourite;
+}
+
+class AppsScreen extends StatefulWidget {
+  const AppsScreen({
+    super.key,
+    required this.deviceName,
+    required this.connected,
+    required this.onSwitchDevice,
+    required this.onTvSettings,
+    required this.onAppSettings,
+    this.onPower,
+    required this.onBack,
+    required this.apps,
+    required this.onOpen,
+    required this.onShowActions,
+    this.onToggleFavourite,
+    this.notice,
+  });
+  final String deviceName;
+  final bool connected;
+  final VoidCallback onSwitchDevice, onTvSettings, onAppSettings, onBack;
+  final VoidCallback? onPower;
+  final List<TvAppItem> apps;
+  final ValueChanged<TvAppItem> onOpen, onShowActions;
+  final ValueChanged<TvAppItem>? onToggleFavourite;
+  final String? notice;
+  @override
+  State<AppsScreen> createState() => _AppsScreenState();
+}
+
+class _AppsScreenState extends State<AppsScreen> {
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+  bool _favourites = false;
+  @override
+  void dispose() {
+    _search.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final query = _search.text;
+    final apps = widget.apps
+        .where(
+          (app) =>
+              (!_favourites || app.isFavourite) &&
+              app.label.toLowerCase().contains(query.toLowerCase()),
+        )
+        .toList();
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Column(
+            children: [
+              DeviceHeader(
+                name: widget.deviceName,
+                connected: widget.connected,
+                onSwitchDevice: widget.onSwitchDevice,
+                onTvSettings: widget.onTvSettings,
+                onAppSettings: widget.onAppSettings,
+                onPower: widget.onPower,
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: widget.onBack,
+                    icon: Icon(Icons.arrow_back, color: c.onSurfaceStrong),
+                    tooltip: 'Back',
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Apps',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: c.onSurfaceStrong,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _searchFocus.requestFocus(),
+                    icon: Icon(Icons.search, color: c.onSurfaceStrong),
+                    tooltip: 'Search',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _search,
+                focusNode: _searchFocus,
+                onChanged: (_) => setState(() {}),
+                style: TextStyle(color: c.onSurfaceStrong),
+                decoration: InputDecoration(
+                  hintText: 'Search ${widget.apps.length} apps',
+                  hintStyle: TextStyle(color: c.onSurfaceVariant),
+                  prefixIcon: Icon(Icons.search, color: c.onSurface),
+                  filled: true,
+                  fillColor: c.surfaceContainer,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppShapes.pill),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                height: 48,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: c.surfaceContainer,
+                  borderRadius: BorderRadius.circular(AppShapes.pill),
+                ),
+                child: Row(
+                  children: [
+                    for (final favourite in [false, true])
+                      Expanded(
+                        child: Semantics(
+                          selected: _favourites == favourite,
+                          button: true,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(AppShapes.pill),
+                            onTap: () =>
+                                setState(() => _favourites = favourite),
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: _favourites == favourite
+                                    ? c.primary
+                                    : c.surfaceContainer,
+                                borderRadius: BorderRadius.circular(
+                                  AppShapes.pill,
+                                ),
+                              ),
+                              child: Text(
+                                favourite ? 'Favourites' : 'All',
+                                style: TextStyle(
+                                  color: _favourites == favourite
+                                      ? c.onPrimary
+                                      : c.onSurfaceStrong,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (widget.notice != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.notice!,
+                      style: TextStyle(color: c.muted, fontSize: 12),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: apps.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No apps match "$query"',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: c.muted),
+                        ),
+                      )
+                    : GridView.builder(
+                        itemCount: apps.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 14,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: .72,
+                            ),
+                        itemBuilder: (context, index) {
+                          final app = apps[index];
+                          return LayoutBuilder(
+                            builder: (context, constraints) => InkWell(
+                              onTap: () => widget.onOpen(app),
+                              onLongPress: () => widget.onShowActions(app),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: constraints.maxWidth,
+                                    height: constraints.maxWidth,
+                                    decoration: BoxDecoration(
+                                      color: c.appTile,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: c.subtleOutline,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Center(
+                                          child: SizedBox(
+                                            width: 56,
+                                            height: 56,
+                                            child: app.icon,
+                                          ),
+                                        ),
+                                        if (app.isFavourite)
+                                          Positioned(
+                                            right: 4,
+                                            top: 4,
+                                            child: GestureDetector(
+                                              onTap:
+                                                  widget.onToggleFavourite ==
+                                                      null
+                                                  ? null
+                                                  : () =>
+                                                        widget
+                                                            .onToggleFavourite!(
+                                                          app,
+                                                        ),
+                                              child: Icon(
+                                                Icons.star,
+                                                size: 16,
+                                                color: c.primary,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Expanded(
+                                    child: Text(
+                                      app.label,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: c.onSurfaceStrong,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

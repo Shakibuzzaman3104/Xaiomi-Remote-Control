@@ -86,7 +86,8 @@ void main() {
       await tester.pump();
       expect(selectedItem, equals(devices[0]));
 
-      // Tap Enter IP manually
+      await tester.ensureVisible(find.text('Enter IP address manually'));
+      await tester.pump();
       await tester.tap(find.text('Enter IP address manually'));
       await tester.pump();
       expect(ipTapped, isTrue);
@@ -160,8 +161,7 @@ void main() {
       // Verify code boxes display "A", "7", "2", "A", "9", "E"
       expect(find.text('A'), findsNWidgets(2));
       expect(find.text('7'), findsOneWidget);
-      // '2' appears in StepDots ('2') and code box ('2') -> 2 widgets total
-      expect(find.text('2'), findsNWidgets(2));
+      expect(find.text('2'), findsOneWidget);
       expect(find.text('9'), findsOneWidget);
       expect(find.text('E'), findsOneWidget);
 
@@ -178,13 +178,9 @@ void main() {
       await tester.pump();
 
       expect(find.text('Wrong code'), findsOneWidget);
-      // Boxes cleared (StepDots '1', '2', '3' remain, code box chars are gone)
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsNothing);
-      expect(find.text('6'), findsNothing);
-      expect(find.text('1'), findsOneWidget); // StepDots '1'
-      expect(find.text('2'), findsOneWidget); // StepDots '2'
-      expect(find.text('3'), findsOneWidget); // StepDots '3'
+      for (final digit in ['1', '2', '3', '4', '5', '6']) {
+        expect(find.text(digit), findsNothing);
+      }
 
       // Test back and read automatically buttons
       await tester.tap(find.bySemanticsLabel('Back'));
@@ -273,7 +269,6 @@ void main() {
     var currentText = 'initial';
     var sendTapped = false;
     var clearTapped = false;
-    var closeTapped = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -285,7 +280,7 @@ void main() {
             onChanged: (val) => currentText = val,
             onSend: () => sendTapped = true,
             onClear: () => clearTapped = true,
-            onClose: () => closeTapped = true,
+            onClose: () {},
           ),
         ),
       ),
@@ -302,20 +297,17 @@ void main() {
     expect(currentText, equals('bangla natok'));
 
     // Send button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Send'));
+    await tester.tap(find.text('Send'));
     await tester.pump();
     expect(sendTapped, isTrue);
 
     // Clear button
-    await tester.tap(find.widgetWithText(TextButton, 'Clear'));
+    await tester.tap(find.text('Clear'));
     await tester.pump();
     expect(clearTapped, isTrue);
     expect(currentText, equals(''));
 
-    // Close button
-    await tester.tap(find.bySemanticsLabel('Close'));
-    await tester.pump();
-    expect(closeTapped, isTrue);
+    expect(find.text('EN / বাংলা'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -348,7 +340,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tap the mic to speak'), findsOneWidget);
-    expect(find.text('Search on TV'), findsOneWidget);
+    expect(find.text('Ask Assistant'), findsOneWidget);
     expect(find.text('Type into field'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
