@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -74,7 +75,7 @@ class _TrackpadState extends State<Trackpad> {
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: TextButton(
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       widget.onClick(right);
                     },
                     style: TextButton.styleFrom(
@@ -100,7 +101,7 @@ class _TrackpadState extends State<Trackpad> {
               child: Switch(
                 value: air,
                 onChanged: (v) {
-                  HapticFeedback.selectionClick();
+                  AppHaptics.selection();
                   setState(() => air = v);
                   widget.onAirMouseChanged(v);
                 },

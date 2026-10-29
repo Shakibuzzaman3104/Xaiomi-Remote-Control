@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -34,7 +35,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
   Timer? timer;
   bool pressed = false;
   void start() {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     widget.onPressed();
     setState(() => pressed = true);
     if (widget.repeat) {
@@ -67,7 +68,7 @@ class _RoundActionButtonState extends State<RoundActionButton> {
       label: widget.label,
       button: true,
       onTap: () {
-        HapticFeedback.selectionClick();
+        AppHaptics.selection();
         widget.onPressed();
       },
       child: ExcludeSemantics(

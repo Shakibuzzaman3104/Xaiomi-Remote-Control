@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../haptics.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'step_dots.dart';
@@ -140,7 +142,7 @@ class _PairScreenState extends State<PairScreen> {
                           child: InkWell(
                             customBorder: const CircleBorder(),
                             onTap: () {
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selection();
                               widget.onBack();
                             },
                             child: SizedBox(
@@ -328,7 +330,7 @@ class _PairScreenState extends State<PairScreen> {
                     child: ElevatedButton(
                       onPressed: canSubmit
                           ? () {
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selection();
                               _handlePair();
                             }
                           : null,
@@ -374,7 +376,7 @@ class _PairScreenState extends State<PairScreen> {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selection();
                           widget.onReadAutomatically!();
                         },
                         style: TextButton.styleFrom(

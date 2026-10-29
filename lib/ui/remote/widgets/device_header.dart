@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -35,7 +36,7 @@ class DeviceHeader extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                HapticFeedback.selectionClick();
+                AppHaptics.selection();
                 onSwitchDevice();
               },
               child: ConstrainedBox(
@@ -97,7 +98,7 @@ class DeviceHeader extends StatelessWidget {
           onPressed: onPower == null
               ? null
               : () {
-                  HapticFeedback.mediumImpact();
+                  AppHaptics.medium();
                   onPower!();
                 },
           icon: Icon(Icons.power_settings_new, color: c.onSurface),

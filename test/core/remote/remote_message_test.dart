@@ -87,6 +87,19 @@ void main() {
       expect(sent, isEmpty);
     },
   );
+  test('rapid edits skip stale text and settle on the latest', () async {
+    client.replaceText('h');
+    client.replaceText('he');
+    client.replaceText('hey');
+    await client.textSettled;
+    final edits = sent.where((m) => m.hasRemoteImeBatchEdit()).toList();
+    expect(edits, hasLength(1));
+    expect(
+      edits.single.remoteImeBatchEdit.editInfo.single.textFieldStatus.value,
+      'hey',
+    );
+    expect(client.state.imeValue, 'hey');
+  });
   test('show request updates the field counter and value', () {
     receive(
       RemoteMessage(

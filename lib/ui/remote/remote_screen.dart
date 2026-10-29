@@ -22,6 +22,7 @@ class RemoteScreen extends StatefulWidget {
     super.key,
     required this.state,
     this.initialMode = RemoteMode.dpad,
+    this.swipeSensitivity = 0.5,
     required this.onButton,
     required this.onSwitchDevice,
     required this.onOpenNowPlaying,
@@ -37,6 +38,7 @@ class RemoteScreen extends StatefulWidget {
   });
   final RemoteViewState state;
   final RemoteMode initialMode;
+  final double swipeSensitivity;
   final ValueChanged<RemoteButton> onButton;
   final VoidCallback onSwitchDevice,
       onOpenNowPlaying,
@@ -162,7 +164,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
           height: padSize,
           child: switch (mode) {
             RemoteMode.dpad => Dpad(onButton: widget.onButton),
-            RemoteMode.swipe => SwipePad(onButton: widget.onButton),
+            RemoteMode.swipe => SwipePad(
+              onButton: widget.onButton,
+              sensitivity: widget.swipeSensitivity,
+            ),
             RemoteMode.mouse => Trackpad(
               onPointerMove: widget.onPointerMove,
               onScroll: widget.onScroll,

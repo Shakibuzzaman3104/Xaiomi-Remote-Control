@@ -5,15 +5,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
 
 class SwipePad extends StatefulWidget {
-  const SwipePad({super.key, required this.onButton});
+  const SwipePad({super.key, required this.onButton, this.sensitivity = 0.5});
 
   final ValueChanged<RemoteButton> onButton;
+  final double sensitivity;
 
   @override
   State<SwipePad> createState() => _SwipePadState();
@@ -29,7 +31,7 @@ class _SwipePadState extends State<SwipePad> {
   RemoteButton? direction;
 
   void emit(RemoteButton button) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     widget.onButton(button);
   }
 
@@ -44,18 +46,21 @@ class _SwipePadState extends State<SwipePad> {
     }
   }
 
+  double get threshold => 32 - 16 * widget.sensitivity.clamp(0.0, 1.0);
+
   void move(PointerMoveEvent event) {
     points[event.pointer] = event.localPosition;
     if (maxPointers > 1) {
       final start = origins[event.pointer];
-      if (start != null && (event.localPosition - start).distance >= 24) {
+      if (start != null &&
+          (event.localPosition - start).distance >= threshold) {
         moved = true;
       }
       return;
     }
     if (origin == null || direction != null) return;
     final delta = event.localPosition - origin!;
-    if (delta.distance < 24) return;
+    if (delta.distance < threshold) return;
     moved = true;
     direction = delta.dx.abs() > delta.dy.abs()
         ? (delta.dx < 0 ? RemoteButton.left : RemoteButton.right)

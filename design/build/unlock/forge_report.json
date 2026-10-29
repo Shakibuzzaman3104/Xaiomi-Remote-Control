@@ -1,0 +1,121 @@
+{
+  "unlock_illustration": {
+    "candidates": [
+      {
+        "cand": 1,
+        "path": "raw/unlock_illustration_c1.png",
+        "score": {
+          "fid": 59.5,
+          "diff": 21.3,
+          "iou": 0.181,
+          "de": 22.6,
+          "col": 9.0,
+          "flags": [],
+          "warn": [
+            "silhouette"
+          ],
+          "sharp_ratio": 2.7,
+          "transparent_frac": 0.617,
+          "aspect_err": 0.001
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1535x1024",
+          "source_format": "PNG"
+        }
+      },
+      {
+        "cand": 2,
+        "path": "raw/unlock_illustration_c2.png",
+        "score": {
+          "fid": 41.8,
+          "diff": 14.9,
+          "iou": 0.54,
+          "de": 30.3,
+          "col": 3.8,
+          "flags": [
+            "BACKDROP"
+          ],
+          "warn": [
+            "soft"
+          ],
+          "sharp_ratio": 1.5,
+          "transparent_frac": 0.671,
+          "aspect_err": 0.017
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1536x1024",
+          "source_format": "PNG"
+        }
+      },
+      {
+        "cand": 3,
+        "path": "raw/unlock_illustration_c3.png",
+        "score": {
+          "fid": 45.9,
+          "diff": 19.7,
+          "iou": 0.323,
+          "de": 12.2,
+          "col": 6.8,
+          "flags": [
+            "BACKDROP"
+          ],
+          "warn": [
+            "soft",
+            "silhouette"
+          ],
+          "sharp_ratio": 1.5,
+          "transparent_frac": 0.615,
+          "aspect_err": 0.037
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1536x1024",
+          "source_format": "PNG"
+        }
+      }
+    ],
+    "complete": true,
+    "dp": {
+      "w": 277.2,
+      "h": 185.0
+    },
+    "chosen": {
+      "cand": 1,
+      "path": "raw/unlock_illustration_c1.png",
+      "score": {
+        "fid": 59.5,
+        "diff": 21.3,
+        "iou": 0.181,
+        "de": 22.6,
+        "col": 9.0,
+        "flags": [],
+        "warn": [
+          "silhouette"
+        ],
+        "sharp_ratio": 2.7,
+        "transparent_frac": 0.617,
+        "aspect_err": 0.001
+      },
+      "meta": {
+        "quality": "medium",
+        "size": "1535x1024",
+        "source_format": "PNG"
+      }
+    },
+    "picked_manually": false,
+    "color_match": {
+      "strength": 0.75,
+      "fid_before": 59.5,
+      "fid_after": 81.4,
+      "applied": false
+    },
+    "final": "assets/unlock_illustration.png",
+    "final_size": [
+      1147,
+      783
+    ],
+    "needs_attention": false
+  }
+}

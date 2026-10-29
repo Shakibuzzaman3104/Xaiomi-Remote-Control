@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../haptics.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -83,7 +84,7 @@ class VoiceSheet extends StatelessWidget {
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       onMicTap();
                     },
                     child: AnimatedContainer(
@@ -184,7 +185,7 @@ class VoiceSheet extends StatelessWidget {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       onCancel();
                     },
                     style: TextButton.styleFrom(
@@ -265,7 +266,7 @@ class _TargetChip extends StatelessWidget {
           child: InkWell(
             onTap: enabled
                 ? () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     onTap();
                   }
                 : null,

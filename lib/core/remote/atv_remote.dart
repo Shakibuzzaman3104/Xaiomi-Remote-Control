@@ -108,6 +108,7 @@ class AtvRemoteClient {
   final _ready = Completer<void>();
   Timer? _watchdog;
   Future<void> _textQueue = Future.value();
+  String? _latestText;
   Completer<void>? _fieldUpdate;
   String? _awaitedValue;
   DateTime _lastReceived = DateTime.now();
@@ -322,11 +323,16 @@ class AtvRemoteClient {
   );
 
   /// Makes the focused TV field read [text], sending only the difference.
-  Future<void> replaceText(String text) =>
-      _textQueue = _textQueue.then((_) => _applyText(text));
+  Future<void> replaceText(String text) {
+    _latestText = text;
+    return _textQueue = _textQueue.then((_) => _applyText(text));
+  }
+
+  /// Completes once every queued text edit has reached the TV.
+  Future<void> get textSettled => _textQueue;
 
   Future<void> _applyText(String text) async {
-    if (_closed && sendSink == null) return;
+    if (text != _latestText || (_closed && sendSink == null)) return;
     final current = (_state.imeValue ?? '').runes.toList();
     final target = text.runes.toList();
     var common = 0;
@@ -338,21 +344,29 @@ class AtvRemoteClient {
     final deletes = current.length - common;
     final suffix = String.fromCharCodes(target.skip(common));
     if (deletes > 0) {
-      final update = _fieldUpdate = Completer<void>();
-      _awaitedValue = String.fromCharCodes(target.take(common));
       for (var i = 0; i < deletes; i++) {
         sendKey(RemoteKeyCode.KEYCODE_DEL);
       }
-      if (suffix.isNotEmpty) {
-        await update.future.timeout(
-          const Duration(milliseconds: 1500),
-          onTimeout: () {},
-        );
-      }
-      _awaitedValue = null;
+      await _awaitFieldValue(String.fromCharCodes(target.take(common)));
     }
-    if (suffix.isNotEmpty) insertText(suffix);
-    _update(_state.copyWith(imeValue: text));
+    if (suffix.isNotEmpty) {
+      insertText(suffix);
+      await _awaitFieldValue(text);
+    }
+  }
+
+  Future<void> _awaitFieldValue(String value) async {
+    if (sendSink != null) {
+      _update(_state.copyWith(imeValue: value));
+      return;
+    }
+    final update = _fieldUpdate = Completer<void>();
+    _awaitedValue = value;
+    await update.future.timeout(
+      const Duration(milliseconds: 1500),
+      onTimeout: () => _update(_state.copyWith(imeValue: value)),
+    );
+    _awaitedValue = null;
   }
 
   /// Inserts [text] at the TV field's cursor.

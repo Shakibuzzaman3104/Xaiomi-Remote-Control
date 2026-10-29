@@ -7,12 +7,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/session/providers.dart';
 import 'ui/onboarding/onboarding_flow.dart';
+import 'ui/onboarding/unlock_page.dart';
 import 'ui/remote/remote_home.dart';
+import 'ui/settings/preferences_sync.dart';
 import 'ui/settings/settings_screen.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/theme_mode_provider.dart';
 
-void main() => runApp(const ProviderScope(child: XiaomiRemoteApp()));
+void main() => runApp(
+  const ProviderScope(child: PreferencesSync(child: XiaomiRemoteApp())),
+);
 
 class XiaomiRemoteApp extends ConsumerWidget {
   const XiaomiRemoteApp({super.key});
@@ -50,7 +54,12 @@ class AppRoot extends ConsumerWidget {
 
   void _openSettings(BuildContext context) => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => SettingsScreen(onAddTv: () => _openAddTv(context)),
+      builder: (routeContext) => SettingsScreen(
+        onAddTv: () => _openAddTv(context),
+        onOpenFullControl: () => Navigator.of(routeContext)
+            .push(MaterialPageRoute<void>(builder: (_) => const UnlockPage())),
+        onBack: () => Navigator.of(routeContext).pop(),
+      ),
     ),
   );
 

@@ -5,11 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/session/app_links.dart';
 import '../../core/session/providers.dart';
+import '../../core/settings/app_preferences.dart';
 import '../../core/session/tv_session.dart';
-import '../sheets/apps_sheet.dart';
-import '../theme/app_colors.dart';
+import '../apps/apps_page.dart';
 import 'remote_models.dart';
 import 'remote_screen.dart';
 
@@ -50,35 +49,16 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     }
   }
 
-  void _openApp(FavouriteApp app) {
-    final known = knownApps.firstWhere((a) => a.package == app.id);
-    final link = known.webLink;
-    Navigator.of(context).pop();
-    if (link != null) {
-      ref.read(tvSessionProvider)?.launchLink(link);
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening ${known.label} needs full control')),
+  void _showApps() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AppsPage(
+          onAppSettings: widget.onAppSettings,
+          onSwitchDevice: widget.onSwitchDevice,
+        ),
+      ),
     );
   }
-
-  Future<void> _showApps() => showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) => AppsSheet(
-      favourites: [
-        for (final app in knownApps.take(8))
-          FavouriteApp(
-            id: app.package,
-            label: app.label,
-            icon: _AppLetter(label: app.label),
-          ),
-      ],
-      onOpen: _openApp,
-      note: 'Turn on full control to see and open every app on the TV.',
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +71,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     final status = sessionState.status;
 
     return RemoteScreen(
+      swipeSensitivity: ref.watch(appPreferencesProvider).swipeSensitivity,
       state: RemoteViewState(
         deviceName: tv?.name ?? 'No TV',
         connected: status == SessionStatus.connected,
@@ -112,27 +93,6 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onScroll: (_) {},
       onClick: (_) {},
       onAirMouseChanged: (_) {},
-    );
-  }
-}
-
-class _AppLetter extends StatelessWidget {
-  const _AppLetter({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor: colors.okButton,
-      child: Text(
-        label[0],
-        style: TextStyle(
-          color: colors.primaryText,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
     );
   }
 }

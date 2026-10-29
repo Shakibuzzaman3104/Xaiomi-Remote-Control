@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../haptics.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -59,14 +60,14 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
   }
 
   void _handleClear() {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     _controller.clear();
     widget.onChanged('');
     widget.onClear();
   }
 
   void _handleSend() {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     widget.onSend();
   }
 

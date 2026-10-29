@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -31,7 +32,7 @@ class DisconnectedBanner extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selection();
               onRetry();
             },
             style: TextButton.styleFrom(foregroundColor: c.primaryText),

@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../haptics.dart';
 
 import '../theme/app_colors.dart';
 import 'step_dots.dart';
@@ -96,7 +97,7 @@ class DiscoverScreen extends StatelessWidget {
                   item: devices[i],
                   highlighted: i == 0,
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     onSelect(devices[i]);
                   },
                 ),
@@ -129,7 +130,7 @@ class DiscoverScreen extends StatelessWidget {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    HapticFeedback.selectionClick();
+                    AppHaptics.selection();
                     onEnterIp();
                   },
                   style: TextButton.styleFrom(

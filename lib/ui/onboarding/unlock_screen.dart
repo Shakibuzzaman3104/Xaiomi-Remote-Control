@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../haptics.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -256,7 +257,7 @@ class UnlockScreen extends StatelessWidget {
                       onPressed: connecting
                           ? null
                           : () {
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selection();
                               onConnect();
                             },
                       style: ElevatedButton.styleFrom(
@@ -310,7 +311,7 @@ class UnlockScreen extends StatelessWidget {
                     ),
                     child: TextButton(
                       onPressed: () {
-                        HapticFeedback.selectionClick();
+                        AppHaptics.selection();
                         onSkip();
                       },
                       style: TextButton.styleFrom(

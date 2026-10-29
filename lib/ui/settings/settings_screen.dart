@@ -5,65 +5,153 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/adb/full_control.dart';
 import '../../core/session/providers.dart';
-import '../theme/app_colors.dart';
+import '../../core/session/tv_session.dart';
+import '../../core/settings/app_preferences.dart';
+import '../remote/remote_models.dart';
 import '../theme/theme_mode_provider.dart';
+import 'settings_view.dart';
 
-/// Paired TVs and appearance.
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key, required this.onAddTv});
-  final VoidCallback onAddTv;
+  const SettingsScreen({
+    super.key,
+    required this.onAddTv,
+    required this.onOpenFullControl,
+    required this.onBack,
+  });
+  final VoidCallback onAddTv, onOpenFullControl, onBack;
+
+  Future<void> _choose<T>(
+    BuildContext context,
+    T selected,
+    Map<T, String> choices,
+    ValueChanged<T> onSelected,
+  ) => showModalBottomSheet<void>(
+    context: context,
+    builder: (sheetContext) => SafeArea(
+      child: RadioGroup<T>(
+        groupValue: selected,
+        onChanged: (value) {
+          if (value == null) return;
+          onSelected(value);
+          Navigator.pop(sheetContext);
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final entry in choices.entries)
+              RadioListTile<T>(title: Text(entry.value), value: entry.key),
+          ],
+        ),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
     final paired = ref.watch(pairedTvsProvider).asData?.value;
-    final themeMode = ref.watch(themeModeProvider);
-    final sectionStyle = Theme.of(context).textTheme.titleSmall
-        ?.copyWith(color: colors.primaryText, fontWeight: FontWeight.w700);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          ListTile(title: Text('Devices', style: sectionStyle)),
-          for (final tv in paired?.tvs ?? const [])
-            ListTile(
-              leading: const Icon(Icons.tv_outlined),
-              title: Text(tv.name),
-              subtitle: Text(tv.host),
-              trailing: tv.id == paired?.lastUsedId
-                  ? Icon(Icons.check_circle, color: colors.connected)
-                  : IconButton(
-                      tooltip: 'Remove ${tv.name}',
-                      icon: Icon(Icons.delete_outline, color: colors.danger),
-                      onPressed: () =>
-                          ref.read(pairedTvsProvider.notifier).remove(tv.id),
-                    ),
-              onTap: () => ref.read(pairedTvsProvider.notifier).select(tv.id),
-            ),
-          ListTile(
-            leading: Icon(Icons.add, color: colors.primaryText),
-            title: const Text('Add a TV'),
-            onTap: onAddTv,
+    final active = ref.watch(activeTvProvider);
+    final connected =
+        ref.watch(tvSessionStateProvider).asData?.value.status ==
+        SessionStatus.connected;
+    final session = ref.watch(tvSessionProvider);
+    final prefs = ref.watch(appPreferencesProvider);
+    final notifier = ref.read(appPreferencesProvider.notifier);
+    final theme = ref.watch(themeModeProvider);
+
+    return SettingsView(
+      deviceName: active?.name ?? 'No TV',
+      connected: connected,
+      onSwitchDevice: onAddTv,
+      onTvSettings: () => session?.press(RemoteButton.settings),
+      onAppSettings: () {},
+      onPower: connected ? () => session?.press(RemoteButton.power) : null,
+      devices: [
+        for (final tv in paired?.tvs ?? const [])
+          SettingsDevice(
+            id: tv.id,
+            name: tv.name,
+            subtitle: tv.host,
+            isActive: tv.id == active?.id && connected,
           ),
-          const Divider(),
-          ListTile(title: Text('Appearance', style: sectionStyle)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(value: ThemeMode.system, label: Text('System')),
-                ButtonSegment(value: ThemeMode.light, label: Text('Light')),
-                ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
-              ],
-              selected: {themeMode},
-              showSelectedIcon: false,
-              onSelectionChanged: (selection) =>
-                  ref.read(themeModeProvider.notifier).select(selection.first),
+      ],
+      onSelectDevice: (id) => ref.read(pairedTvsProvider.notifier).select(id),
+      onRemoveDevice: (id) async {
+        if (id == active?.id && (paired?.tvs.length ?? 0) > 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Select another TV before removing this one.'),
             ),
+          );
+          return;
+        }
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Remove TV?'),
+            content: const Text('Remove this TV from paired devices?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Remove'),
+              ),
+            ],
           ),
-        ],
+        );
+        if (confirmed == true && context.mounted) {
+          final navigator = Navigator.of(context);
+          final removingLast =
+              (paired?.tvs.length ?? 0) == 1 && id == active?.id;
+          await ref.read(pairedTvsProvider.notifier).remove(id);
+          if (removingLast && navigator.mounted) {
+            navigator.popUntil((route) => route.isFirst);
+          }
+        }
+      },
+      onAddTv: onAddTv,
+      hapticsEnabled: prefs.haptics,
+      onHapticsChanged: notifier.setHaptics,
+      volumeKeysEnabled: prefs.volumeKeysControlTv,
+      onVolumeKeysChanged: notifier.setVolumeKeysControlTv,
+      swipeSensitivity: prefs.swipeSensitivity,
+      onSwipeSensitivityChanged: notifier.setSwipeSensitivity,
+      micButtonLabel: prefs.micButton == VoiceTargetPreference.askAssistant
+          ? 'Ask Assistant'
+          : 'Type into field',
+      onMicButtonTap: () => _choose(context, prefs.micButton, {
+        VoiceTargetPreference.askAssistant: 'Ask Assistant',
+        VoiceTargetPreference.typeIntoField: 'Type into field',
+      }, notifier.setMicButton),
+      speechLanguageLabel: prefs.speechLocale == 'bn_BD' ? 'বাংলা' : 'English',
+      onSpeechLanguageTap: () => _choose(context, prefs.speechLocale, {
+        'en_US': 'English (US)',
+        'bn_BD': 'বাংলা',
+      }, notifier.setSpeechLocale),
+      adbConnected:
+          ref.watch(fullControlProvider).status == FullControlStatus.connected,
+      onNetworkDebuggingTap: onOpenFullControl,
+      companionInstalled: false,
+      onCompanionTap: onOpenFullControl,
+      themeLabel: switch (theme) {
+        ThemeMode.system => 'System',
+        ThemeMode.light => 'Light',
+        ThemeMode.dark => 'Dark',
+      },
+      onThemeTap: () => _choose(context, theme, {
+        ThemeMode.system: 'System',
+        ThemeMode.light: 'Light',
+        ThemeMode.dark: 'Dark',
+      }, ref.read(themeModeProvider.notifier).select),
+      appVersion: '1.0.0',
+      onAboutTap: () => showAboutDialog(
+        context: context,
+        applicationName: 'Xiaomi Remote',
+        applicationVersion: '1.0.0',
       ),
     );
   }

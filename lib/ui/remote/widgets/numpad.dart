@@ -3,7 +3,8 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
@@ -59,7 +60,7 @@ class Numpad extends StatelessWidget {
             button: true,
             child: GestureDetector(
               onTap: () {
-                HapticFeedback.selectionClick();
+                AppHaptics.selection();
                 onButton(buttons[i]);
               },
               child: Container(

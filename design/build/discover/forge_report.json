@@ -1,0 +1,116 @@
+{
+  "discover_illustration": {
+    "candidates": [
+      {
+        "cand": 1,
+        "path": "raw/discover_illustration_c1.png",
+        "score": {
+          "fid": 55.2,
+          "diff": 13.4,
+          "iou": 0.176,
+          "de": 23.8,
+          "col": 6.3,
+          "flags": [],
+          "warn": [
+            "silhouette"
+          ],
+          "sharp_ratio": 2.8,
+          "transparent_frac": 0.633,
+          "aspect_err": 0.012
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1619x971",
+          "source_format": "PNG"
+        }
+      },
+      {
+        "cand": 2,
+        "path": "raw/discover_illustration_c2.png",
+        "score": {
+          "fid": 57.4,
+          "diff": 11.7,
+          "iou": 0.203,
+          "de": 30.5,
+          "col": 6.7,
+          "flags": [],
+          "warn": [
+            "silhouette"
+          ],
+          "sharp_ratio": 2.9,
+          "transparent_frac": 0.558,
+          "aspect_err": 0.008
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1619x971",
+          "source_format": "PNG"
+        }
+      },
+      {
+        "cand": 3,
+        "path": "raw/discover_illustration_c3.png",
+        "score": {
+          "fid": 60.8,
+          "diff": 9.8,
+          "iou": 0.15,
+          "de": 36.3,
+          "col": 5.8,
+          "flags": [],
+          "warn": [
+            "silhouette"
+          ],
+          "sharp_ratio": 2.7,
+          "transparent_frac": 0.631,
+          "aspect_err": 0.008
+        },
+        "meta": {
+          "quality": "medium",
+          "size": "1618x972",
+          "source_format": "PNG"
+        }
+      }
+    ],
+    "complete": true,
+    "dp": {
+      "w": 279.7,
+      "h": 200.9
+    },
+    "chosen": {
+      "cand": 1,
+      "path": "raw/discover_illustration_c1.png",
+      "score": {
+        "fid": 55.2,
+        "diff": 13.4,
+        "iou": 0.176,
+        "de": 23.8,
+        "col": 6.3,
+        "flags": [],
+        "warn": [
+          "silhouette"
+        ],
+        "sharp_ratio": 2.8,
+        "transparent_frac": 0.633,
+        "aspect_err": 0.012
+      },
+      "meta": {
+        "quality": "medium",
+        "size": "1619x971",
+        "source_format": "PNG"
+      }
+    },
+    "picked_manually": false,
+    "color_match": {
+      "strength": 0.75,
+      "fid_before": 55.2,
+      "fid_after": 62.7,
+      "applied": false
+    },
+    "final": "assets/discover_illustration.png",
+    "final_size": [
+      1049,
+      773
+    ],
+    "needs_attention": false
+  }
+}

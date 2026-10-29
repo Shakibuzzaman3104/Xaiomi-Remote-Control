@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../haptics.dart';
 
 import '../../theme/app_colors.dart';
 import '../remote_models.dart';
@@ -35,7 +36,7 @@ class _DpadState extends State<Dpad> {
         : d.dx.abs() > d.dy.abs()
         ? (d.dx < 0 ? RemoteButton.left : RemoteButton.right)
         : (d.dy < 0 ? RemoteButton.up : RemoteButton.down);
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     widget.onButton(b);
     setState(() => pressed = b);
     if (b != RemoteButton.ok) {
@@ -104,7 +105,7 @@ class _DpadState extends State<Dpad> {
                         label: item.$2,
                         button: true,
                         onTap: () {
-                          HapticFeedback.selectionClick();
+                          AppHaptics.selection();
                           widget.onButton(item.$1);
                         },
                         child: const SizedBox(width: 48, height: 48),

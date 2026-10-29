@@ -184,6 +184,19 @@ class TvSession {
       }),
     ),
   );
+
+  /// Submits the TV field once pending edits land.
+  /// A newline triggers the IME action; KEYCODE_ENTER would press the focused TV key.
+  void submitText() => _command(
+    (c) => unawaited(
+      c.textSettled.then((_) => c.insertText('\n')).catchError((Object error) {
+        if (error is AtvConnectionLostException) {
+          _failure(_generation, error);
+        }
+      }),
+    ),
+  );
+
   void insertText(String text) => _command((c) => c.insertText(text));
   void launchLink(String url) => _command((c) => c.launchApp(url));
   Future<int> startVoice() async {

@@ -1,0 +1,38 @@
+{
+  "mockup": "mockup.png",
+  "width": 853,
+  "height": 1844,
+  "platform": "android",
+  "screen_dp": 412,
+  "assets": [
+    {
+      "animated": false,
+      "bbox": {
+        "x": 138,
+        "y": 522,
+        "w": 574,
+        "h": 383
+      },
+      "colors": [
+        "#F0EBFF",
+        "#E8E0FC",
+        "#D7CEF1",
+        "#5B537F",
+        "#746893",
+        "#763CE8",
+        "#F7F3FF"
+      ],
+      "description": "Softly shaded lavender illustration of a phone connecting to a television, including all decorative artwork as one composition. Behind the devices is a large translucent pale lavender organic blob with a rounded upper peak and gently undulating lower edge. In the foreground at left, an upright phone has a thick dark lavender rounded frame, a pale screen and a vivid purple Wi-Fi symbol with two arcs and a dot. Four small purple dots curve upward and right from above the phone toward the television. The larger television occupies the center-right, with a thick rounded dark lavender bezel, softly shaded pale lavender display, central pedestal and broad low foot. On its screen is a pale rounded settings panel containing a dark lavender cog with a light circular center on the left and two lavender horizontal pill-shaped lines on the right, the upper line longer. Subtle translucent oval ground shadows sit below both devices. Preserve the soft gradients, diffuse texture and shaded edges.",
+      "format": "png",
+      "kind": "illustration",
+      "material_symbol": "",
+      "name": "unlock_illustration",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 277.2,
+        "h": 185.0
+      }
+    }
+  ]
+}

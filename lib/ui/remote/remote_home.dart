@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/session/providers.dart';
 import '../../core/session/tv_session.dart';
+import '../../core/settings/app_preferences.dart';
 import '../sheets/keyboard_sheet.dart';
 import '../sheets/voice_sheet.dart';
 import 'connected_remote_page.dart';
@@ -30,19 +32,41 @@ class RemoteHome extends ConsumerStatefulWidget {
 
 class _RemoteHomeState extends ConsumerState<RemoteHome> {
   bool _keyboardOpen = false;
+  bool _volumeHandlerRegistered = false;
+
+  void _syncVolumeHandler(bool enabled) {
+    if (enabled == _volumeHandlerRegistered) return;
+    _volumeHandlerRegistered = enabled;
+    if (enabled) {
+      HardwareKeyboard.instance.addHandler(_handleVolumeKey);
+    } else {
+      HardwareKeyboard.instance.removeHandler(_handleVolumeKey);
+    }
+  }
+
+  bool _handleVolumeKey(KeyEvent event) {
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
+    final button = switch (event.logicalKey) {
+      LogicalKeyboardKey.audioVolumeUp => RemoteButton.volumeUp,
+      LogicalKeyboardKey.audioVolumeDown => RemoteButton.volumeDown,
+      LogicalKeyboardKey.audioVolumeMute => RemoteButton.mute,
+      _ => null,
+    };
+    if (button == null) return false;
+    _session?.press(button);
+    return true;
+  }
+
+  @override
+  void dispose() {
+    _syncVolumeHandler(false);
+    super.dispose();
+  }
 
   TvSession? get _session => ref.read(tvSessionProvider);
 
-  void _sendFieldText(String text) {
-    final session = _session;
-    if (session == null) return;
-    if (text.isEmpty) {
-      session.sendText(' ');
-      session.press(RemoteButton.delete);
-    } else {
-      session.sendText(text);
-    }
-  }
+  void _sendFieldText(String text) => _session?.sendText(text);
 
   Future<void> showKeyboard() async {
     if (_keyboardOpen) return;
@@ -58,7 +82,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
         onChanged: _sendFieldText,
         onClear: () {},
         onSend: () {
-          _session?.press(RemoteButton.enter);
+          _session?.submitText();
           Navigator.of(sheetContext).pop();
         },
         onClose: () => Navigator.of(sheetContext).pop(),
@@ -68,19 +92,25 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
   }
 
   Future<void> showVoice() async {
+    final prefs = ref.read(appPreferencesProvider);
     final imeActive =
         ref.read(tvSessionStateProvider).asData?.value.atv.imeActive ?? false;
     final query = await showModalBottomSheet<_VoiceResult>(
       context: context,
       isScrollControlled: true,
       showDragHandle: false,
-      builder: (_) => _VoiceSheetHost(typeIntoFieldAvailable: imeActive),
+      builder: (_) => _VoiceSheetHost(
+        typeIntoFieldAvailable: imeActive,
+        defaultTarget: prefs.micButton,
+        speechLocale: prefs.speechLocale,
+      ),
     );
     final session = _session;
     if (query == null || query.text.isEmpty || session == null) return;
     if (query.target == VoiceTarget.typeIntoField) {
-      session.sendText(query.text);
-      session.press(RemoteButton.enter);
+      session
+        ..sendText(query.text)
+        ..submitText();
     } else {
       session.launchLink(
         'https://www.youtube.com/results?search_query=${Uri.encodeQueryComponent(query.text)}',
@@ -90,6 +120,7 @@ class _RemoteHomeState extends ConsumerState<RemoteHome> {
 
   @override
   Widget build(BuildContext context) {
+    _syncVolumeHandler(ref.watch(appPreferencesProvider).volumeKeysControlTv);
     ref.listen(tvSessionStateProvider, (previous, next) {
       final was = previous?.asData?.value.atv.imeActive ?? false;
       final now = next.asData?.value.atv.imeActive ?? false;
@@ -111,8 +142,14 @@ class _VoiceResult {
 }
 
 class _VoiceSheetHost extends StatefulWidget {
-  const _VoiceSheetHost({required this.typeIntoFieldAvailable});
+  const _VoiceSheetHost({
+    required this.typeIntoFieldAvailable,
+    required this.defaultTarget,
+    required this.speechLocale,
+  });
   final bool typeIntoFieldAvailable;
+  final VoiceTargetPreference defaultTarget;
+  final String speechLocale;
 
   @override
   State<_VoiceSheetHost> createState() => _VoiceSheetHostState();
@@ -120,7 +157,9 @@ class _VoiceSheetHost extends StatefulWidget {
 
 class _VoiceSheetHostState extends State<_VoiceSheetHost> {
   final _speech = SpeechToText();
-  late VoiceTarget _target = widget.typeIntoFieldAvailable
+  late VoiceTarget _target =
+      widget.typeIntoFieldAvailable &&
+          widget.defaultTarget == VoiceTargetPreference.typeIntoField
       ? VoiceTarget.typeIntoField
       : VoiceTarget.search;
   String _transcript = '';
@@ -156,7 +195,10 @@ class _VoiceSheetHostState extends State<_VoiceSheetHost> {
       onResult: (result) {
         if (mounted) setState(() => _transcript = result.recognizedWords);
       },
-      listenOptions: SpeechListenOptions(partialResults: true),
+      listenOptions: SpeechListenOptions(
+        partialResults: true,
+        localeId: widget.speechLocale,
+      ),
     );
   }
 

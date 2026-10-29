@@ -1,0 +1,36 @@
+{
+  "mockup": "mockup.png",
+  "width": 853,
+  "height": 1843,
+  "platform": "android",
+  "screen_dp": 412,
+  "assets": [
+    {
+      "animated": true,
+      "bbox": {
+        "x": 137,
+        "y": 502,
+        "w": 579,
+        "h": 416
+      },
+      "colors": [
+        "#292257",
+        "#766AB5",
+        "#9163EC",
+        "#DCD3FA",
+        "#EEE9FC"
+      ],
+      "description": "Connection illustration with an upright smartphone on the left and a large widescreen television on the right. Behind both devices are overlapping translucent pale lavender circular halos, with a flattened lavender oval beneath them. The phone has a tall rounded rectangular outline approximately 6 px thick, shaded from dark indigo to muted violet, a pale translucent interior, and a centered purple Wi-Fi glyph formed from three curved bands and a small round dot. The television has a slightly skewed four-sided screen outlined with a roughly 7 px violet stroke: its top edge rises toward the right and its bottom edge slopes slightly downward toward the right. Its interior has a soft near-white lavender wash. A short purple neck and broad shallow pedestal extend below the screen. Two small lavender sparkle crosses sit above and beside the devices. Preserve the soft translucent shading and subtle texture as a single composition. The Wi-Fi bands and sparkles are suitable for a gentle discovery animation.",
+      "format": "png",
+      "kind": "illustration",
+      "material_symbol": "",
+      "name": "discover_illustration",
+      "sf_symbol": "",
+      "transparent": true,
+      "dp": {
+        "w": 279.7,
+        "h": 200.9
+      }
+    }
+  ]
+}
