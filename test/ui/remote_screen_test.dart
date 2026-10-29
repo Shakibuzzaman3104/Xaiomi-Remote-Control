@@ -138,8 +138,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.mic_none));
     await tester.pump();
     expect(voices, 1);
-    await tester.ensureVisible(find.text('Numpad'));
-    await tester.tap(find.text('Numpad'));
+    await tester.ensureVisible(find.byTooltip('Numpad'));
+    await tester.tap(find.byTooltip('Numpad'));
     await tester.pump();
     await tester.tap(find.text('5'));
     await tester.pump();

@@ -67,8 +67,8 @@ class VolumePill extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         RoundActionButton(
-          label: 'Mute',
-          icon: Icons.volume_off_outlined,
+          label: muted ? 'Unmute' : 'Mute',
+          icon: muted ? Icons.volume_off_outlined : Icons.volume_up_outlined,
           selected: muted,
           onPressed: () => onButton(RemoteButton.mute),
         ),

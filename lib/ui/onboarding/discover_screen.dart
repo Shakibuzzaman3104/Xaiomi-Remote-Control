@@ -109,19 +109,26 @@ class DiscoverScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: c.primary,
-                          backgroundColor: c.okButton,
-                        ),
-                      ),
+                      if (devices.isEmpty)
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: c.primary,
+                            backgroundColor: c.okButton,
+                          ),
+                        )
+                      else
+                        Icon(Icons.wifi_find, size: 20, color: c.muted),
                       const SizedBox(width: 14),
-                      Text(
-                        'Searching…',
-                        style: TextStyle(fontSize: 13, color: c.muted),
+                      Flexible(
+                        child: Text(
+                          devices.isEmpty
+                              ? 'Searching…'
+                              : 'Still looking for more TVs…',
+                          style: TextStyle(fontSize: 13, color: c.muted),
+                        ),
                       ),
                     ],
                   ),

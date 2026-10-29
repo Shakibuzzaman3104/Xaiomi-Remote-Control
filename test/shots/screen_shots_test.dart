@@ -123,6 +123,7 @@ Widget _demoAppsScreen() => AppsScreen(
 
 /// Screens rendered at the design canvas size, for side-by-side comparison.
 final shots = <String, Widget Function()>{
+  'remote': _demoRemote,
   'discover': () => DiscoverScreen(
     devices: const [
       DiscoverItem(
@@ -266,9 +267,8 @@ void main() {
             debugShowCheckedModeBanner: false,
             theme: dark ? AppTheme.dark : AppTheme.light,
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.linear(_textScale)),
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(_textScale)),
               child: child!,
             ),
             home: entry.value(),

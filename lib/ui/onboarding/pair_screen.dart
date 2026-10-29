@@ -110,6 +110,7 @@ class _PairScreenState extends State<PairScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final isBusy = widget.busy || _submitting;
+    final deviceLabel = widget.deviceName.replaceAll(' ', '\u00A0');
     final text = _controller.text;
     final canSubmit = text.length == 6 && !isBusy;
 
@@ -169,7 +170,7 @@ class _PairScreenState extends State<PairScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Pair with ${widget.deviceName}',
+                        'Pair with $deviceLabel',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 28,

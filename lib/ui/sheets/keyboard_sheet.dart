@@ -147,7 +147,7 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                   ),
                   suffixIconConstraints: const BoxConstraints(
                     minWidth: 48,
-                    minHeight: 32,
+                    minHeight: 48,
                   ),
                   suffixIcon: ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
@@ -163,8 +163,8 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                             behavior: HitTestBehavior.opaque,
                             onTap: _handleClear,
                             child: SizedBox(
-                              width: 32,
-                              height: 32,
+                              width: 48,
+                              height: 48,
                               child: Icon(
                                 Icons.cancel_rounded,
                                 color: c.muted,
@@ -204,7 +204,6 @@ class _KeyboardSheetState extends State<KeyboardSheet> {
                           Flexible(
                             child: Text(
                               widget.languageLabel,
-                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 13,
                                 color: c.onSurface,

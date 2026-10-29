@@ -78,7 +78,7 @@ void main() {
       expect(find.text('Android TV · Mi Box S'), findsOneWidget);
       expect(find.text('192.168.0.103'), findsOneWidget);
       expect(find.text('Bedroom TV · Google TV'), findsOneWidget);
-      expect(find.text('Searching…'), findsOneWidget);
+      expect(find.text('Still looking for more TVs…'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // Tap device row
@@ -143,7 +143,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Pair with Mi Box S'), findsOneWidget);
+      expect(find.text('Pair with Mi\u00A0Box\u00A0S'), findsOneWidget);
       expect(find.text('Enter the code shown on your TV.'), findsOneWidget);
       expect(
         find.text(

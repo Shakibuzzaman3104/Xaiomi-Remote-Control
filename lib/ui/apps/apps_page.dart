@@ -142,14 +142,21 @@ class _AppsPageState extends ConsumerState<AppsPage> {
     );
   }
 
-  Widget _icon(String label, TvApp? app) {
+  Widget _icon(BuildContext context, String label, TvApp? app) {
     final bytes = app?.iconPng;
     final fallback = CircleAvatar(
       child: Text(label.isEmpty ? '?' : label.characters.first.toUpperCase()),
     );
+    final cacheSize = (56 * MediaQuery.devicePixelRatioOf(context)).round();
     return bytes == null
         ? fallback
-        : Image.memory(bytes, errorBuilder: (_, _, _) => fallback);
+        : Image.memory(
+            bytes,
+            cacheWidth: cacheSize,
+            cacheHeight: cacheSize,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => fallback,
+          );
   }
 
   @override
@@ -169,7 +176,7 @@ class _AppsPageState extends ConsumerState<AppsPage> {
               TvAppItem(
                 package: app.package,
                 label: app.label,
-                icon: _icon(app.label, app),
+                icon: _icon(context, app.label, app),
                 isFavourite: favourites.contains(app.package),
               ),
           ]
@@ -181,7 +188,7 @@ class _AppsPageState extends ConsumerState<AppsPage> {
               TvAppItem(
                 package: app.package,
                 label: app.label,
-                icon: _icon(app.label, null),
+                icon: _icon(context, app.label, null),
                 isFavourite: favourites.contains(app.package),
               ),
           ];

@@ -181,15 +181,25 @@ class _AppsScreenState extends State<AppsScreen> {
                   padding: const EdgeInsets.only(top: 12),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: InkWell(
-                      onTap: widget.onNoticeTap,
-                      child: Text(
-                        widget.notice!,
-                        style: TextStyle(
-                          color: widget.onNoticeTap == null
-                              ? c.muted
-                              : c.primary,
-                          fontSize: 12,
+                    child: Semantics(
+                      button: widget.onNoticeTap != null,
+                      link: widget.onNoticeTap != null,
+                      child: InkWell(
+                        onTap: widget.onNoticeTap,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.notice!,
+                              style: TextStyle(
+                                color: widget.onNoticeTap == null
+                                    ? c.muted
+                                    : c.primary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -205,83 +215,112 @@ class _AppsScreenState extends State<AppsScreen> {
                           style: TextStyle(color: c.muted),
                         ),
                       )
-                    : GridView.builder(
-                        itemCount: apps.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: .72,
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final tileWidth = (constraints.maxWidth - 14 * 3) / 4;
+                          final labelPainter = TextPainter(
+                            text: const TextSpan(
+                              text: 'Ag',
+                              style: TextStyle(fontSize: 12, height: 1.2),
                             ),
-                        itemBuilder: (context, index) {
-                          final app = apps[index];
-                          return LayoutBuilder(
-                            builder: (context, constraints) => InkWell(
-                              onTap: () => widget.onOpen(app),
-                              onLongPress: () => widget.onShowActions(app),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: constraints.maxWidth,
-                                    height: constraints.maxWidth,
-                                    decoration: BoxDecoration(
-                                      color: c.appTile,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: c.subtleOutline,
-                                      ),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Center(
-                                          child: SizedBox(
-                                            width: 56,
-                                            height: 56,
-                                            child: app.icon,
+                            textScaler: MediaQuery.textScalerOf(context),
+                            textDirection: Directionality.of(context),
+                            maxLines: 2,
+                          )..layout(maxWidth: tileWidth);
+                          final labelHeight =
+                              labelPainter.preferredLineHeight * 2;
+                          return GridView.builder(
+                            itemCount: apps.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  crossAxisSpacing: 14,
+                                  mainAxisSpacing: 16,
+                                  mainAxisExtent: tileWidth + 6 + labelHeight,
+                                ),
+                            itemBuilder: (context, index) {
+                              final app = apps[index];
+                              final toggle = widget.onToggleFavourite;
+                              return LayoutBuilder(
+                                builder: (context, constraints) => InkWell(
+                                  onTap: () => widget.onOpen(app),
+                                  onLongPress: () => widget.onShowActions(app),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: constraints.maxWidth,
+                                        height: constraints.maxWidth,
+                                        decoration: BoxDecoration(
+                                          color: c.appTile,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: c.subtleOutline,
                                           ),
                                         ),
-                                        if (app.isFavourite)
-                                          Positioned(
-                                            right: 4,
-                                            top: 4,
-                                            child: GestureDetector(
-                                              onTap:
-                                                  widget.onToggleFavourite ==
-                                                      null
-                                                  ? null
-                                                  : () =>
-                                                        widget
-                                                            .onToggleFavourite!(
-                                                          app,
-                                                        ),
-                                              child: Icon(
-                                                Icons.star,
-                                                size: 16,
-                                                color: c.primary,
+                                        child: Stack(
+                                          children: [
+                                            Center(
+                                              child: SizedBox(
+                                                width: 56,
+                                                height: 56,
+                                                child: app.icon,
                                               ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Expanded(
-                                    child: Text(
-                                      app.label,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: c.onSurfaceStrong,
+                                            if (app.isFavourite)
+                                              Positioned(
+                                                right: 0,
+                                                top: 0,
+                                                child: Semantics(
+                                                  button: true,
+                                                  label:
+                                                      'Remove ${app.label} from favourites',
+                                                  child: GestureDetector(
+                                                    behavior:
+                                                        HitTestBehavior.opaque,
+                                                    onTap: toggle == null
+                                                        ? null
+                                                        : () => toggle(app),
+                                                    child: SizedBox(
+                                                      width: 48,
+                                                      height: 48,
+                                                      child: Align(
+                                                        alignment:
+                                                            Alignment.topRight,
+                                                        child: Icon(
+                                                          Icons.star,
+                                                          size: 16,
+                                                          color: c.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 6),
+                                      Expanded(
+                                        child: Text(
+                                          app.label,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            height: 1.2,
+                                            color: c.onSurfaceStrong,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

@@ -2,6 +2,8 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'remote_models.dart';
@@ -66,74 +68,113 @@ class _RemoteScreenState extends State<RemoteScreen> {
   }
 
   static const double _padGap = 28;
+  static const double _landscapeGap = 32;
+  static const double _minLandscapePad = 120;
+  static const double _minActionsWidth = 280;
   static const double _controlsAroundPad = 180 + _padGap * 2;
 
   @override
   Widget build(BuildContext context) {
-    final s = widget.state;
+    final actionBar = BottomActionBar(
+      onKeyboard: widget.onKeyboard,
+      onVoice: widget.onVoice,
+      onApps: widget.onApps,
+    );
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              DeviceHeader(
-                name: s.deviceName,
-                connected: s.connected,
-                onSwitchDevice: widget.onSwitchDevice,
-                onTvSettings: () => widget.onButton(RemoteButton.settings),
-                onAppSettings: widget.onAppSettings,
-                onPower: s.connected
-                    ? () => widget.onButton(RemoteButton.power)
-                    : null,
-              ),
-              if (!s.connected) ...[
-                const SizedBox(height: 8),
-                DisconnectedBanner(onRetry: widget.onRetry),
-              ],
-              if (s.connected && s.nowPlaying != null) ...[
-                const SizedBox(height: 10),
-                NowPlayingLine(
-                  playing: s.nowPlaying!,
-                  onTap: widget.onOpenNowPlaying,
-                ),
-              ],
-              const SizedBox(height: 12),
-              _whenConnected(
-                ModeSwitcher(
-                  mode: mode,
-                  onChanged: (v) => setState(() => mode = v),
-                ),
-              ),
-              Expanded(
-                child: _whenConnected(
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final padSize = _padSizeFor(constraints);
-                      return SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: Center(child: _buildControls(padSize)),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const Divider(height: 12),
-              _whenConnected(
-                BottomActionBar(
-                  onKeyboard: widget.onKeyboard,
-                  onVoice: widget.onVoice,
-                  onApps: widget.onApps,
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, screen) => _buildBody(screen, actionBar),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBody(BoxConstraints screen, Widget actionBar) {
+    final s = widget.state;
+    final landscape =
+        screen.maxWidth > screen.maxHeight &&
+        screen.maxWidth >=
+            _minLandscapePad + _landscapeGap + _minActionsWidth + 40;
+    final tablet = screen.maxWidth >= 600;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          DeviceHeader(
+            name: s.deviceName,
+            connected: s.connected,
+            onSwitchDevice: widget.onSwitchDevice,
+            onTvSettings: () => widget.onButton(RemoteButton.settings),
+            onAppSettings: widget.onAppSettings,
+            onPower: s.connected
+                ? () => widget.onButton(RemoteButton.power)
+                : null,
+          ),
+          if (!s.connected) ...[
+            const SizedBox(height: 8),
+            DisconnectedBanner(onRetry: widget.onRetry),
+          ],
+          if (s.connected && s.nowPlaying != null) ...[
+            const SizedBox(height: 10),
+            NowPlayingLine(
+              playing: s.nowPlaying!,
+              onTap: widget.onOpenNowPlaying,
+            ),
+          ],
+          const SizedBox(height: 12),
+          _whenConnected(
+            ModeSwitcher(
+              mode: mode,
+              onChanged: (v) => setState(() => mode = v),
+            ),
+          ),
+          Expanded(
+            child: _whenConnected(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final padSize = landscape
+                      ? math
+                            .min(
+                              math.min(constraints.maxHeight - 16, 360.0),
+                              constraints.maxWidth -
+                                  _landscapeGap -
+                                  _minActionsWidth,
+                            )
+                            .clamp(_minLandscapePad, 360.0)
+                      : _padSizeFor(constraints);
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: Center(
+                        child: landscape
+                            ? _buildLandscapeControls(
+                                padSize,
+                                constraints,
+                                actionBar,
+                              )
+                            : tablet
+                            ? ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 480,
+                                ),
+                                child: _buildControls(padSize),
+                              )
+                            : _buildControls(padSize),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          if (!landscape) ...[
+            const Divider(height: 12),
+            _whenConnected(actionBar),
+          ],
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -156,61 +197,107 @@ class _RemoteScreenState extends State<RemoteScreen> {
   }
 
   Widget _buildControls(double padSize) {
-    final s = widget.state;
-    final playing = s.nowPlaying?.playing ?? false;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: _padGap),
-        SizedBox(
-          width: padSize,
-          height: padSize,
-          child: switch (mode) {
-            RemoteMode.dpad => Dpad(onButton: widget.onButton),
-            RemoteMode.swipe => SwipePad(
-              onButton: widget.onButton,
-              sensitivity: widget.swipeSensitivity,
-            ),
-            RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
-              onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
-            ),
-            RemoteMode.mouse => Trackpad(
-              onPointerMove: widget.onPointerMove,
-              onScroll: widget.onScroll,
-              onClick: widget.onClick,
-              onAirMouseChanged: widget.onAirMouseChanged,
-            ),
-            RemoteMode.numpad => Numpad(onButton: widget.onButton),
-          },
-        ),
+        _buildPad(padSize),
         const SizedBox(height: _padGap),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            RoundActionButton(
-              label: 'Back',
-              icon: Icons.arrow_back,
-              onPressed: () => widget.onButton(RemoteButton.back),
+        ..._buildActions(),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeControls(
+    double padSize,
+    BoxConstraints constraints,
+    Widget actionBar,
+  ) {
+    final actionsWidth = (constraints.maxWidth - padSize - _landscapeGap).clamp(
+      _minActionsWidth,
+      360.0,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildPad(padSize),
+        const SizedBox(width: _landscapeGap),
+        SizedBox(
+          width: actionsWidth,
+          height: constraints.maxHeight,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SizedBox(
+              width: actionsWidth,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ..._buildActions(),
+                  const SizedBox(height: 12),
+                  actionBar,
+                ],
+              ),
             ),
-            RoundActionButton(
-              label: 'Home',
-              icon: Icons.home_outlined,
-              onPressed: () => widget.onButton(RemoteButton.home),
-            ),
-            RoundActionButton(
-              label: playing ? 'Pause' : 'Play',
-              icon: playing ? Icons.pause : Icons.play_arrow,
-              onPressed: () => widget.onButton(RemoteButton.playPause),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        VolumePill(
-          level: s.volumeLevel,
-          muted: s.muted,
-          onButton: widget.onButton,
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildPad(double padSize) {
+    return SizedBox(
+      width: padSize,
+      height: padSize,
+      child: switch (mode) {
+        RemoteMode.dpad => Dpad(onButton: widget.onButton),
+        RemoteMode.swipe => SwipePad(
+          onButton: widget.onButton,
+          sensitivity: widget.swipeSensitivity,
+        ),
+        RemoteMode.mouse when !widget.mouseAvailable => MouseUnavailable(
+          onUseSwipe: () => setState(() => mode = RemoteMode.swipe),
+        ),
+        RemoteMode.mouse => Trackpad(
+          onPointerMove: widget.onPointerMove,
+          onScroll: widget.onScroll,
+          onClick: widget.onClick,
+          onAirMouseChanged: widget.onAirMouseChanged,
+        ),
+        RemoteMode.numpad => Numpad(onButton: widget.onButton),
+      },
+    );
+  }
+
+  List<Widget> _buildActions() {
+    final s = widget.state;
+    final playing = s.nowPlaying?.playing ?? false;
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          RoundActionButton(
+            label: 'Back',
+            icon: Icons.arrow_back,
+            onPressed: () => widget.onButton(RemoteButton.back),
+          ),
+          RoundActionButton(
+            label: 'Home',
+            icon: Icons.home_outlined,
+            onPressed: () => widget.onButton(RemoteButton.home),
+          ),
+          RoundActionButton(
+            label: playing ? 'Pause' : 'Play',
+            icon: playing ? Icons.pause : Icons.play_arrow,
+            onPressed: () => widget.onButton(RemoteButton.playPause),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      VolumePill(
+        level: s.volumeLevel,
+        muted: s.muted,
+        onButton: widget.onButton,
+      ),
+    ];
   }
 }
