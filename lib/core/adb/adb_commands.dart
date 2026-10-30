@@ -17,12 +17,18 @@ class AdbNowPlaying {
     required this.positionMs,
     this.durationMs,
     this.speed = 1,
+    this.actions = 0,
   });
+  static const _actionSeekTo = 256;
+
   final String package, title, subtitle;
   final AdbPlaybackState state;
   final int positionMs;
   final int? durationMs;
   final double speed;
+  final int actions;
+
+  bool get canSeek => actions & _actionSeekTo != 0;
 }
 
 class AdbDeviceInfo {
@@ -194,7 +200,8 @@ class AdbCommands {
       );
       final state = RegExp(
         r'PlaybackState\s*\{\s*state=(\d+),\s*position=(-?\d+)'
-        r'(?:[^}]*?speed=(-?[\d.]+))?(?:[^}]*?updated=(\d+))?',
+        r'(?:[^}]*?speed=(-?[\d.]+))?(?:[^}]*?updated=(\d+))?'
+        r'(?:[^}]*?actions=(\d+))?',
       ).firstMatch(section);
       if (state == null || (state.group(1) != '3' && state.group(1) != '2')) {
         continue;
@@ -234,6 +241,7 @@ class AdbCommands {
         positionMs: position,
         durationMs: durationMs,
         speed: speed,
+        actions: int.tryParse(state.group(5) ?? '') ?? 0,
       );
     }
     return null;
@@ -249,11 +257,19 @@ class AdbCommands {
     return int.parse(match.group(1)!) * 1000 + int.parse(fraction);
   }
 
-  Future<AdbNowPlaying?> nowPlaying() async {
+  static String? parseForegroundPackage(String output) => RegExp(
+    r'mResumedActivity:\s*ActivityRecord\{\S+\s+\S+\s+([\w.]+)/',
+  ).firstMatch(output)?.group(1);
+
+  Future<({AdbNowPlaying? nowPlaying, String? foreground})> playback() async {
     final output = await client.shell(
-      'dumpsys media_session; echo; echo __UPTIME__ \$(cut -d" " -f1 /proc/uptime)',
+      'dumpsys media_session; echo; echo __UPTIME__ \$(cut -d" " -f1 /proc/uptime); '
+      'dumpsys activity activities | grep -m1 mResumedActivity',
     );
-    return parseNowPlaying(output, uptimeMs: parseUptimeMs(output));
+    return (
+      nowPlaying: parseNowPlaying(output, uptimeMs: parseUptimeMs(output)),
+      foreground: parseForegroundPackage(output),
+    );
   }
 
   Future<void> openSettings() async {

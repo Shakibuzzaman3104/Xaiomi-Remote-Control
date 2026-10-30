@@ -79,6 +79,10 @@ Widget _demoRemote({
           duration: Duration(seconds: 19),
           playing: true,
         ),
+        appControls: AppControlData(
+          package: 'com.google.android.youtube.tv',
+          label: 'YouTube',
+        ),
         volumeLevel: 12,
         muted: false,
       ),

@@ -13,6 +13,8 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.os.Looper;
 import android.util.Base64;
 
@@ -31,6 +33,9 @@ public final class Main {
         switch (command) {
             case "apps":
                 printLauncherApps(context, args.length > 1 ? Integer.parseInt(args[1]) : 96);
+                break;
+            case "seek":
+                seek(context, args[1], Long.parseLong(args[2]));
                 break;
             case "clipboard-set":
                 setClipboard(context, new String(Base64.decode(args[1], Base64.NO_WRAP), "UTF-8"));
@@ -73,6 +78,25 @@ public final class Main {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+    }
+
+    private static void seek(Context context, String pkg, long positionMs) {
+        List<MediaController> controllers;
+        try {
+            MediaSessionManager sessions = (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
+            controllers = sessions.getActiveSessions(null);
+        } catch (Throwable e) {
+            System.out.println("unsupported");
+            return;
+        }
+        for (MediaController controller : controllers) {
+            if (controller.getPackageName().equals(pkg)) {
+                controller.getTransportControls().seekTo(Math.max(0, positionMs));
+                System.out.println("ok");
+                return;
+            }
+        }
+        System.out.println("no session");
     }
 
     private static void setClipboard(Context context, String text) {

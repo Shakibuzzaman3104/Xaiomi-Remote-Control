@@ -17,11 +17,9 @@ import '../../core/session/tv_session.dart';
 import '../apps/apps_page.dart';
 import '../onboarding/unlock_page.dart';
 import '../motion.dart';
-import '../physics.dart';
-import '../theme/app_theme.dart';
+import 'now_playing_sheet.dart';
 import 'remote_models.dart';
 import 'remote_screen.dart';
-import 'widgets/now_playing_line.dart';
 
 /// The Remote screen driven by the active TV session.
 class ConnectedRemotePage extends ConsumerStatefulWidget {
@@ -55,6 +53,11 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
   bool? _adbMuted;
   bool _assumedMuted = false;
   AdbNowPlaying? _nowPlaying;
+  String? _foreground;
+  DateTime? _playbackReadAt;
+  final _playingNotifier = ValueNotifier<NowPlaying?>(null);
+  bool _sheetOpen = false;
+  int _seeksInFlight = 0;
   int _nowPlayingGeneration = 0;
   int? _readingGeneration;
   Object? _activeTv;
@@ -85,6 +88,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     _volumeTimer?.cancel();
     _stopNowPlaying();
     _stopAirMouse();
+    _playingNotifier.dispose();
     _volumeGeneration++;
     super.dispose();
   }
@@ -126,7 +130,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
   }
 
   void _syncRouteVisibility() {
-    final visible = ModalRoute.of(context)?.isCurrent ?? true;
+    final visible = _sheetOpen || (ModalRoute.of(context)?.isCurrent ?? true);
     if (_routeVisible == visible) return;
     _routeVisible = visible;
     if (visible) {
@@ -197,20 +201,24 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
 
   Future<void> _readNowPlaying() async {
     final generation = _nowPlayingGeneration;
-    if (_readingGeneration == generation || !_fullControl || !_routeVisible) {
+    if (_readingGeneration == generation || !_fullControl || !_routeVisible || _seeksInFlight > 0) {
       return;
     }
     _readingGeneration = generation;
     try {
-      final now = await ref.read(fullControlProvider.notifier).readNowPlaying();
+      final playback = await ref.read(fullControlProvider.notifier).readPlayback();
       if (mounted && generation == _nowPlayingGeneration && _fullControl) {
-        setState(() => _nowPlaying = now);
+        setState(() {
+          _nowPlaying = playback.nowPlaying;
+          _foreground = playback.foreground;
+          _playbackReadAt = DateTime.now();
+        });
       }
     } catch (_) {
       if (mounted &&
           generation == _nowPlayingGeneration &&
-          _nowPlaying != null) {
-        setState(() => _nowPlaying = null);
+          (_nowPlaying != null || _foreground != null)) {
+        setState(() { _nowPlaying = null; _foreground = null; });
       }
     } finally {
       if (_readingGeneration == generation) _readingGeneration = null;
@@ -225,17 +233,17 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     final icon = app?.iconPng;
     return NowPlaying(
       title: now.title.isNotEmpty ? now.title : appName,
-      subtitle: now.title.isEmpty
-          ? null
-          : [
-              if (now.subtitle.isNotEmpty) now.subtitle,
-              if (app != null) app.label,
-            ].join(' · '),
+      subtitle: now.title.isEmpty ? null : now.subtitle,
       position: Duration(milliseconds: now.positionMs.clamp(0, 1 << 40)),
       duration: now.durationMs == null
           ? null
           : Duration(milliseconds: now.durationMs!),
       playing: now.state == AdbPlaybackState.playing,
+      canSeek: now.canSeek,
+      speed: now.speed,
+      updatedAt: _playbackReadAt,
+      package: now.package,
+      appName: appName,
       appIcon: icon == null
           ? null
           : ClipRRect(
@@ -351,90 +359,73 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
         .push(MaterialPageRoute<void>(builder: (_) => const AppsPage()));
   }
 
-  void _openNowPlaying(NowPlaying playing) {
-    final package = _nowPlaying?.package;
-    final apps = ref.read(fullControlProvider).apps;
-    final app = apps.where((item) => item.package == package).firstOrNull;
-    final formatter = NowPlayingLine(playing: playing);
+  void _pressPlayback(RemoteButton button) {
+    ref.read(tvSessionProvider)?.press(button);
+    _refreshNowPlayingSoon();
+  }
+
+  void _seekBy(Duration delta) {
+    final now = _nowPlaying;
+    if (now == null || !now.canSeek) {
+      _pressPlayback(delta.isNegative ? RemoteButton.rewind : RemoteButton.fastForward);
+      return;
+    }
+    final current = _buildNowPlaying(ref.read(fullControlProvider).apps)!
+        .positionAt(DateTime.now());
+    _seekTo(current + delta);
+  }
+
+  Future<void> _seekTo(Duration target) async {
+    final now = _nowPlaying;
+    final current = now == null ? Duration.zero :
+        _buildNowPlaying(ref.read(fullControlProvider).apps)!.positionAt(DateTime.now());
+    final direction = target < current ? RemoteButton.rewind : RemoteButton.fastForward;
+    if (now == null || !now.canSeek) {
+      _pressPlayback(direction);
+      return;
+    }
+    final position = target.inMilliseconds.clamp(0, (now.durationMs ?? (1 << 40)).clamp(0, 1 << 40));
+    _nowPlayingGeneration++;
+    _seeksInFlight++;
+    setState(() {
+      _nowPlaying = AdbNowPlaying(
+        package: now.package, title: now.title, subtitle: now.subtitle,
+        state: now.state, positionMs: position, durationMs: now.durationMs,
+        speed: now.speed, actions: now.actions,
+      );
+      _playbackReadAt = DateTime.now();
+    });
+    try {
+      final success = await ref.read(fullControlProvider.notifier).seekTo(now.package, Duration(milliseconds: position));
+      if (!mounted) return;
+      if (!success) _pressPlayback(direction);
+    } catch (_) {
+      if (!mounted) return;
+      _pressPlayback(direction);
+    } finally {
+      _seeksInFlight--;
+    }
+    if (mounted) _refreshNowPlayingSoon();
+  }
+
+  void _openNowPlaying() {
+    _playingNotifier.value = _buildNowPlaying(ref.read(fullControlProvider).apps);
+    if (_playingNotifier.value == null) return;
+    _sheetOpen = true;
     showModalBottomSheet<void>(
       context: context,
       sheetAnimationStyle: sheetAnimation(context),
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SpringIn(
-                child: Text(
-                  playing.title,
-                  style: context.appTextTheme.titleLarge,
-                ),
-              ),
-              if (playing.subtitle?.isNotEmpty ?? false)
-                Text(playing.subtitle!, style: context.appTextTheme.bodyMedium),
-              if (app != null)
-                Text(app.label, style: context.appTextTheme.bodyMedium),
-              const SizedBox(height: 12),
-              Text(
-                '${formatter.time(playing.position)}${playing.duration == null ? '' : ' / ${formatter.time(playing.duration!)}'}',
-                style: context.appTextTheme.labelMedium!.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-              SpringIn(
-                delay: const Duration(milliseconds: 80),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _SheetPress(
-                      child: IconButton(
-                        tooltip: 'Rewind',
-                        onPressed: () => ref
-                            .read(tvSessionProvider)
-                            ?.press(RemoteButton.rewind),
-                        icon: const Icon(Icons.fast_rewind_rounded),
-                      ),
-                    ),
-                    _SheetPress(
-                      child: IconButton(
-                        tooltip: 'Play-Pause',
-                        onPressed: () => ref
-                            .read(tvSessionProvider)
-                            ?.press(RemoteButton.playPause),
-                        icon: Icon(
-                          playing.playing
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                        ),
-                      ),
-                    ),
-                    _SheetPress(
-                      child: IconButton(
-                        tooltip: 'Fast-forward',
-                        onPressed: () => ref
-                            .read(tvSessionProvider)
-                            ?.press(RemoteButton.fastForward),
-                        icon: const Icon(Icons.fast_forward_rounded),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (package != null && package.isNotEmpty)
-                FilledButton.tonal(
-                  onPressed: () {
-                    ref.read(fullControlProvider.notifier).launch(package);
-                    Navigator.pop(sheetContext);
-                  },
-                  child: const Text('Open app'),
-                ),
-            ],
-          ),
-        ),
+      builder: (_) => NowPlayingSheet(
+        playing: _playingNotifier,
+        onSeekTo: _seekTo,
+        onSeekBy: _seekBy,
+        onButton: _pressPlayback,
+        onOpenApp: (package) => ref.read(fullControlProvider.notifier).launch(package),
       ),
-    );
+    ).whenComplete(() {
+      _sheetOpen = false;
+      if (mounted) _syncRouteVisibility();
+    });
   }
 
   @override
@@ -453,6 +444,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
           _exactVolume = null;
           _adbMuted = null;
           _nowPlaying = null;
+          _foreground = null;
         });
       }
     });
@@ -461,6 +453,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       _activeTv = tv;
       _nowPlayingGeneration++;
       _nowPlaying = null;
+      _foreground = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _readNowPlaying();
       });
@@ -473,6 +466,13 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     final cursor = ref.read(tvCursorProvider.notifier);
     final cursorState = ref.watch(tvCursorProvider);
     final status = sessionState.status;
+    final apps = ref.watch(fullControlProvider).apps;
+    final playing = _buildNowPlaying(apps);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _playingNotifier.value = playing;
+    });
+    final package = _foreground ?? _nowPlaying?.package;
+    final foregroundApp = apps.where((app) => app.package == package).firstOrNull;
 
     return RemoteScreen(
       initialMode:
@@ -504,7 +504,10 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
         needsPairing: status == SessionStatus.notPaired,
         attempt: sessionState.attempt,
         exactVolume: _exactVolume,
-        nowPlaying: _buildNowPlaying(ref.watch(fullControlProvider).apps),
+        nowPlaying: playing,
+        appControls: package != null && package == 'com.google.android.youtube.tv'
+            ? AppControlData(package: package, label: 'YouTube', icon: foregroundApp?.iconPng)
+            : null,
       ),
       onButton: (button) {
         if (button == RemoteButton.settings) {
@@ -524,7 +527,9 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
             }
           case RemoteButton.playPause ||
               RemoteButton.rewind ||
-              RemoteButton.fastForward:
+              RemoteButton.fastForward ||
+              RemoteButton.previous ||
+              RemoteButton.next:
             _refreshNowPlayingSoon();
           default:
         }
@@ -539,14 +544,9 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onButtonDown: (button) => session?.pressDown(button),
       onButtonUp: (button) => session?.pressUp(button),
       onExactVolumeChanged: _setVolume,
-      onOpenNowPlaying: _nowPlaying == null
-          ? null
-          : () {
-              final playing = _buildNowPlaying(
-                ref.read(fullControlProvider).apps,
-              );
-              if (playing != null) _openNowPlaying(playing);
-            },
+      onOpenNowPlaying: _nowPlaying == null ? null : _openNowPlaying,
+      onSeekBy: _seekBy,
+      onAppSearch: widget.onKeyboard,
       onSwitchDevice: widget.onSwitchDevice,
       onApps: _showApps,
       onKeyboard: widget.onKeyboard,
@@ -563,22 +563,4 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       mouseSetup: _mouseSetupPrompt(cursorState),
     );
   }
-}
-
-class _SheetPress extends StatefulWidget {
-  const _SheetPress({required this.child});
-  final Widget child;
-  @override
-  State<_SheetPress> createState() => _SheetPressState();
-}
-
-class _SheetPressState extends State<_SheetPress> {
-  bool pressed = false;
-  @override
-  Widget build(BuildContext context) => Listener(
-    onPointerDown: (_) => setState(() => pressed = true),
-    onPointerUp: (_) => setState(() => pressed = false),
-    onPointerCancel: (_) => setState(() => pressed = false),
-    child: SpringPress(pressed: pressed, child: widget.child),
-  );
 }

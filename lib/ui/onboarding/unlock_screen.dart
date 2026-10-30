@@ -12,6 +12,7 @@ import '../haptics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'step_dots.dart';
+import 'illustrations.dart';
 
 class UnlockScreen extends StatelessWidget {
   const UnlockScreen({
@@ -112,15 +113,10 @@ class UnlockScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
                       Center(
-                        child: Image.asset(
-                          Theme.of(context).brightness == Brightness.dark
-                              ? 'assets/illustrations/unlock_dark.png'
-                              : 'assets/illustrations/unlock.png',
+                        child: const SizedBox(
                           width: 277,
                           height: 185,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) =>
-                              const SizedBox(width: 277, height: 185),
+                          child: UnlockIllustration(),
                         ),
                       ),
                       const SizedBox(height: 16),

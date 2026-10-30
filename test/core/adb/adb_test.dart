@@ -172,6 +172,8 @@ void main() {
     expect(now.subtitle, 'jawed');
     expect(now.positionMs, 1437);
     expect(now.state, AdbPlaybackState.playing);
+    expect(now.actions, 379);
+    expect(now.canSeek, isTrue);
     expect(AdbCommands.parseMusicVolume(audio), (12, 15));
     expect(AdbCommands.parseMusicMuted(audio), isFalse);
     expect(
@@ -184,6 +186,21 @@ void main() {
       AdbCommands.parseMusicMuted('$audio- STREAM_ALARM:\n   Muted: true\n'),
       isFalse,
     );
+  });
+
+  test('reads seek support and the foreground app', () {
+    const media = '''
+    package=com.example.radio
+      state=PlaybackState {state=3, position=0, buffered position=0, speed=1.0, updated=10, actions=6, custom actions=[], active item id=-1, error=null}
+      metadata:size=0, description=Live, null
+  mResumedActivity: ActivityRecord{4a2c1f u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity t42}
+''';
+    expect(AdbCommands.parseNowPlaying(media)!.canSeek, isFalse);
+    expect(
+      AdbCommands.parseForegroundPackage(media),
+      'com.google.android.youtube.tv',
+    );
+    expect(AdbCommands.parseForegroundPackage('nothing'), isNull);
   });
 
   test('advances a playing position by the time since the last update', () {

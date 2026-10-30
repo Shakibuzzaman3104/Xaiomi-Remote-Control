@@ -368,20 +368,9 @@ class FullControl extends Notifier<FullControlState> {
     state = state.copyWith(appsLoading: true);
     try {
       final client = _connectedClient();
-      final data = await rootBundle.load('assets/tv_helper.jar');
-      final bytes = data.buffer.asUint8List(
-        data.offsetInBytes,
-        data.lengthInBytes,
-      );
-      const path = '/data/local/tmp/xr_helper.jar';
-      final digest = sha256.convert(bytes).toString();
-      final remoteDigest = await client.shell('cat $path.sha256');
-      if (remoteDigest.trim() != digest) {
-        await client.push(bytes, path);
-        await client.shell('echo $digest > $path.sha256');
-      }
+      await _ensureHelper(client);
       final output = await client.shell(
-        'CLASSPATH=$path app_process / com.diatomicsoft.xiaomiremote.helper.Main apps 96',
+        '$_runHelper apps 96',
         timeout: const Duration(seconds: 30),
       );
       if (generation == _generation) {
@@ -399,6 +388,32 @@ class FullControl extends Notifier<FullControlState> {
         );
       }
     }
+  }
+
+  static const _helperPath = '/data/local/tmp/xr_helper.jar';
+  static const _runHelper =
+      'CLASSPATH=$_helperPath app_process / com.diatomicsoft.xiaomiremote.helper.Main';
+
+  Future<void> _ensureHelper(AdbClient client) async {
+    final data = await rootBundle.load('assets/tv_helper.jar');
+    final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    final digest = sha256.convert(bytes).toString();
+    final remoteDigest = await client.shell('cat $_helperPath.sha256');
+    if (remoteDigest.trim() != digest) {
+      await client.push(bytes, _helperPath);
+      await client.shell('echo $digest > $_helperPath.sha256');
+    }
+  }
+
+  /// Seeks the media session of [package]; false when the TV can't seek it.
+  Future<bool> seekTo(String package, Duration position) async {
+    final client = _connectedClient();
+    await _ensureHelper(client);
+    final output = await client.shell(
+      "$_runHelper seek '${package.replaceAll("'", '')}' ${position.inMilliseconds}",
+      timeout: const Duration(seconds: 15),
+    );
+    return output.trim() == 'ok';
   }
 
   AdbClient get connectedClient => _connectedClient();
@@ -422,8 +437,8 @@ class FullControl extends Notifier<FullControlState> {
     );
   }
 
-  Future<AdbNowPlaying?> readNowPlaying() =>
-      AdbCommands(_connectedClient()).nowPlaying();
+  Future<({AdbNowPlaying? nowPlaying, String? foreground})> readPlayback() =>
+      AdbCommands(_connectedClient()).playback();
 
   Future<void> openTvSettings() =>
       AdbCommands(_connectedClient()).openSettings();

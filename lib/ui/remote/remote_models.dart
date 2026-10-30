@@ -2,6 +2,8 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 
 export '../../core/session/remote_button.dart';
@@ -16,6 +18,11 @@ class NowPlaying {
     required this.playing,
     this.subtitle,
     this.appIcon,
+    this.appName,
+    this.package,
+    this.canSeek = false,
+    this.speed = 1,
+    this.updatedAt,
   });
   final String title;
   final String? subtitle;
@@ -23,6 +30,27 @@ class NowPlaying {
   final Duration? duration;
   final bool playing;
   final Widget? appIcon;
+  final String? appName, package;
+  final bool canSeek;
+  final double speed;
+  final DateTime? updatedAt;
+
+  Duration positionAt(DateTime now) {
+    final elapsed = playing && updatedAt != null
+        ? now.difference(updatedAt!).inMilliseconds * speed
+        : 0.0;
+    final milliseconds = (position.inMilliseconds + elapsed).round().clamp(
+      0,
+      (duration?.inMilliseconds ?? (1 << 40)).clamp(0, 1 << 40),
+    );
+    return Duration(milliseconds: milliseconds);
+  }
+}
+
+class AppControlData {
+  const AppControlData({required this.package, required this.label, this.icon});
+  final String package, label;
+  final Uint8List? icon;
 }
 
 class MouseSetupPrompt {
@@ -64,6 +92,7 @@ class RemoteViewState {
     required this.connected,
     required this.reconnecting,
     this.nowPlaying,
+    this.appControls,
     this.volumeLevel,
     this.exactVolume,
     required this.muted,
@@ -73,6 +102,7 @@ class RemoteViewState {
   final String deviceName;
   final bool connected, reconnecting, muted, needsPairing;
   final NowPlaying? nowPlaying;
+  final AppControlData? appControls;
   final int? volumeLevel;
   final int attempt;
   final VolumeControl? exactVolume;
@@ -81,6 +111,7 @@ class RemoteViewState {
     bool? connected,
     bool? reconnecting,
     Object? nowPlaying = _unset,
+    Object? appControls = _unset,
     Object? volumeLevel = _unset,
     Object? exactVolume = _unset,
     bool? muted,
@@ -93,6 +124,9 @@ class RemoteViewState {
     nowPlaying: identical(nowPlaying, _unset)
         ? this.nowPlaying
         : nowPlaying as NowPlaying?,
+    appControls: identical(appControls, _unset)
+        ? this.appControls
+        : appControls as AppControlData?,
     volumeLevel: identical(volumeLevel, _unset)
         ? this.volumeLevel
         : volumeLevel as int?,

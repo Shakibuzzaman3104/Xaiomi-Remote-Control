@@ -11,6 +11,7 @@ import '../motion.dart';
 import 'expanded_pad_page.dart';
 import 'remote_models.dart';
 import 'widgets/device_header.dart';
+import 'widgets/app_controls.dart';
 import 'widgets/mouse_unavailable.dart';
 import 'widgets/now_playing_line.dart';
 import 'widgets/trackpad.dart';
@@ -36,6 +37,8 @@ class RemoteScreen extends StatefulWidget {
     this.onExactVolumeChanged,
     required this.onSwitchDevice,
     this.onOpenNowPlaying,
+    this.onSeekBy,
+    this.onAppSearch,
     required this.onApps,
     required this.onKeyboard,
     required this.onVoice,
@@ -64,6 +67,8 @@ class RemoteScreen extends StatefulWidget {
       onRetry,
       onAppSettings;
   final VoidCallback? onPairAgain, onOpenNowPlaying;
+  final ValueChanged<Duration>? onSeekBy;
+  final VoidCallback? onAppSearch;
   final ValueChanged<Offset> onPointerMove;
   final ValueChanged<double> onScroll;
   final ValueChanged<bool> onClick, onAirMouseChanged;
@@ -163,6 +168,19 @@ class _RemoteScreenState extends State<RemoteScreen> {
               onTap: widget.onOpenNowPlaying,
             ),
           ],
+          FadeSwitcher(
+            scale: 1,
+            alignment: Alignment.topCenter,
+            child: s.connected && s.appControls != null
+                ? AppControls(
+                    key: ValueKey(s.appControls!.package),
+                    data: s.appControls!,
+                    onSeekBy: widget.onSeekBy ?? (_) {},
+                    onButton: widget.onButton,
+                    onSearch: widget.onAppSearch ?? widget.onKeyboard,
+                  )
+                : const SizedBox.shrink(key: ValueKey('no-app-controls')),
+          ),
           const SizedBox(height: 12),
           _whenConnected(ModeSwitcher(mode: mode, onChanged: _changeMode)),
           Expanded(
@@ -226,7 +244,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
             ),
           ),
           if (!landscape) ...[
-            const Divider(height: 12),
+            const SizedBox(height: 12),
             _whenConnected(actionBar),
           ],
           const SizedBox(height: 8),

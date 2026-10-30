@@ -11,6 +11,7 @@ import '../haptics.dart';
 import '../motion.dart';
 import '../theme/app_colors.dart';
 import 'step_dots.dart';
+import 'illustrations.dart';
 import '../theme/app_theme.dart';
 
 class DiscoverItem {
@@ -95,15 +96,10 @@ class DiscoverScreen extends StatelessWidget {
                       devices.isEmpty &&
                       !timedOut &&
                       errorText == null,
-                  child: Image.asset(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? 'assets/illustrations/discover_dark.png'
-                        : 'assets/illustrations/discover.png',
+                  child: const SizedBox(
                     width: 280,
                     height: 201,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) =>
-                        const SizedBox(width: 280, height: 201),
+                    child: DiscoverIllustration(),
                   ),
                 ),
               ),

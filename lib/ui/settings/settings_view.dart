@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../fade_switcher.dart';
 import '../physics.dart';
+import '../sheets/bluetooth_remote_sheet.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
@@ -211,6 +212,17 @@ class SettingsView extends StatelessWidget {
             _Section(
               label: 'Connection',
               children: [
+                if (defaultTargetPlatform == TargetPlatform.android && !kIsWeb)
+                  row(
+                    Icons.bluetooth,
+                    'Bluetooth remote',
+                    'Wake the TV when Wi-Fi is off',
+                    tap: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => const BluetoothRemoteSheet(),
+                    ),
+                  ),
                 row(
                   Icons.terminal,
                   'Full control',

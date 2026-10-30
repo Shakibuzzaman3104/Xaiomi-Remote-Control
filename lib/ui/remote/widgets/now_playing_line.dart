@@ -2,6 +2,8 @@
  * @author Shakib
  * @since 29/10/26
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../haptics.dart';
@@ -11,7 +13,7 @@ import '../../theme/app_colors.dart';
 import '../remote_models.dart';
 import '../../theme/app_theme.dart';
 
-class NowPlayingLine extends StatelessWidget {
+class NowPlayingLine extends StatefulWidget {
   const NowPlayingLine({super.key, required this.playing, this.onTap});
   final NowPlaying playing;
   final VoidCallback? onTap;
@@ -25,18 +27,41 @@ class NowPlayingLine extends StatelessWidget {
   }
 
   @override
+  State<NowPlayingLine> createState() => _NowPlayingLineState();
+}
+
+class _NowPlayingLineState extends State<NowPlayingLine> {
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (widget.playing.playing) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final playing = widget.playing;
+    final position = playing.positionAt(DateTime.now());
     final c = context.colors;
     final duration = playing.duration;
     final hasDuration = duration != null && duration.inMilliseconds > 0;
     final progress = hasDuration
-        ? (playing.position.inMilliseconds / duration.inMilliseconds).clamp(
+        ? (position.inMilliseconds / duration.inMilliseconds).clamp(
             0.0,
             1.0,
           )
         : 0.0;
     final subtitle = playing.subtitle;
-    final tap = onTap;
+    final tap = widget.onTap;
     return Semantics(
       label:
           '${playing.playing ? 'Playing' : 'Paused'}, ${playing.title}'
@@ -86,7 +111,7 @@ class NowPlayingLine extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          time(playing.position),
+                          widget.time(position),
                           style: context.appTextTheme.labelMedium!.copyWith(
                             color: c.primaryText,
                             fontFeatures: const [FontFeature.tabularFigures()],
@@ -94,7 +119,7 @@ class NowPlayingLine extends StatelessWidget {
                         ),
                         if (hasDuration)
                           Text(
-                            ' / ${time(duration)}',
+                            ' / ${widget.time(duration)}',
                             style: context.appTextTheme.labelMedium!.copyWith(
                               color: c.muted,
                               fontFeatures: const [
