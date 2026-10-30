@@ -18,6 +18,7 @@ import '../../core/session/tv_session.dart';
 import '../apps/apps_page.dart';
 import '../onboarding/unlock_page.dart';
 import '../transfer/transfer_page.dart';
+import '../tuneup/tune_up_page.dart';
 import '../motion.dart';
 import 'now_playing_sheet.dart';
 import 'remote_models.dart';
@@ -557,6 +558,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onSwitchDevice: widget.onSwitchDevice,
       onApps: _showApps,
       onTransfer: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TransferPage())),
+      onTuneUp: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TuneUpPage())),
       onKeyboard: widget.onKeyboard,
       onVoice: widget.onVoice,
       onRetry: () => session?.retryNow(),

@@ -46,6 +46,7 @@ class RemoteScreen extends StatefulWidget {
     this.onPairAgain,
     required this.onAppSettings,
     this.onTransfer,
+    this.onTuneUp,
     required this.onPointerMove,
     required this.onScroll,
     required this.onClick,
@@ -67,7 +68,7 @@ class RemoteScreen extends StatefulWidget {
       onVoice,
       onRetry,
       onAppSettings;
-  final VoidCallback? onPairAgain, onOpenNowPlaying, onTransfer;
+  final VoidCallback? onPairAgain, onOpenNowPlaying, onTransfer, onTuneUp;
   final ValueChanged<Duration>? onSeekBy;
   final VoidCallback? onAppSearch;
   final ValueChanged<Offset> onPointerMove;
@@ -142,6 +143,7 @@ class _RemoteScreenState extends State<RemoteScreen> {
             onTvSettings: () => widget.onButton(RemoteButton.settings),
             onAppSettings: widget.onAppSettings,
             onTransfer: widget.onTransfer,
+            onTuneUp: widget.onTuneUp,
             onPower: s.connected
                 ? () => widget.onButton(RemoteButton.power)
                 : null,

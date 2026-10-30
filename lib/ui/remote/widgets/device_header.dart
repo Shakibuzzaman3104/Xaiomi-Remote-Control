@@ -21,6 +21,7 @@ class DeviceHeader extends StatelessWidget {
     required this.onTvSettings,
     required this.onAppSettings,
     this.onTransfer,
+    this.onTuneUp,
     this.onPower,
     this.offlineLabel = 'Reconnecting…',
     this.retrying = true,
@@ -30,7 +31,7 @@ class DeviceHeader extends StatelessWidget {
   final bool? tvOn;
   final bool connected, retrying;
   final VoidCallback onSwitchDevice, onTvSettings, onAppSettings;
-  final VoidCallback? onPower, onTransfer;
+  final VoidCallback? onPower, onTransfer, onTuneUp;
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -154,7 +155,12 @@ class DeviceHeader extends StatelessWidget {
           onSelected: (action) => action(),
           itemBuilder: (_) => [
             if (connected && onTransfer != null)
-              PopupMenuItem(value: onTransfer, child: const Text('Transfer files')),
+              PopupMenuItem(
+                value: onTransfer,
+                child: const Text('Transfer files'),
+              ),
+            if (connected && onTuneUp != null)
+              PopupMenuItem(value: onTuneUp, child: const Text('Tune up TV')),
             if (connected)
               PopupMenuItem(
                 value: onTvSettings,
