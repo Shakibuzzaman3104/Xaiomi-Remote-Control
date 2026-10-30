@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -120,6 +122,36 @@ class _TransferPageState extends ConsumerState<TransferPage> {
     });
   }
 
+  static const _shareChannel = MethodChannel('xr/share');
+
+  /// Android keeps downloads in Downloads/Xiaomi Remote; elsewhere the share sheet saves them.
+  Future<void> _saveToPhone(TransferJob job) async {
+    String? uri;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        uri = await _shareChannel.invokeMethod<String>('saveToDownloads', {
+          'path': job.resultPath,
+          'name': job.name,
+        });
+      } catch (e) {
+        _toast("Couldn't save ${job.name}");
+        return;
+      }
+    }
+    if (uri == null) return _share(job.resultPath!);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Saved to Downloads › Xiaomi Remote'),
+        action: SnackBarAction(
+          label: 'Open',
+          onPressed: () =>
+              _shareChannel.invokeMethod('openDownload', {'uri': uri}),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pick() async {
     try {
       final picked = await FilePicker.pickFiles();
@@ -221,7 +253,7 @@ class _TransferPageState extends ConsumerState<TransferPage> {
             job.status == TransferStatus.done &&
             job.resultPath != null) {
           autoShare.remove(job.id);
-          unawaited(_share(job.resultPath!));
+          unawaited(_saveToPhone(job));
         } else if (job.status == TransferStatus.failed ||
             job.status == TransferStatus.cancelled) {
           autoShare.remove(job.id);

@@ -15,10 +15,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -102,12 +104,37 @@ public final class Main {
         System.out.println("no session");
     }
 
-    private static void printClipboard(Context context) {
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = clipboard.getPrimaryClip();
+    private static void printClipboard(Context context) throws Exception {
+        ClipData clip = readPrimaryClip();
         CharSequence text = clip == null || clip.getItemCount() == 0 ? null : clip.getItemAt(0).coerceToText(context);
         String value = text == null ? "" : text.toString();
         System.out.println("clip:" + Base64.encodeToString(value.getBytes(java.nio.charset.StandardCharsets.UTF_8), Base64.NO_WRAP));
+    }
+
+    /** Asks the clipboard service directly as the shell package; the system context's "android" is refused. */
+    private static ClipData readPrimaryClip() throws Exception {
+        Class<?> serviceManager = Class.forName("android.os.ServiceManager");
+        IBinder binder = (IBinder) serviceManager.getMethod("getService", String.class).invoke(null, "clipboard");
+        Object service = Class.forName("android.content.IClipboard$Stub").getMethod("asInterface", IBinder.class).invoke(null, binder);
+        for (Method method : service.getClass().getMethods()) {
+            if (!method.getName().equals("getPrimaryClip")) continue;
+            Class<?>[] types = method.getParameterTypes();
+            Object[] args = new Object[types.length];
+            boolean firstString = true;
+            for (int i = 0; i < types.length; i++) {
+                if (types[i] == String.class) {
+                    args[i] = firstString ? "com.android.shell" : null;
+                    firstString = false;
+                } else if (types[i] == int.class) {
+                    args[i] = 0;
+                } else {
+                    args = null;
+                    break;
+                }
+            }
+            if (args != null) return (ClipData) method.invoke(service, args);
+        }
+        throw new IllegalStateException("no getPrimaryClip");
     }
 
     private static void setClipboard(Context context, String text) {

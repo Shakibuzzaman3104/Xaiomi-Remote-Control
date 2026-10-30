@@ -136,12 +136,12 @@ void main() {
   tearDown(() async { await client.disconnect(); await daemon.close(); });
 
   test('streamed push and split pull round trip', () async {
-    final bytes = List<int>.generate(140000, (i) => i % 256);
+    final bytes = List<int>.generate(600000, (i) => i % 256);
     final progress = <int>[];
     await client.pushStream(Stream.value(bytes), bytes.length, '/file',
         mode: 0x180, onProgress: (sent, _) => progress.add(sent));
     expect(daemon.sentModes['/file'], 0x8180);
-    expect(progress, [65536, 131072, 140000]);
+    expect(progress, [262112, 524224, 600000]);
     final output = <int>[];
     await for (final chunk in client.pull('/file')) { output.addAll(chunk); }
     expect(output, bytes);
@@ -165,13 +165,13 @@ void main() {
 
   test('cancelling an active upload closes the transfer', () async {
     final token = CancelToken();
-    final data = List<int>.filled(100000, 42);
+    final data = List<int>.filled(600000, 42);
     await expectLater(
       client.pushStream(Stream.value(data), data.length, '/cancelled',
           cancel: token, onProgress: (_, _) => token.cancel()),
       throwsA(isA<AdbTransferCancelled>()),
     );
-    expect(daemon.files['/cancelled']!.length, 65536);
+    expect(daemon.files['/cancelled']!.length, 262112);
   });
 
   test('cancellation does not wait for a stalled input source', () async {

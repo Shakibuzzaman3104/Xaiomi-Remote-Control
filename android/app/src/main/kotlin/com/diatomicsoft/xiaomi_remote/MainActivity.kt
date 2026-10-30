@@ -1,10 +1,14 @@
 package com.diatomicsoft.xiaomi_remote
 
+import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import java.io.File
 import java.util.concurrent.Executors
@@ -41,11 +45,26 @@ class MainActivity : FlutterActivity() {
         systemControls = SystemControls(this, flutterEngine)
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "xr/share").also { channel ->
             channel.setMethodCallHandler { call, result ->
-                if (call.method == "takeInitialShare") {
-                    shareReady = true
-                    result.success(pendingShares.toList())
-                    pendingShares.clear()
-                } else result.notImplemented()
+                when (call.method) {
+                    "takeInitialShare" -> {
+                        shareReady = true
+                        result.success(pendingShares.toList())
+                        pendingShares.clear()
+                    }
+                    "saveToDownloads" -> saveToDownloads(call.argument<String>("path")!!, call.argument<String>("name")!!, result)
+                    "openDownload" -> {
+                        val uri = Uri.parse(call.argument<String>("uri")!!)
+                        val view = Intent(Intent.ACTION_VIEW).setDataAndType(uri, contentResolver.getType(uri))
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        try {
+                            startActivity(Intent.createChooser(view, null))
+                            result.success(true)
+                        } catch (_: Exception) {
+                            result.success(false)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
             }
         }
     }
@@ -80,6 +99,32 @@ class MainActivity : FlutterActivity() {
             }
             if (copied.isNotEmpty()) mainHandler.post {
                 if (shareReady) shareChannel?.invokeMethod("sharedFiles", copied) else pendingShares.addAll(copied)
+            }
+        }
+    }
+    /** Moves a downloaded file into Downloads/Xiaomi Remote; returns its content URI, or null before Android 10. */
+    private fun saveToDownloads(path: String, name: String, result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT < 29) return result.success(null)
+        shareExecutor.execute {
+            try {
+                val source = File(path)
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, name)
+                    put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/Xiaomi Remote")
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+                val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)!!
+                try {
+                    contentResolver.openOutputStream(uri)!!.use { out -> source.inputStream().use { it.copyTo(out) } }
+                    contentResolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
+                } catch (e: Exception) {
+                    contentResolver.delete(uri, null, null)
+                    throw e
+                }
+                source.delete()
+                mainHandler.post { result.success(uri.toString()) }
+            } catch (e: Exception) {
+                mainHandler.post { result.error("save", e.message, null) }
             }
         }
     }
