@@ -43,6 +43,9 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   speech_to_text: ^7.5.0
   sensors_plus: ^7.1.1
+  file_picker: ^13.3.0
+  share_plus: ^13.3.1
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

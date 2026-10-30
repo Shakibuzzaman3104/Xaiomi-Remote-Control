@@ -1,0 +1,26 @@
+{
+  "mockup": "design/transfer/files/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/transfer/files/mockup_v1.png",
+      "issues": [
+        {
+          "category": "accessibility",
+          "problem": "The bottom-sheet actions \u201cSave to phone\u201d, \u201cOpen on TV\u201d and \u201cInstall\u201d are spaced about 42 logical units apart, preventing separate 48-unit-high touch targets.",
+          "edit": "Give each bottom-sheet action a non-overlapping touch target at least 48 logical units tall, expanding the sheet upward as needed.",
+          "bbox": {
+            "x": 48,
+            "y": 1426,
+            "w": 758,
+            "h": 354
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/transfer/files/mockup_v1.png"
+}

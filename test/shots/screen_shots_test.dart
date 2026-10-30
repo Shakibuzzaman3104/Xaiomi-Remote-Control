@@ -11,6 +11,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xiaomi_remote/core/adb/adb_client.dart';
+import 'package:xiaomi_remote/core/adb/full_control.dart';
+import 'package:xiaomi_remote/core/adb/tv_files.dart';
+import 'package:xiaomi_remote/core/session/providers.dart';
+import 'package:xiaomi_remote/core/storage/paired_tv_store.dart';
+import 'package:xiaomi_remote/core/transfer/transfer_queue.dart';
 import 'package:xiaomi_remote/ui/apps/app_actions_sheet.dart';
 import 'package:xiaomi_remote/ui/apps/apps_screen.dart';
 import 'package:xiaomi_remote/ui/onboarding/discover_screen.dart';
@@ -22,6 +29,7 @@ import 'package:xiaomi_remote/ui/settings/settings_view.dart';
 import 'package:xiaomi_remote/ui/sheets/keyboard_sheet.dart';
 import 'package:xiaomi_remote/ui/sheets/voice_sheet.dart';
 import 'package:xiaomi_remote/ui/theme/app_theme.dart';
+import 'package:xiaomi_remote/ui/transfer/transfer_page.dart';
 
 final _env = Platform.environment;
 final _textScale = double.tryParse(_env['SHOT_TEXT_SCALE'] ?? '') ?? 1;
@@ -150,6 +158,39 @@ Widget _demoAppsScreen() => AppsScreen(
   onShowActions: (_) {},
 );
 
+class _TransferControl extends FullControl {
+  @override
+  FullControlState build() => const FullControlState(status: FullControlStatus.connected);
+}
+
+class _TransferFiles implements TvFiles {
+  @override
+  Future<List<AdbFileEntry>> listFolder(String path) async => [
+    for (final (name, mode, size) in [('Movies', 0x4000, 0), ('Pictures', 0x4000, 0), ('Kodi-21.apk', 0x8000, 78 * 1048576), ('screenshot_0412.png', 0x8000, 2202009), ('report.pdf', 0x8000, 655360)])
+      AdbFileEntry(name: name, mode: mode, size: size, modified: DateTime(2026)),
+  ];
+  @override
+  Future<({int free, int total})> storage() async => (free: 4402341478, total: 8589934592);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _TransferJobs extends TransferQueue {
+  @override
+  List<TransferJob> build() => [
+    TransferJob(id: '1', name: 'holiday.mp4', size: 182 * 1048576, direction: TransferDirection.toTv, status: TransferStatus.running, progress: .64, cancelToken: CancelToken()),
+    TransferJob(id: '2', name: 'Kodi-21.apk', size: 78 * 1048576, direction: TransferDirection.install, status: TransferStatus.done, cancelToken: CancelToken()),
+    TransferJob(id: '3', name: 'notes.txt', size: 1200, direction: TransferDirection.toTv, status: TransferStatus.done, resultPath: '/sdcard/notes.txt', cancelToken: CancelToken()),
+  ];
+}
+
+Widget _demoTransfer({bool files = false}) => ProviderScope(overrides: [
+  fullControlProvider.overrideWith(_TransferControl.new),
+  tvFilesProvider.overrideWithValue(_TransferFiles()),
+  transferQueueProvider.overrideWith(_TransferJobs.new),
+  activeTvProvider.overrideWith((ref) => PairedTv(id: '1', name: 'Living Room · Mi Box S', host: '', certPem: '', privateKeyPem: '', pairedAt: DateTime(2026))),
+], child: TransferPage(initialFilesTab: files));
+
 /// Screens rendered at the design canvas size, for side-by-side comparison.
 final shots = <String, Widget Function()>{
   'remote': _demoRemote,
@@ -223,6 +264,8 @@ final shots = <String, Widget Function()>{
     onAboutTap: () {},
   ),
   'apps': _demoAppsScreen,
+  'transfer_send': () => _demoTransfer(),
+  'transfer_files': () => _demoTransfer(files: true),
   'app_actions': () => _WithSheet(
     background: _demoAppsScreen,
     sheet: AppActionsSheet(
@@ -314,6 +357,12 @@ void main() {
         });
         for (var i = 0; i < 10; i++) {
           await tester.pump(const Duration(milliseconds: 60));
+        }
+        if (entry.key == 'transfer_files') {
+          await tester.tap(find.text('Kodi-21.apk'));
+          for (var i = 0; i < 10; i++) {
+            await tester.pump(const Duration(milliseconds: 60));
+          }
         }
         await expectLater(
           find.byType(MaterialApp),

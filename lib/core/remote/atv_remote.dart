@@ -20,7 +20,7 @@ export 'proto/remotemessage.pbenum.dart' show RemoteKeyCode, RemoteDirection;
 class AtvState {
   const AtvState({
     this.connected = false,
-    this.isOn = false,
+    this.isOn,
     this.currentApp,
     this.volumeLevel = 0,
     this.volumeMax = 0,
@@ -33,7 +33,10 @@ class AtvState {
     this.deviceManufacturer,
     this.swVersion,
   });
-  final bool connected, isOn, muted, imeActive;
+  final bool connected, muted, imeActive;
+
+  /// Whether the TV screen is on; null until the TV reports it.
+  final bool? isOn;
   final String? currentApp,
       imeLabel,
       imeValue,

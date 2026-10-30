@@ -37,6 +37,9 @@ public final class Main {
             case "seek":
                 seek(context, args[1], Long.parseLong(args[2]));
                 break;
+            case "clipboard-get":
+                printClipboard(context);
+                break;
             case "clipboard-set":
                 setClipboard(context, new String(Base64.decode(args[1], Base64.NO_WRAP), "UTF-8"));
                 break;
@@ -97,6 +100,14 @@ public final class Main {
             }
         }
         System.out.println("no session");
+    }
+
+    private static void printClipboard(Context context) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard.getPrimaryClip();
+        CharSequence text = clip == null || clip.getItemCount() == 0 ? null : clip.getItemAt(0).coerceToText(context);
+        String value = text == null ? "" : text.toString();
+        System.out.println("clip:" + Base64.encodeToString(value.getBytes(java.nio.charset.StandardCharsets.UTF_8), Base64.NO_WRAP));
     }
 
     private static void setClipboard(Context context, String text) {

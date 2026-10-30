@@ -5,8 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/session/providers.dart';
 import 'core/discovery/tv_discovery.dart';
+import 'core/session/providers.dart';
+import 'core/system/system_controls.dart';
+import 'core/transfer/share_intake.dart';
 import 'ui/fade_switcher.dart';
 import 'ui/onboarding/onboarding_flow.dart';
 import 'ui/onboarding/unlock_page.dart';
@@ -26,15 +28,21 @@ class XiaomiRemoteApp extends ConsumerWidget {
   const XiaomiRemoteApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
-    title: 'Xiaomi Remote',
-    debugShowCheckedModeBanner: false,
-    theme: AppTheme.light,
-    darkTheme: AppTheme.dark,
-    themeMode: ref.watch(themeModeProvider),
-    home: const AppRoot(),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(systemControlsProvider);
+    return ShareIntake(navigatorKey: _navigatorKey, child: MaterialApp(
+      navigatorKey: _navigatorKey,
+      title: 'Xiaomi Remote',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
+      home: const AppRoot(),
+    ));
+  }
 }
+
+final _navigatorKey = GlobalKey<NavigatorState>();
 
 /// Shows onboarding until a TV is paired, then the Remote.
 class AppRoot extends ConsumerStatefulWidget {

@@ -33,6 +33,8 @@ class SettingsView extends StatelessWidget {
     required this.onHapticsChanged,
     required this.volumeKeysEnabled,
     required this.onVolumeKeysChanged,
+    this.controlsInNotification = false,
+    this.onControlsInNotificationChanged,
     required this.swipeSensitivity,
     required this.onSwipeSensitivityChanged,
     required this.micButtonLabel,
@@ -52,6 +54,8 @@ class SettingsView extends StatelessWidget {
   final ValueChanged<String> onSelectDevice, onRemoveDevice;
   final VoidCallback onAddTv;
   final bool hapticsEnabled, volumeKeysEnabled;
+  final bool controlsInNotification;
+  final ValueChanged<bool>? onControlsInNotificationChanged;
   final ValueChanged<bool> onHapticsChanged, onVolumeKeysChanged;
   final double swipeSensitivity;
   final ValueChanged<double> onSwipeSensitivityChanged;
@@ -159,6 +163,22 @@ class SettingsView extends StatelessWidget {
                     "Use your phone's volume buttons",
                     tap: () => onVolumeKeysChanged(!volumeKeysEnabled),
                     trailing: toggle(volumeKeysEnabled, onVolumeKeysChanged),
+                    mergeSemantics: true,
+                  ),
+                if (defaultTargetPlatform == TargetPlatform.android &&
+                    !kIsWeb &&
+                    onControlsInNotificationChanged != null)
+                  row(
+                    Icons.notifications_outlined,
+                    'Controls in notification',
+                    'Play, pause and volume from the notification shade',
+                    tap: () => onControlsInNotificationChanged!(
+                      !controlsInNotification,
+                    ),
+                    trailing: toggle(
+                      controlsInNotification,
+                      onControlsInNotificationChanged!,
+                    ),
                     mergeSemantics: true,
                   ),
                 row(

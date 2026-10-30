@@ -68,6 +68,7 @@ void main() {
       'micButton': 'typeIntoField',
       'speechLocale': 'bn_BD',
       'remoteMode': 'dpad',
+      'controlsInNotification': false,
     });
   });
 }

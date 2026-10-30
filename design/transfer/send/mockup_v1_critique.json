@@ -1,0 +1,26 @@
+{
+  "mockup": "design/transfer/send/mockup_v1.png",
+  "rounds": [
+    {
+      "image": "design/transfer/send/mockup_v1.png",
+      "issues": [
+        {
+          "category": "consistency",
+          "problem": "The selected \u201cSend to TV\u201d segment, buttons, and lavender surfaces use gradients and mottled shading, whereas the approved screen uses flat fills.",
+          "edit": "Use flat purple and lavender fills matching the approved screen for the selected segment, buttons, and surfaces.",
+          "bbox": {
+            "x": 39,
+            "y": 226,
+            "w": 408,
+            "h": 87
+          },
+          "scope": "local",
+          "severity": "medium",
+          "id": 1
+        }
+      ],
+      "weight": 2
+    }
+  ],
+  "best": "design/transfer/send/mockup_v1.png"
+}

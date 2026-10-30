@@ -12,10 +12,12 @@ import '../../core/adb/adb_commands.dart';
 import '../../core/adb/full_control.dart';
 import '../../core/adb/tv_cursor.dart';
 import '../../core/session/providers.dart';
+import '../../core/system/system_controls.dart';
 import '../../core/settings/app_preferences.dart';
 import '../../core/session/tv_session.dart';
 import '../apps/apps_page.dart';
 import '../onboarding/unlock_page.dart';
+import '../transfer/transfer_page.dart';
 import '../motion.dart';
 import 'now_playing_sheet.dart';
 import 'remote_models.dart';
@@ -469,9 +471,13 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
     final apps = ref.watch(fullControlProvider).apps;
     final playing = _buildNowPlaying(apps);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _playingNotifier.value = playing;
+      if (!mounted) return;
+      _playingNotifier.value = playing;
+      final controls = ref.read(systemControlsProvider);
+      controls.nowPlayingTitle.value = playing?.title;
+      controls.nowPlayingActive.value = playing?.playing ?? false;
     });
-    final package = _foreground ?? _nowPlaying?.package;
+    final package = _foreground ?? atv.currentApp ?? _nowPlaying?.package;
     final foregroundApp = apps.where((app) => app.package == package).firstOrNull;
 
     return RemoteScreen(
@@ -500,6 +506,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
         volumeLevel: atv.volumeMax > 0
             ? (atv.volumeLevel * 100 / atv.volumeMax).round()
             : null,
+        tvOn: atv.isOn,
         muted: _adbMuted ?? (atv.volumeMax > 0 ? atv.muted : _assumedMuted),
         needsPairing: status == SessionStatus.notPaired,
         attempt: sessionState.attempt,
@@ -549,6 +556,7 @@ class _ConnectedRemotePageState extends ConsumerState<ConnectedRemotePage>
       onAppSearch: widget.onKeyboard,
       onSwitchDevice: widget.onSwitchDevice,
       onApps: _showApps,
+      onTransfer: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TransferPage())),
       onKeyboard: widget.onKeyboard,
       onVoice: widget.onVoice,
       onRetry: () => session?.retryNow(),

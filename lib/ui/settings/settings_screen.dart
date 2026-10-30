@@ -9,6 +9,7 @@ import '../../core/adb/full_control.dart';
 import '../../core/session/providers.dart';
 import '../../core/session/tv_session.dart';
 import '../../core/settings/app_preferences.dart';
+import '../../core/system/system_controls.dart';
 import '../motion.dart';
 import '../theme/theme_mode_provider.dart';
 import 'settings_view.dart';
@@ -125,6 +126,11 @@ class SettingsScreen extends ConsumerWidget {
       onHapticsChanged: notifier.setHaptics,
       volumeKeysEnabled: prefs.volumeKeysControlTv,
       onVolumeKeysChanged: notifier.setVolumeKeysControlTv,
+      controlsInNotification: prefs.controlsInNotification,
+      onControlsInNotificationChanged: (value) {
+        if (value) ref.read(systemControlsProvider).requestPermission();
+        notifier.setControlsInNotification(value);
+      },
       swipeSensitivity: prefs.swipeSensitivity,
       onSwipeSensitivityChanged: notifier.setSwipeSensitivity,
       micButtonLabel: prefs.micButton == VoiceTargetPreference.askAssistant

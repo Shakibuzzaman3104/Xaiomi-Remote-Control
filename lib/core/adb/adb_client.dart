@@ -25,6 +25,67 @@ class AdbException implements Exception {
   String toString() => 'AdbException: $message';
 }
 
+class AdbTransferCancelled implements Exception {}
+
+class CancelToken {
+  bool _isCancelled = false;
+  final _listeners = <void Function()>{};
+  bool get isCancelled => _isCancelled;
+  void cancel() {
+    if (isCancelled) return;
+    _isCancelled = true;
+    for (final listener in _listeners.toList()) {
+      listener();
+    }
+    _listeners.clear();
+  }
+
+  Future<T> guard<T>(Future<T> future) {
+    if (isCancelled) {
+      future.ignore();
+      return Future.error(AdbTransferCancelled());
+    }
+    final result = Completer<T>();
+    void cancelled() {
+      if (!result.isCompleted) result.completeError(AdbTransferCancelled());
+    }
+    _listeners.add(cancelled);
+    future.then((value) {
+      _listeners.remove(cancelled);
+      if (!result.isCompleted) result.complete(value);
+    }, onError: (Object error, StackTrace stack) {
+      _listeners.remove(cancelled);
+      if (!result.isCompleted) result.completeError(error, stack);
+    });
+    return result.future;
+  }
+}
+
+class AdbFileEntry {
+  const AdbFileEntry({required this.name, required this.mode, required this.size, required this.modified});
+  final String name;
+  final int mode, size;
+  final DateTime modified;
+  bool get isDirectory => (mode & 0xf000) == 0x4000;
+  bool get isSymlink => (mode & 0xf000) == 0xa000;
+}
+
+class _SyncReader {
+  _SyncReader(Stream<List<int>> source) : iterator = StreamIterator(source);
+  final StreamIterator<List<int>> iterator;
+  final buffer = <int>[];
+  Future<Uint8List> read(int length) async {
+    while (buffer.length < length) {
+      if (!await iterator.moveNext()) throw AdbException('Sync stream closed');
+      buffer.addAll(iterator.current);
+    }
+    final result = Uint8List.fromList(buffer.sublist(0, length));
+    buffer.removeRange(0, length);
+    return result;
+  }
+  Future<void> close() => iterator.cancel();
+}
+
 class _AdbStream {
   _AdbStream(this.id);
   final int id;
@@ -33,6 +94,7 @@ class _AdbStream {
   Completer<void>? ack;
   Future<void> writes = Future.value();
   final data = StreamController<List<int>>();
+  void Function()? cancelTransfer;
 }
 
 /// A two-way stream to a device service, such as `localabstract:<name>`.
@@ -203,6 +265,8 @@ class AdbClient {
       }
       if (stream.remoteId != null) _send('CLSE', stream.id, m.arg0);
       _streams.remove(stream.id);
+      stream.cancelTransfer?.call();
+      stream.cancelTransfer = null;
       stream.data.close();
     }
   }
@@ -218,6 +282,8 @@ class AdbClient {
     }
     _handshake = null;
     for (final stream in _streams.values) {
+      stream.cancelTransfer?.call();
+      stream.cancelTransfer = null;
       if (!stream.opened.isCompleted) {
         stream.opened.completeError(error);
       }
@@ -231,21 +297,33 @@ class AdbClient {
     _state(AdbConnectionState.failed);
   }
 
-  Future<_AdbStream> _open(String service) async {
+  Future<_AdbStream> _open(String service, {CancelToken? cancel}) async {
     if (!_connected) throw AdbException('Not connected');
+    if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
     final stream = _AdbStream(_nextId++);
     _streams[stream.id] = stream;
+    if (cancel != null) {
+      void close() => _close(stream);
+      cancel._listeners.add(close);
+      stream.cancelTransfer = () => cancel._listeners.remove(close);
+    }
     _send('OPEN', stream.id, 0, utf8.encode('$service\u0000'));
     try {
-      await stream.opened.future.timeout(const Duration(seconds: 15));
+      await _guard(stream.opened.future, cancel).timeout(const Duration(seconds: 15));
     } on TimeoutException {
       _close(stream);
       throw AdbException('Stream open timed out');
+    } catch (_) {
+      _close(stream);
+      if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+      rethrow;
     }
     return stream;
   }
 
   void _close(_AdbStream stream) {
+    stream.cancelTransfer?.call();
+    stream.cancelTransfer = null;
     if (_streams.remove(stream.id) == null) return;
     final error = AdbException('Stream closed');
     if (!stream.opened.isCompleted) stream.opened.completeError(error);
@@ -350,78 +428,158 @@ class AdbClient {
     return result;
   }
 
-  Future<void> push(
-    Uint8List bytes,
-    String remotePath, {
+  void _checkPath(String path) {
+    if (path.contains('\u0000')) throw AdbException('Invalid remote path');
+  }
+
+  Future<T> _guard<T>(Future<T> future, CancelToken? cancel) =>
+      cancel == null ? future : cancel.guard(future);
+
+  Future<_AdbStream> _openTransfer(CancelToken? cancel) =>
+      _open('sync:', cancel: cancel);
+
+  Future<void> push(Uint8List bytes, String remotePath, {
     void Function(int sent, int total)? onProgress,
+  }) => pushStream(Stream.value(bytes), bytes.length, remotePath, onProgress: onProgress);
+
+  Future<void> pushStream(Stream<List<int>> data, int length, String remotePath, {
+    int mode = 0x1a4, void Function(int sent, int total)? onProgress, CancelToken? cancel,
   }) async {
-    if (remotePath.contains('\u0000')) {
-      throw AdbException('Invalid remote path');
-    }
-    final stream = await _open('sync:');
-    final response = <int>[];
-    final completed = Completer<void>();
-    completed.future.ignore();
-    final subscription = stream.data.stream.listen(
-      (data) {
-        response.addAll(data);
-        if (response.length >= 8) {
-          final length = ByteData.sublistView(Uint8List.fromList(response))
-              .getUint32(4, Endian.little);
-          final id = ascii.decode(
-            response.take(4).toList(),
-            allowInvalid: true,
-          );
-          if ((id == 'OKAY' ||
-                  (id == 'FAIL' && response.length >= 8 + length)) &&
-              !completed.isCompleted) {
-            if (id == 'FAIL') {
-              completed.completeError(
-                AdbException(
-                  utf8.decode(
-                    response.sublist(8, 8 + length),
-                    allowMalformed: true,
-                  ),
-                ),
-              );
-            } else {
-              completed.complete();
-            }
-          }
-        }
-      },
-      onError: (Object e) {
-        if (!completed.isCompleted) completed.completeError(e);
-      },
-      onDone: () {
-        if (!completed.isCompleted) {
-          completed.completeError(AdbException('Sync stream closed'));
-        }
-      },
-    );
+    _checkPath(remotePath);
+    if (length < 0) throw AdbException('Invalid transfer length');
+    if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+    final stream = await _openTransfer(cancel);
+    final reader = _SyncReader(stream.data.stream);
+    final input = StreamIterator(data);
     try {
-      final path = utf8.encode('$remotePath,33188');
-      await _write(stream, _syncPacket('SEND', path.length, path));
-      for (var offset = 0; offset < bytes.length; offset += 65536) {
-        final end = (offset + 65536).clamp(0, bytes.length);
-        await _write(
-          stream,
-          _syncPacket('DATA', end - offset, bytes.sublist(offset, end)),
-        );
-        onProgress?.call(end, bytes.length);
+      final path = utf8.encode('$remotePath,${0x8000 | mode}');
+      await _guard(_write(stream, _syncPacket('SEND', path.length, path)), cancel);
+      var sent = 0;
+      while (await _guard(input.moveNext(), cancel)) {
+        final bytes = input.current;
+        for (var offset = 0; offset < bytes.length; offset += 65536) {
+          final end = (offset + 65536).clamp(0, bytes.length);
+          if (sent + end - offset > length) throw AdbException('Transfer length mismatch');
+          await _guard(_write(stream, _syncPacket('DATA', end - offset, bytes.sublist(offset, end))), cancel);
+          sent += end - offset;
+          onProgress?.call(sent, length);
+        }
       }
-      await _write(
-        stream,
-        _syncPacket('DONE', DateTime.now().millisecondsSinceEpoch ~/ 1000),
-      );
-      try {
-        await completed.future.timeout(const Duration(seconds: 15));
-      } on TimeoutException {
-        throw AdbException('Sync timed out');
+      if (sent != length) throw AdbException('Transfer length mismatch');
+      await _guard(_write(stream, _syncPacket('DONE', DateTime.now().millisecondsSinceEpoch ~/ 1000)), cancel);
+      final header = await _guard(reader.read(8).timeout(const Duration(seconds: 15)), cancel);
+      final id = ascii.decode(header.sublist(0, 4), allowInvalid: true);
+      final size = ByteData.sublistView(header).getUint32(4, Endian.little);
+      if (id == 'FAIL') throw AdbException(utf8.decode(await _guard(reader.read(size), cancel), allowMalformed: true));
+      if (id != 'OKAY') throw AdbException('Invalid sync response');
+      if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+    } on TimeoutException {
+      throw AdbException('Sync timed out');
+    } catch (_) {
+      if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+      rethrow;
+    } finally {
+      _close(stream);
+      await reader.close();
+      if (cancel?.isCancelled ?? false) {
+        input.cancel().ignore();
+      } else {
+        await input.cancel();
+      }
+    }
+  }
+
+  Future<({int mode, int size, DateTime modified})?> stat(String path) =>
+      _stat(path, null);
+
+  Future<({int mode, int size, DateTime modified})?> _stat(String path, CancelToken? cancel) async {
+    _checkPath(path);
+    final stream = await _openTransfer(cancel);
+    final reader = _SyncReader(stream.data.stream);
+    try {
+      final name = utf8.encode(path);
+      await _guard(_write(stream, _syncPacket('STAT', name.length, name)), cancel);
+      final first = await _guard(reader.read(8), cancel);
+      final id = ascii.decode(first.sublist(0, 4), allowInvalid: true);
+      if (id == 'FAIL') {
+        final length = ByteData.sublistView(first).getUint32(4, Endian.little);
+        throw AdbException(utf8.decode(await _guard(reader.read(length), cancel), allowMalformed: true));
+      }
+      if (id != 'STAT') throw AdbException('Invalid sync response');
+      final header = Uint8List.fromList([...first, ...await _guard(reader.read(8), cancel)]);
+      final fields = ByteData.sublistView(header);
+      final mode = fields.getUint32(4, Endian.little);
+      if (mode == 0) return null;
+      return (mode: mode, size: fields.getUint32(8, Endian.little), modified: DateTime.fromMillisecondsSinceEpoch(fields.getUint32(12, Endian.little) * 1000));
+    } catch (_) {
+      if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+      rethrow;
+    } finally {
+      _close(stream);
+      await reader.close();
+    }
+  }
+
+  Future<List<AdbFileEntry>> list(String path) async {
+    _checkPath(path);
+    final stream = await _open('sync:');
+    final reader = _SyncReader(stream.data.stream);
+    try {
+      final name = utf8.encode(path);
+      await _write(stream, _syncPacket('LIST', name.length, name));
+      final entries = <AdbFileEntry>[];
+      while (true) {
+        final first = await reader.read(8);
+        final id = ascii.decode(first.sublist(0, 4), allowInvalid: true);
+        if (id == 'FAIL') {
+          final length = ByteData.sublistView(first).getUint32(4, Endian.little);
+          throw AdbException(utf8.decode(await reader.read(length), allowMalformed: true));
+        }
+        if (id != 'DONE' && id != 'DENT') {
+          throw AdbException('Invalid sync response');
+        }
+        final header = Uint8List.fromList([...first, ...await reader.read(12)]);
+        if (id == 'DONE') return entries;
+        final fields = ByteData.sublistView(header);
+        final entryName = utf8.decode(await reader.read(fields.getUint32(16, Endian.little)), allowMalformed: true);
+        if (entryName == '.' || entryName == '..') continue;
+        entries.add(AdbFileEntry(name: entryName, mode: fields.getUint32(4, Endian.little), size: fields.getUint32(8, Endian.little), modified: DateTime.fromMillisecondsSinceEpoch(fields.getUint32(12, Endian.little) * 1000)));
       }
     } finally {
-      await subscription.cancel();
       _close(stream);
+      await reader.close();
+    }
+  }
+
+  Stream<List<int>> pull(String remotePath, {void Function(int received, int total)? onProgress, CancelToken? cancel}) async* {
+    _checkPath(remotePath);
+    if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+    final info = await _stat(remotePath, cancel);
+    final stream = await _openTransfer(cancel);
+    final reader = _SyncReader(stream.data.stream);
+    try {
+      final path = utf8.encode(remotePath);
+      await _guard(_write(stream, _syncPacket('RECV', path.length, path)), cancel);
+      var received = 0;
+      while (true) {
+        final header = await _guard(reader.read(8), cancel);
+        final id = ascii.decode(header.sublist(0, 4), allowInvalid: true);
+        final length = ByteData.sublistView(header).getUint32(4, Endian.little);
+        if (id == 'DONE') return;
+        if (id == 'FAIL') throw AdbException(utf8.decode(await _guard(reader.read(length), cancel), allowMalformed: true));
+        if (id != 'DATA' || length > 65536) throw AdbException('Invalid sync response');
+        final bytes = await _guard(reader.read(length), cancel);
+        received += bytes.length;
+        onProgress?.call(received, info?.size ?? 0);
+        if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+        yield bytes;
+      }
+    } catch (_) {
+      if (cancel?.isCancelled ?? false) throw AdbTransferCancelled();
+      rethrow;
+    } finally {
+      _close(stream);
+      await reader.close();
     }
   }
 
@@ -449,6 +607,8 @@ class AdbClient {
     }
     _handshake = null;
     for (final stream in _streams.values) {
+      stream.cancelTransfer?.call();
+      stream.cancelTransfer = null;
       if (!stream.opened.isCompleted) stream.opened.completeError(error);
       if (stream.ack != null && !stream.ack!.isCompleted) {
         stream.ack!.completeError(error);

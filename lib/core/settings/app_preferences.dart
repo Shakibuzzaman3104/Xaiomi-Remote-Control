@@ -14,6 +14,7 @@ class AppPreferences {
   const AppPreferences({
     this.haptics = true,
     this.volumeKeysControlTv = true,
+    this.controlsInNotification = false,
     this.swipeSensitivity = 0.5,
     this.micButton = VoiceTargetPreference.askAssistant,
     this.speechLocale = 'en_US',
@@ -22,6 +23,7 @@ class AppPreferences {
 
   final bool haptics;
   final bool volumeKeysControlTv;
+  final bool controlsInNotification;
   final double swipeSensitivity;
   final VoiceTargetPreference micButton;
   final String speechLocale;
@@ -30,6 +32,7 @@ class AppPreferences {
   AppPreferences copyWith({
     bool? haptics,
     bool? volumeKeysControlTv,
+    bool? controlsInNotification,
     double? swipeSensitivity,
     VoiceTargetPreference? micButton,
     String? speechLocale,
@@ -37,6 +40,7 @@ class AppPreferences {
   }) => AppPreferences(
     haptics: haptics ?? this.haptics,
     volumeKeysControlTv: volumeKeysControlTv ?? this.volumeKeysControlTv,
+    controlsInNotification: controlsInNotification ?? this.controlsInNotification,
     swipeSensitivity: swipeSensitivity ?? this.swipeSensitivity,
     micButton: micButton ?? this.micButton,
     speechLocale: speechLocale ?? this.speechLocale,
@@ -46,6 +50,7 @@ class AppPreferences {
   Map<String, dynamic> toJson() => {
     'haptics': haptics,
     'volumeKeysControlTv': volumeKeysControlTv,
+    'controlsInNotification': controlsInNotification,
     'swipeSensitivity': swipeSensitivity,
     'micButton': micButton.name,
     'speechLocale': speechLocale,
@@ -57,6 +62,7 @@ class AppPreferences {
     volumeKeysControlTv: json['volumeKeysControlTv'] is bool
         ? json['volumeKeysControlTv'] as bool
         : true,
+    controlsInNotification: json['controlsInNotification'] == true,
     swipeSensitivity: json['swipeSensitivity'] is num
         ? (json['swipeSensitivity'] as num).toDouble().clamp(0.0, 1.0)
         : 0.5,
@@ -114,6 +120,8 @@ class AppPreferencesNotifier extends Notifier<AppPreferences> {
       _update(state.copyWith(haptics: value));
   Future<void> setVolumeKeysControlTv(bool value) =>
       _update(state.copyWith(volumeKeysControlTv: value));
+  Future<void> setControlsInNotification(bool value) =>
+      _update(state.copyWith(controlsInNotification: value));
   Future<void> setSwipeSensitivity(double value) =>
       _update(state.copyWith(swipeSensitivity: value.clamp(0.0, 1.0)));
   Future<void> setMicButton(VoiceTargetPreference value) =>

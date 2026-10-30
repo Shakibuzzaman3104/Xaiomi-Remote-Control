@@ -3,6 +3,7 @@
  * @since 29/10/26
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xiaomi_remote/ui/remote/remote_models.dart';
 import 'package:xiaomi_remote/ui/remote/remote_screen.dart';
@@ -13,15 +14,17 @@ void main() {
   testWidgets('OK sends a tap or a long down and up', (tester) async {
     final events = <String>[];
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        home: Center(
-          child: SizedBox(
-            width: 200,
-            child: Dpad(
-              onButton: (button) => events.add('tap:$button'),
-              onButtonDown: (button) => events.add('down:$button'),
-              onButtonUp: (button) => events.add('up:$button'),
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: Center(
+            child: SizedBox(
+              width: 200,
+              child: Dpad(
+                onButton: (button) => events.add('tap:$button'),
+                onButtonDown: (button) => events.add('down:$button'),
+                onButtonUp: (button) => events.add('up:$button'),
+              ),
             ),
           ),
         ),
@@ -40,10 +43,12 @@ void main() {
   testWidgets('overlapping dpad pointers do not leak repeats', (tester) async {
     final buttons = <RemoteButton>[];
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        home: Center(
-          child: SizedBox(width: 200, child: Dpad(onButton: buttons.add)),
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: Center(
+            child: SizedBox(width: 200, child: Dpad(onButton: buttons.add)),
+          ),
         ),
       ),
     );
@@ -74,39 +79,41 @@ void main() {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
       for (final scale in [1.0, 1.3]) {
         await tester.pumpWidget(
-          MaterialApp(
-            theme: theme,
-            home: MediaQuery(
-              data: MediaQueryData(
-                size: const Size(360, 780),
-                textScaler: TextScaler.linear(scale),
-              ),
-              child: RemoteScreen(
-                state: RemoteViewState(
-                  deviceName: 'Living Room · Mi Box S',
-                  connected: true,
-                  reconnecting: false,
-                  nowPlaying: const NowPlaying(
-                    title: 'Me at the zoo',
-                    position: Duration(seconds: 12),
-                    duration: Duration(seconds: 19),
-                    playing: true,
-                  ),
-                  volumeLevel: 12,
-                  muted: false,
+          ProviderScope(
+            child: MaterialApp(
+              theme: theme,
+              home: MediaQuery(
+                data: MediaQueryData(
+                  size: const Size(360, 780),
+                  textScaler: TextScaler.linear(scale),
                 ),
-                onButton: (_) {},
-                onSwitchDevice: () {},
-                onOpenNowPlaying: () {},
-                onApps: () {},
-                onKeyboard: () {},
-                onVoice: () {},
-                onRetry: () {},
-                onAppSettings: () {},
-                onPointerMove: (_) {},
-                onScroll: (_) {},
-                onClick: (_) {},
-                onAirMouseChanged: (_) {},
+                child: RemoteScreen(
+                  state: RemoteViewState(
+                    deviceName: 'Living Room · Mi Box S',
+                    connected: true,
+                    reconnecting: false,
+                    nowPlaying: const NowPlaying(
+                      title: 'Me at the zoo',
+                      position: Duration(seconds: 12),
+                      duration: Duration(seconds: 19),
+                      playing: true,
+                    ),
+                    volumeLevel: 12,
+                    muted: false,
+                  ),
+                  onButton: (_) {},
+                  onSwitchDevice: () {},
+                  onOpenNowPlaying: () {},
+                  onApps: () {},
+                  onKeyboard: () {},
+                  onVoice: () {},
+                  onRetry: () {},
+                  onAppSettings: () {},
+                  onPointerMove: (_) {},
+                  onScroll: (_) {},
+                  onClick: (_) {},
+                  onAirMouseChanged: (_) {},
+                ),
               ),
             ),
           ),
@@ -128,31 +135,33 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final buttons = <RemoteButton>[];
     var voices = 0;
-    Widget screen(bool connected) => MaterialApp(
-      theme: AppTheme.light,
-      home: RemoteScreen(
-        key: ValueKey(connected),
-        state: RemoteViewState(
-          deviceName: 'TV',
-          connected: connected,
-          reconnecting: !connected,
-          attempt: connected ? 0 : 2,
-          muted: false,
+    Widget screen(bool connected) => ProviderScope(
+      child: MaterialApp(
+        theme: AppTheme.light,
+        home: RemoteScreen(
+          key: ValueKey(connected),
+          state: RemoteViewState(
+            deviceName: 'TV',
+            connected: connected,
+            reconnecting: !connected,
+            attempt: connected ? 0 : 2,
+            muted: false,
+          ),
+          onButton: buttons.add,
+          onSwitchDevice: () {},
+          onOpenNowPlaying: () {},
+          onApps: () {},
+          onKeyboard: () {},
+          onVoice: () {
+            voices++;
+          },
+          onRetry: () {},
+          onAppSettings: () {},
+          onPointerMove: (_) {},
+          onScroll: (_) {},
+          onClick: (_) {},
+          onAirMouseChanged: (_) {},
         ),
-        onButton: buttons.add,
-        onSwitchDevice: () {},
-        onOpenNowPlaying: () {},
-        onApps: () {},
-        onKeyboard: () {},
-        onVoice: () {
-          voices++;
-        },
-        onRetry: () {},
-        onAppSettings: () {},
-        onPointerMove: (_) {},
-        onScroll: (_) {},
-        onClick: (_) {},
-        onAirMouseChanged: (_) {},
       ),
     );
     await tester.pumpWidget(screen(true));
@@ -212,27 +221,29 @@ void main() {
   testWidgets('connecting suppresses banner until the second attempt', (
     tester,
   ) async {
-    Widget screen(int attempt) => MaterialApp(
-      theme: AppTheme.light,
-      home: RemoteScreen(
-        state: RemoteViewState(
-          deviceName: 'TV',
-          connected: false,
-          reconnecting: true,
-          muted: false,
-          attempt: attempt,
+    Widget screen(int attempt) => ProviderScope(
+      child: MaterialApp(
+        theme: AppTheme.light,
+        home: RemoteScreen(
+          state: RemoteViewState(
+            deviceName: 'TV',
+            connected: false,
+            reconnecting: true,
+            muted: false,
+            attempt: attempt,
+          ),
+          onButton: (_) {},
+          onSwitchDevice: () {},
+          onApps: () {},
+          onKeyboard: () {},
+          onVoice: () {},
+          onRetry: () {},
+          onAppSettings: () {},
+          onPointerMove: (_) {},
+          onScroll: (_) {},
+          onClick: (_) {},
+          onAirMouseChanged: (_) {},
         ),
-        onButton: (_) {},
-        onSwitchDevice: () {},
-        onApps: () {},
-        onKeyboard: () {},
-        onVoice: () {},
-        onRetry: () {},
-        onAppSettings: () {},
-        onPointerMove: (_) {},
-        onScroll: (_) {},
-        onClick: (_) {},
-        onAirMouseChanged: (_) {},
       ),
     );
     await tester.pumpWidget(screen(0));

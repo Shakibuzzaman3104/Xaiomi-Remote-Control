@@ -20,17 +20,21 @@ class DeviceHeader extends StatelessWidget {
     required this.onSwitchDevice,
     required this.onTvSettings,
     required this.onAppSettings,
+    this.onTransfer,
     this.onPower,
     this.offlineLabel = 'Reconnecting…',
     this.retrying = true,
+    this.tvOn,
   });
   final String name, offlineLabel;
+  final bool? tvOn;
   final bool connected, retrying;
   final VoidCallback onSwitchDevice, onTvSettings, onAppSettings;
-  final VoidCallback? onPower;
+  final VoidCallback? onPower, onTransfer;
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final screenOff = connected && tvOn == false;
     return Row(
       children: [
         Icon(Icons.tv_outlined, color: c.onSurface, size: 28),
@@ -86,13 +90,19 @@ class DeviceHeader extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         duration: AppMotion.quick,
                         child: Row(
-                          key: ValueKey((connected, offlineLabel)),
+                          key: ValueKey((connected, screenOff, offlineLabel)),
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox.square(
                               dimension: 15,
                               child: Center(
-                                child: connected
+                                child: screenOff
+                                    ? Icon(
+                                        Icons.bedtime_outlined,
+                                        size: 15,
+                                        color: c.muted,
+                                      )
+                                    : connected
                                     ? Icon(Icons.wifi, size: 15, color: c.muted)
                                     : retrying
                                     ? const PulseDot()
@@ -105,7 +115,11 @@ class DeviceHeader extends StatelessWidget {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              connected ? 'Connected' : offlineLabel,
+                              screenOff
+                                  ? 'Screen off'
+                                  : connected
+                                  ? 'Connected'
+                                  : offlineLabel,
                               style: context.appTextTheme.labelMedium!.copyWith(
                                 color: c.muted,
                               ),
@@ -121,14 +135,17 @@ class DeviceHeader extends StatelessWidget {
           ),
         ),
         IconButton(
-          tooltip: 'Power',
+          tooltip: screenOff ? 'Turn on' : 'Power',
           onPressed: onPower == null
               ? null
               : () {
                   AppHaptics.medium();
                   onPower!();
                 },
-          icon: Icon(Icons.power_settings_new, color: c.onSurface),
+          icon: Icon(
+            Icons.power_settings_new,
+            color: screenOff ? c.primaryText : c.onSurface,
+          ),
         ),
         PopupMenuButton<VoidCallback>(
           tooltip: 'Menu',
@@ -136,6 +153,8 @@ class DeviceHeader extends StatelessWidget {
           color: c.surfaceContainer,
           onSelected: (action) => action(),
           itemBuilder: (_) => [
+            if (connected && onTransfer != null)
+              PopupMenuItem(value: onTransfer, child: const Text('Transfer files')),
             if (connected)
               PopupMenuItem(
                 value: onTvSettings,

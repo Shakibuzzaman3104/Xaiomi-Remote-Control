@@ -98,8 +98,10 @@ class RemoteViewState {
     required this.muted,
     this.needsPairing = false,
     this.attempt = 0,
+    this.tvOn,
   });
   final String deviceName;
+  final bool? tvOn;
   final bool connected, reconnecting, muted, needsPairing;
   final NowPlaying? nowPlaying;
   final AppControlData? appControls;

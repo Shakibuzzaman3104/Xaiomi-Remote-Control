@@ -18,6 +18,7 @@ import '../storage/paired_tv_store.dart';
 import 'adb_client.dart';
 import 'adb_commands.dart';
 import 'adb_key.dart';
+import 'tv_files.dart';
 
 enum FullControlStatus {
   off,
@@ -417,6 +418,17 @@ class FullControl extends Notifier<FullControlState> {
   }
 
   AdbClient get connectedClient => _connectedClient();
+
+  TvFiles get tvFiles {
+    final client = _connectedClient();
+    return TvFiles(
+      client,
+      ensureHelper: () => _ensureHelper(client),
+      helperCommand: _runHelper,
+    );
+  }
+
+  Future<void> sendTextToClipboard(String text) => tvFiles.sendText(text);
 
   AdbClient _connectedClient() {
     final client = _client;
